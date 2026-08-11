@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (request.auth.token.email == 'giga.sonjoy@gmail.com' || request.auth.token.role == 'admin');
+    }
+
+    // Leads: Anyone can submit a lead; read/update for authenticated or open client demos
+    match /leads/{leadId} {
+      allow create: if true;
+      allow read, update, delete: if true;
+    }
+
+    // Public readable datasets: Benchmarks, Price Ranges, Media, Settings, Knowledge Base
+    match /benchmarks/{benchmarkId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /productPriceRanges/{rangeId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /media/{mediaId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /siteSettings/{settingId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /knowledgeBase/{kbId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /adminUsers/{userId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Default fallback
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

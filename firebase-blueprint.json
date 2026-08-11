@@ -1,0 +1,90 @@
+{
+  "entities": {
+    "leads": {
+      "title": "Leads",
+      "description": "Client inquiries and calculator assessment lead captures",
+      "fields": {
+        "id": { "type": "string", "description": "Unique lead ID" },
+        "name": { "type": "string", "description": "Full name of the client" },
+        "phone": { "type": "string", "description": "Phone or WhatsApp number" },
+        "email": { "type": "string", "description": "Contact email address" },
+        "businessType": { "type": "string", "description": "Business niche/industry category" },
+        "interestedService": { "type": "string", "description": "Selected ad service" },
+        "monthlyBudget": { "type": "string", "description": "Declared monthly advertising budget" },
+        "status": { "type": "string", "description": "Lead lifecycle status (NEW, CONTACTED, CONVERTED, CLOSED)" },
+        "notes": { "type": "string", "description": "Internal notes or assessment details" },
+        "createdAt": { "type": "string", "description": "ISO timestamp of creation" },
+        "visitorId": { "type": "string", "description": "Visitor session token" },
+        "calculatorSnapshot": { "type": "object", "description": "Snapshot of calculator inputs and projections" }
+      }
+    },
+    "benchmarks": {
+      "title": "Calculator Benchmarks",
+      "description": "Advertising performance benchmark data for TikTok and Facebook in Bangladesh",
+      "fields": {
+        "id": { "type": "string", "description": "Benchmark record ID" },
+        "category": { "type": "string", "description": "E-commerce product category" },
+        "platform": { "type": "string", "description": "TikTok or Facebook" },
+        "creativeType": { "type": "string", "description": "UGC, Product Video, or Image" },
+        "conversionGoal": { "type": "string", "description": "Purchase, Messages, or Lead" },
+        "cpmBDT": { "type": "number", "description": "Cost per mille in BDT" },
+        "ctrPercent": { "type": "number", "description": "Click-through rate percentage" },
+        "cvrPercent": { "type": "number", "description": "Conversion rate percentage" },
+        "averageOrderValueBDT": { "type": "number", "description": "Typical ticket size in BDT" },
+        "confidence": { "type": "string", "description": "Confidence level (HIGH, MEDIUM, LOW)" },
+        "active": { "type": "boolean", "description": "Active status" },
+        "sortOrder": { "type": "number", "description": "Display order priority" }
+      }
+    },
+    "productPriceRanges": {
+      "title": "Product Price Ranges",
+      "description": "Pricing tiers and dynamic conversion rate multipliers",
+      "fields": {
+        "id": { "type": "string", "description": "Price range tier ID" },
+        "labelEn": { "type": "string", "description": "English tier label" },
+        "labelBn": { "type": "string", "description": "Bengali tier label" },
+        "minPriceBDT": { "type": "number", "description": "Minimum product price in BDT" },
+        "maxPriceBDT": { "type": "number", "description": "Maximum product price in BDT" },
+        "cvrMultiplier": { "type": "number", "description": "Conversion rate multiplier" },
+        "cpcMultiplier": { "type": "number", "description": "CPC impact multiplier" },
+        "recommendedGoal": { "type": "string", "description": "Optimal campaign goal" },
+        "averageTicketBDT": { "type": "number", "description": "Average ticket price" },
+        "active": { "type": "boolean", "description": "Active status" },
+        "sortOrder": { "type": "number", "description": "Sorting priority" }
+      }
+    },
+    "media": {
+      "title": "Media Items",
+      "description": "Images, YouTube embeds, and TikTok video resources",
+      "fields": {
+        "id": { "type": "string", "description": "Media asset ID" },
+        "title": { "type": "string", "description": "Media title" },
+        "type": { "type": "string", "description": "image, youtube, or tiktok" },
+        "url": { "type": "string", "description": "Image URL or direct link" },
+        "videoUrl": { "type": "string", "description": "External video URL" },
+        "embedCode": { "type": "string", "description": "HTML embed code" },
+        "thumbnailUrl": { "type": "string", "description": "Preview thumbnail image URL" },
+        "placement": { "type": "string", "description": "Placement tag on the site" },
+        "isEnabled": { "type": "boolean", "description": "Publish status" },
+        "uploadedAt": { "type": "string", "description": "Timestamp uploaded" },
+        "description": { "type": "string", "description": "Asset description or caption" }
+      }
+    },
+    "siteSettings": {
+      "title": "Site Settings",
+      "description": "Global application configuration and marketing settings",
+      "fields": {
+        "id": { "type": "string", "description": "Settings document ID" },
+        "heroHeadlineEn": { "type": "string", "description": "Hero English headline" },
+        "heroHeadlineBn": { "type": "string", "description": "Hero Bengali headline" },
+        "whatsappNumber": { "type": "string", "description": "Primary WhatsApp contact number" },
+        "contactEmail": { "type": "string", "description": "Primary email" },
+        "exchangeRateUsdToBdt": { "type": "number", "description": "USD to BDT exchange rate" },
+        "minMonthlyBudgetUSD": { "type": "number", "description": "Minimum budget threshold in USD" },
+        "minMonthlyBudgetBDT": { "type": "number", "description": "Minimum budget threshold in BDT" },
+        "enableAiChatWidget": { "type": "boolean", "description": "Toggle AI chat assistant" },
+        "enableCalculator": { "type": "boolean", "description": "Toggle public calculator" }
+      }
+    }
+  }
+}
