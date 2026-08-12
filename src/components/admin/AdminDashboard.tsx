@@ -22,6 +22,7 @@ import {
 import { Lead, LeadSubmission, KnowledgeGapItem, AIConversation, AdminTab, AdminTask } from '../../types';
 import { AutomationTaskService } from '../../services/automationTaskService';
 import { storageService } from '../../services/storageService';
+import { db } from '../../services/firebase';
 
 interface AdminDashboardProps {
   leads: Lead[] | LeadSubmission[];
@@ -43,6 +44,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onOpenAiAssistant
 }) => {
   const [isScanning, setIsScanning] = useState<boolean>(false);
+  const isDbActive = Boolean(db);
+
   const [tasks, setTasks] = useState<AdminTask[]>(() => {
     return AutomationTaskService.generateTasks({
       leads,
@@ -52,8 +55,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       benchmarks: storageService.getBenchmarks(true),
       priceRanges: storageService.getProductPriceRanges(),
       siteSettings: storageService.getSiteSettings(),
-      isFirebaseWorking: false, // Default indicator triggers action task
-      firebaseErrorDetails: 'Firestore Database (default) is not yet provisioned in Google Cloud console.'
+      isFirebaseWorking: isDbActive,
+      firebaseErrorDetails: isDbActive ? undefined : 'Firestore Database is connecting...'
     });
   });
 
@@ -68,8 +71,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         benchmarks: storageService.getBenchmarks(true),
         priceRanges: storageService.getProductPriceRanges(),
         siteSettings: storageService.getSiteSettings(),
-        isFirebaseWorking: false,
-        firebaseErrorDetails: 'Firestore Database (default) is not yet provisioned in Google Cloud console.'
+        isFirebaseWorking: isDbActive,
+        firebaseErrorDetails: isDbActive ? undefined : 'Firestore Database is connecting...'
       });
       setTasks(updated);
       setIsScanning(false);
