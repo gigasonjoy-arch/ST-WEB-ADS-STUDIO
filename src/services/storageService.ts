@@ -1259,6 +1259,25 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
     this.notify();
   }
 
+  public saveLeadSubmission(submission: {
+    name: string;
+    phone: string;
+    businessType?: string;
+    monthlyBudget?: string;
+    websiteUrl?: string;
+    notes?: string;
+  }): Lead {
+    return this.captureLead({
+      name: submission.name,
+      whatsapp: submission.phone,
+      businessType: submission.businessType,
+      monthlyBudget: submission.monthlyBudget,
+      socialLink: submission.websiteUrl,
+      notes: submission.notes || 'Submitted via In-Chat AI Assistant',
+      location: 'Bangladesh'
+    });
+  }
+
   public resetToDefaults(): void {
     localStorage.clear();
     this.initDefaults();

@@ -283,6 +283,29 @@ export interface KnowledgeGap {
   createdAt: string;
 }
 
+export interface InChatPredictionData {
+  budgetBDT: number;
+  budgetUSD: number;
+  category: string;
+  platform: 'TikTok' | 'Facebook' | 'Both';
+  impressions: string;
+  reach: string;
+  clicks: string;
+  estimatedResults: string;
+  resultLabel: string;
+  estimatedRoas: string;
+  avgCpa: string;
+  verdict: string;
+}
+
+export interface InChatLeadCardData {
+  stage: 'initial' | 'qualifying' | 'ready' | 'submitted';
+  category?: string;
+  budget?: string;
+  submittedName?: string;
+  submittedPhone?: string;
+}
+
 export interface AIMessage {
   id: string;
   sender: 'user' | 'ai' | 'system';
@@ -290,11 +313,14 @@ export interface AIMessage {
   timestamp: string;
   suggestedCtas?: Array<{
     label: string;
-    action: 'LEAD_FORM' | 'CALCULATOR' | 'WHATSAPP' | 'CASE_STUDIES';
+    action: 'LEAD_FORM' | 'CALCULATOR' | 'WHATSAPP' | 'CASE_STUDIES' | 'IN_CHAT_LEAD';
     url?: string;
   }>;
   knowledgeBaseItemIds?: string[];
   isFallback?: boolean;
+  predictionData?: InChatPredictionData;
+  leadFormCard?: InChatLeadCardData;
+  isVoiceTranscript?: boolean;
 }
 
 export interface AIConversation {
