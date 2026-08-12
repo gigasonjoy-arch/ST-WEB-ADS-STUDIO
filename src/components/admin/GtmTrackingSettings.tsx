@@ -15,7 +15,7 @@ import {
   HelpCircle
 } from 'lucide-react';
 import { GtmSettings } from '../../types';
-import { trackingService } from '../../services/trackingService';
+import { trackingService, safeSerializeEvent } from '../../services/trackingService';
 
 interface GtmTrackingSettingsProps {
   gtm: GtmSettings;
@@ -365,10 +365,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               recentEvents.map((evt, idx) => (
                 <div key={idx} className="border-b border-[#3A4533]/60 pb-2 last:border-b-0 last:pb-0">
                   <div className="text-[#8FB377] font-bold">
-                    #{idx + 1} {evt.event ? `[event: "${evt.event}"]` : JSON.stringify(evt)}
+                    #{idx + 1} {evt && evt.event ? `[event: "${evt.event}"]` : safeSerializeEvent(evt, 0)}
                   </div>
                   <pre className="text-stone-300 text-[10px] mt-0.5 overflow-x-auto whitespace-pre-wrap">
-                    {JSON.stringify(evt, null, 2)}
+                    {safeSerializeEvent(evt, 2)}
                   </pre>
                 </div>
               ))

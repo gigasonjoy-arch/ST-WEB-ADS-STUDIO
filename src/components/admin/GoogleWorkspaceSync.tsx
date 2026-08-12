@@ -17,17 +17,46 @@ import {
   Table,
   Sparkles,
   Lock,
-  Unlock
+  Unlock,
+  KeyRound,
+  Link as LinkIcon,
+  Send,
+  HelpCircle,
+  Settings
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { googleWorkspaceService, GoogleSheetExportResult, GoogleDriveFile } from '../../services/googleWorkspaceService';
 import firebaseConfig from '../../../firebase-applet-config.json';
 import { db, collection, getDocs, doc, setDoc } from '../../services/firebase';
 
-export const GoogleWorkspaceSync: React.FC = () => {
+interface GoogleWorkspaceSyncProps {
+  initialSubTab?: string;
+  targetElementId?: string;
+}
+
+export const GoogleWorkspaceSync: React.FC<GoogleWorkspaceSyncProps> = ({
+  initialSubTab,
+  targetElementId
+}) => {
   const [isGoogleAuthed, setIsGoogleAuthed] = useState<boolean>(googleWorkspaceService.isAuthenticated());
   const [isAuthorizing, setIsAuthorizing] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+
+  // Deep-linking scroll support
+  useEffect(() => {
+    if (targetElementId) {
+      setTimeout(() => {
+        const el = document.getElementById(targetElementId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('ring-4', 'ring-[#4A5D3B]', 'ring-offset-2', 'transition-all');
+          setTimeout(() => {
+            el.classList.remove('ring-4', 'ring-[#4A5D3B]', 'ring-offset-2');
+          }, 3000);
+        }
+      }, 250);
+    }
+  }, [targetElementId]);
 
   // Firestore sync states
   const [firestoreStatus, setFirestoreStatus] = useState<'CONNECTED' | 'SYNCING' | 'IDLE'>('CONNECTED');
@@ -44,6 +73,14 @@ export const GoogleWorkspaceSync: React.FC = () => {
   const [isLoadingDrive, setIsLoadingDrive] = useState(false);
   const [driveFolderCreated, setDriveFolderCreated] = useState<string | null>(null);
 
+  // Webhook and Manual Token inputs
+  const [webhookUrl, setWebhookUrl] = useState<string>(googleWorkspaceService.getWebhookUrl());
+  const [isTestingWebhook, setIsTestingWebhook] = useState(false);
+  const [webhookSuccess, setWebhookSuccess] = useState<string | null>(null);
+  const [manualToken, setManualToken] = useState<string>('');
+  const [customClientId, setCustomClientId] = useState<string>(googleWorkspaceService.getOAuthClientId());
+  const [showAdvancedAuth, setShowAdvancedAuth] = useState(false);
+
   useEffect(() => {
     checkFirestoreData();
   }, []);
@@ -59,6 +96,11 @@ export const GoogleWorkspaceSync: React.FC = () => {
       console.warn('Firestore fetch notice:', e);
       setFirestoreStatus('CONNECTED');
     }
+  };
+
+  const handleOpenInNewTab = () => {
+    const directUrl = `${window.location.origin}${window.location.pathname}#admin`;
+    window.open(directUrl, '_blank');
   };
 
   const handleConnectGoogle = async () => {
@@ -83,6 +125,59 @@ export const GoogleWorkspaceSync: React.FC = () => {
     setDriveFiles([]);
   };
 
+  const handleApplyManualToken = () => {
+    if (!manualToken.trim()) return;
+    googleWorkspaceService.setAccessToken(manualToken.trim(), 3600);
+    setIsGoogleAuthed(true);
+    setAuthError(null);
+    alert('গুগল অ্যাক্সেস টোকেন সফলভাবে সংরক্ষণ করা হয়েছে!');
+    loadDriveFiles();
+  };
+
+  const handleSaveCustomClientId = () => {
+    if (!customClientId.trim()) return;
+    googleWorkspaceService.setOAuthClientId(customClientId.trim());
+    alert('কাস্টম OAuth Client ID সফলভাবে সংরক্ষণ করা হয়েছে!');
+  };
+
+  const handleSaveWebhook = async () => {
+    googleWorkspaceService.setWebhookUrl(webhookUrl);
+    setWebhookSuccess('Webhook URL সফলভাবে সংরক্ষণ করা হয়েছে!');
+    setTimeout(() => setWebhookSuccess(null), 3000);
+  };
+
+  const handleTestWebhook = async () => {
+    if (!webhookUrl) {
+      alert('অনুগ্রহ করে আগে Webhook URL লিখুন।');
+      return;
+    }
+    setIsTestingWebhook(true);
+    setWebhookSuccess(null);
+    try {
+      googleWorkspaceService.setWebhookUrl(webhookUrl);
+      const testLead = {
+        id: 'test_' + Date.now(),
+        name: 'সঞ্জয় সরকার (টেস্ট লিড)',
+        whatsapp: '+8801815124970',
+        businessType: 'E-commerce (TikTok Ads Testing)',
+        monthlyBudget: '৫০,০০০ টাকা',
+        notes: 'Google Apps Script Webhook সংযোগ পরীক্ষা সফল হয়েছে।'
+      };
+      await googleWorkspaceService.pushLeadViaWebhook(webhookUrl, testLead);
+      setWebhookSuccess('টেস্ট ডেটা সফলভাবে Webhook-এ পাঠানো হয়েছে! আপনার Google Sheet চেক করুন।');
+    } catch (e: any) {
+      alert('Webhook প্রেরণে সমস্যা: ' + e.message);
+    } finally {
+      setIsTestingWebhook(false);
+    }
+  };
+
+  const handleDownloadCsv = () => {
+    const leads = storageService.getLeads();
+    const csvContent = googleWorkspaceService.generateLeadsCsv(leads);
+    googleWorkspaceService.downloadCsvFile(csvContent, `Sonjoy_Sarkar_Leads_${new Date().toISOString().slice(0, 10)}.csv`);
+  };
+
   const handleExportLeadsToSheets = async () => {
     if (!googleWorkspaceService.isAuthenticated()) {
       await handleConnectGoogle();
@@ -92,24 +187,12 @@ export const GoogleWorkspaceSync: React.FC = () => {
     setIsExportingSheet(true);
     setSheetExportSuccess(null);
     try {
-      const localLeads = storageService.getLeads().map(l => ({
-        id: l.id,
-        name: l.name,
-        phone: l.whatsapp,
-        email: undefined,
-        businessType: l.businessType || 'General Business',
-        interestedService: 'TIKTOK_ADS' as any,
-        monthlyBudget: l.monthlyBudget,
-        notes: l.notes,
-        status: (l.status as any) || 'NEW',
-        createdAt: l.createdAt
-      }));
-
+      const localLeads = storageService.getLeads();
       const res = await googleWorkspaceService.exportLeadsToSheet(localLeads);
       setSheetExportResult(res);
-      setSheetExportSuccess(`Successfully generated Google Sheet with ${res.rowCount} leads!`);
+      setSheetExportSuccess(`সফলভাবে ${res.rowCount}টি লিড নিয়ে নতুন Google Sheet তৈরি হয়েছে!`);
     } catch (err: any) {
-      setAuthError(err.message || 'Failed to export to Google Sheets');
+      setAuthError(err.message || 'Google Sheets-এ এক্সপোর্ট করতে সমস্যা হয়েছে।');
     } finally {
       setIsExportingSheet(false);
     }
@@ -126,9 +209,9 @@ export const GoogleWorkspaceSync: React.FC = () => {
       const benchmarks = storageService.getCalculatorBenchmarks();
       const res = await googleWorkspaceService.exportBenchmarksToSheet(benchmarks);
       setSheetExportResult(res);
-      setSheetExportSuccess(`Benchmarks exported to Google Sheet successfully!`);
+      setSheetExportSuccess(`বেঞ্চমার্কসমূহ Google Sheet-এ সফলভাবে সংরক্ষিত হয়েছে!`);
     } catch (err: any) {
-      setAuthError(err.message || 'Failed to export benchmarks');
+      setAuthError(err.message || 'বেঞ্চমার্ক এক্সপোর্টে সমস্যা হয়েছে।');
     } finally {
       setIsExportingSheet(false);
     }
@@ -217,15 +300,25 @@ export const GoogleWorkspaceSync: React.FC = () => {
             <span>Cloud & Workspace Sync Center</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#2C3327]">
-            Firebase Firestore & Google Workspace Hub
+            Firebase Firestore ও Google Workspace হাব
           </h1>
           <p className="text-xs text-[#5C6652] mt-1">
-            Real-time persistence across Firebase Firestore, automated Google Sheets CRM exports, and Google Drive ad asset management.
+            ফায়ারবেস ক্লাউড ডাটাবেস পারসিস্টেন্স, স্বয়ংক্রিয় গুগল শিটস সিঙ্ক ও গুগল ড্রাইভ ক্যাম্পেইন সম্পদ ব্যবস্থাপনা।
           </p>
         </div>
 
-        {/* Global Connection Badge */}
+        {/* Global Connection Badge & New Tab Button */}
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleOpenInNewTab}
+            className="px-3.5 py-1.5 bg-white border border-[#D9DED1] hover:bg-[#F5F1EB] rounded-2xl text-xs font-bold text-[#2C3327] flex items-center gap-1.5 transition-all shadow-2xs"
+            title="গুগল অথরাইজেশন পপআপ সহজ করার জন্য নতুন ট্যাবে খুলুন"
+          >
+            <ExternalLink className="w-3.5 h-3.5 text-[#4A5D3B]" />
+            <span>নতুন ট্যাবে খুলুন (OAuth Fix)</span>
+          </button>
+          
           <div className="flex items-center gap-2 px-3.5 py-1.5 bg-[#FFFFFF] border border-[#D9DED1] rounded-2xl shadow-2xs">
             <span className="w-2.5 h-2.5 rounded-full bg-[#25D366] animate-pulse"></span>
             <span className="text-xs font-bold text-[#2C3327]">Firestore: Active</span>
@@ -234,9 +327,20 @@ export const GoogleWorkspaceSync: React.FC = () => {
       </div>
 
       {authError && (
-        <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          <span>{authError}</span>
+        <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <div>
+              <span className="font-bold">অথরাইজেশন সমস্যা:</span> {authError}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleOpenInNewTab}
+            className="px-3 py-1.5 bg-red-700 text-white rounded-xl text-[11px] font-bold shrink-0 self-start sm:self-auto"
+          >
+            নতুন উইন্ডোতে খুলুন
+          </button>
         </div>
       )}
 
@@ -244,7 +348,7 @@ export const GoogleWorkspaceSync: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Card 1: Firebase Firestore Status & Sync */}
-        <div className="bg-[#FFFFFF] p-6 sm:p-7 rounded-[28px] border border-[#D9DED1] shadow-sm space-y-6 flex flex-col justify-between">
+        <div id="firebase-cloud-sync-card" className="bg-[#FFFFFF] p-6 sm:p-7 rounded-3xl border border-[#D9DED1] shadow-2xs space-y-6 flex flex-col justify-between">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -287,15 +391,15 @@ export const GoogleWorkspaceSync: React.FC = () => {
             <div className="text-xs text-[#5C6652] leading-relaxed bg-[#FDFCF8] p-3.5 rounded-2xl border border-[#D9DED1]">
               <div className="font-bold text-[#2C3327] mb-1 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-[#E2725B]" />
-                <span>Automatic Offline-First Resilience</span>
+                <span>Offline-First Resilience & Security</span>
               </div>
-              All inquiries, prediction benchmarks, price tiers, and settings are mirrored to Firestore in real-time, ensuring zero lead loss.
+              সকল লিড, বেঞ্চমার্ক, প্রাইসিং টায়ার এবং সেটিংস রিয়েল-টাইমে ফায়ারবেস ফায়ারস্টোরে সংরক্ষিত থাকে।
             </div>
           </div>
 
           <div className="pt-4 border-t border-[#D9DED1] flex items-center justify-between">
             <span className="text-[11px] text-[#8A957F]">
-              Last synced: {lastSyncTime}
+              সর্বশেষ সিঙ্ক: {lastSyncTime}
             </span>
             <button
               onClick={handleSyncAllToFirestore}
@@ -303,13 +407,13 @@ export const GoogleWorkspaceSync: React.FC = () => {
               className="px-4 py-2 bg-[#4A5D3B] hover:bg-[#3A4533] text-[#FDFCF8] rounded-xl text-xs font-semibold flex items-center gap-2 transition-all shadow-2xs"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${firestoreStatus === 'SYNCING' ? 'animate-spin' : ''}`} />
-              <span>{firestoreStatus === 'SYNCING' ? 'Syncing...' : 'Force Sync All to Firestore'}</span>
+              <span>{firestoreStatus === 'SYNCING' ? 'সিঙ্ক হচ্ছে...' : 'সব তথ্য Firestore-এ সিঙ্ক করুন'}</span>
             </button>
           </div>
         </div>
 
         {/* Card 2: Google Workspace (Sheets & Drive) Status */}
-        <div className="bg-[#FFFFFF] p-6 sm:p-7 rounded-[28px] border border-[#D9DED1] shadow-sm space-y-6 flex flex-col justify-between">
+        <div id="google-sheets-sync-card" className="bg-[#FFFFFF] p-6 sm:p-7 rounded-3xl border border-[#D9DED1] shadow-2xs space-y-6 flex flex-col justify-between">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -321,7 +425,7 @@ export const GoogleWorkspaceSync: React.FC = () => {
                     Google Workspace Integration
                   </h2>
                   <div className="text-[11px] text-[#8A957F]">
-                    Google Sheets & Google Drive
+                    Google Sheets ও Google Drive সংযোগ
                   </div>
                 </div>
               </div>
@@ -340,25 +444,41 @@ export const GoogleWorkspaceSync: React.FC = () => {
             </div>
 
             <p className="text-xs text-[#5C6652] leading-relaxed">
-              Connect your authorized Google Workspace to automatically export CRM submissions into formatted Google Sheets and sync ad assets to Google Drive.
+              গুগল শিটসে লিড এক্সপোর্ট করুন অথবা কোনো অথরাইজেশন ছাড়াই সরাসরি ১-ক্লিক CSV ডাউনলোড করুন।
             </p>
 
-            {/* Google Action Buttons */}
+            {/* Quick Action Buttons */}
             <div className="space-y-2.5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <button
+                  type="button"
+                  onClick={handleDownloadCsv}
+                  className="p-3 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 rounded-2xl text-left transition-all flex items-center gap-2.5"
+                >
+                  <Download className="w-4 h-4 text-emerald-700 shrink-0" />
+                  <div>
+                    <div className="text-xs font-bold text-emerald-900">১-ক্লিক CSV ডাউনলোড</div>
+                    <div className="text-[10px] text-emerald-700">Google Sheets ও Excel ফরম্যাট</div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
                   onClick={handleExportLeadsToSheets}
                   disabled={isExportingSheet}
                   className="p-3 bg-[#F5F1EB] hover:bg-[#E8EAE2] border border-[#D9DED1] rounded-2xl text-left transition-all flex items-center gap-2.5"
                 >
                   <FileSpreadsheet className="w-4 h-4 text-[#0F9D58] shrink-0" />
                   <div>
-                    <div className="text-xs font-bold text-[#2C3327]">Export Leads to Sheets</div>
-                    <div className="text-[10px] text-[#8A957F]">Create Live CRM Spreadsheet</div>
+                    <div className="text-xs font-bold text-[#2C3327]">Create Google Sheet</div>
+                    <div className="text-[10px] text-[#8A957F]">সরাসরি শিটসে এক্সপোর্ট</div>
                   </div>
                 </button>
+              </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <button
+                  type="button"
                   onClick={handleExportBenchmarksToSheets}
                   disabled={isExportingSheet}
                   className="p-3 bg-[#F5F1EB] hover:bg-[#E8EAE2] border border-[#D9DED1] rounded-2xl text-left transition-all flex items-center gap-2.5"
@@ -366,21 +486,22 @@ export const GoogleWorkspaceSync: React.FC = () => {
                   <Table className="w-4 h-4 text-[#1A73E8] shrink-0" />
                   <div>
                     <div className="text-xs font-bold text-[#2C3327]">Export Benchmarks</div>
-                    <div className="text-[10px] text-[#8A957F]">Sync TikTok & FB metrics</div>
+                    <div className="text-[10px] text-[#8A957F]">TikTok & FB মেট্রিক্স শিট</div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleCreateDriveFolder}
+                  className="p-3 bg-[#F5F1EB] hover:bg-[#E8EAE2] border border-[#D9DED1] rounded-2xl text-left transition-all flex items-center gap-2.5"
+                >
+                  <HardDrive className="w-4 h-4 text-[#EA4335] shrink-0" />
+                  <div>
+                    <div className="text-xs font-bold text-[#2C3327]">Drive Folder</div>
+                    <div className="text-[10px] text-[#8A957F]">অ্যাড এসেট ফোল্ডার</div>
                   </div>
                 </button>
               </div>
-
-              <button
-                onClick={handleCreateDriveFolder}
-                className="w-full p-3 bg-[#F5F1EB] hover:bg-[#E8EAE2] border border-[#D9DED1] rounded-2xl text-left transition-all flex items-center gap-2.5"
-              >
-                <HardDrive className="w-4 h-4 text-[#EA4335] shrink-0" />
-                <div>
-                  <div className="text-xs font-bold text-[#2C3327]">Create Campaign Drive Folder</div>
-                  <div className="text-[10px] text-[#8A957F]">ST Web & Ads Studio - Campaign Assets</div>
-                </div>
-              </button>
             </div>
 
             {sheetExportSuccess && (
@@ -416,18 +537,139 @@ export const GoogleWorkspaceSync: React.FC = () => {
                 </button>
               </>
             ) : (
-              <button
-                onClick={handleConnectGoogle}
-                disabled={isAuthorizing}
-                className="w-full py-2.5 bg-[#1A73E8] hover:bg-[#1557b0] text-[#FFFFFF] rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-2xs"
-              >
-                <Unlock className="w-3.5 h-3.5" />
-                <span>{isAuthorizing ? 'Connecting to Google...' : 'Authorize Google Drive & Sheets'}</span>
-              </button>
+              <div className="w-full flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleConnectGoogle}
+                  disabled={isAuthorizing}
+                  className="flex-1 py-2.5 bg-[#1A73E8] hover:bg-[#1557b0] text-[#FFFFFF] rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-2xs"
+                >
+                  <Unlock className="w-3.5 h-3.5" />
+                  <span>{isAuthorizing ? 'Connecting to Google...' : 'Authorize Google Account'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAdvancedAuth(!showAdvancedAuth)}
+                  className="p-2.5 bg-[#F5F1EB] hover:bg-[#E8EAE2] border border-[#D9DED1] rounded-xl text-[#5C6652]"
+                  title="উন্নত অথরাইজেশন ও টোকেন অপশন"
+                >
+                  <Settings className="w-4 h-4" />
+                </button>
+              </div>
             )}
           </div>
         </div>
 
+      </div>
+
+      {/* Advanced Auth & Webhook Section */}
+      <div className="bg-white rounded-3xl border border-[#D9DED1] p-6 shadow-2xs space-y-6">
+        <div className="flex items-center justify-between pb-4 border-b border-[#D9DED1]">
+          <div className="flex items-center gap-2">
+            <LinkIcon className="w-4 h-4 text-[#4A5D3B]" />
+            <h2 className="text-sm font-bold text-[#2C3327] uppercase tracking-wider">
+              Google Apps Script Webhook ও বিকল্প সিঙ্ক (Zero OAuth Friction)
+            </h2>
+          </div>
+          <span className="text-[11px] text-[#8A957F] bg-[#F5F1EB] px-2.5 py-0.5 rounded-full font-semibold">
+            বিকল্প পদ্ধতি
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Webhook Sync */}
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-bold text-[#2C3327] mb-1">
+                Google Apps Script Webhook URL (অটোমেটিক লিড পুশ)
+              </label>
+              <p className="text-[11px] text-[#5C6652] mb-2 leading-relaxed">
+                আপনার গুগল স্প্রেডশিটের Apps Script Webhook লিঙ্কটি এখানে পেস্ট করলে কোনো OAuth ছাড়াই প্রতিটি নতুন লিড সরাসরি আপনার শিটসে যুক্ত হবে।
+              </p>
+              <input
+                type="text"
+                value={webhookUrl}
+                onChange={(e) => setWebhookUrl(e.target.value)}
+                placeholder="https://script.google.com/macros/s/.../exec"
+                className="w-full bg-[#FDFCF8] border border-[#D9DED1] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2C3327]"
+              />
+            </div>
+
+            {webhookSuccess && (
+              <div className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-300 p-2.5 rounded-xl font-semibold">
+                {webhookSuccess}
+              </div>
+            )}
+
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={handleSaveWebhook}
+                className="px-3.5 py-2 bg-[#4A5D3B] text-white rounded-xl text-xs font-bold hover:bg-[#3A4533] transition-colors"
+              >
+                Webhook সংরক্ষণ
+              </button>
+              <button
+                type="button"
+                onClick={handleTestWebhook}
+                disabled={isTestingWebhook}
+                className="px-3.5 py-2 bg-[#F5F1EB] text-[#2C3327] border border-[#D9DED1] rounded-xl text-xs font-bold hover:bg-[#E8EAE2] transition-colors flex items-center gap-1"
+              >
+                <Send className="w-3 h-3 text-[#4A5D3B]" />
+                <span>{isTestingWebhook ? 'টেস্ট হচ্ছে...' : 'টেস্ট ডাটা পাঠান'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Manual Token Paste */}
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-bold text-[#2C3327] mb-1">
+                ম্যানুয়াল গুগল অ্যাক্সেস টোকেন (Manual Access Token)
+              </label>
+              <p className="text-[11px] text-[#5C6652] mb-2 leading-relaxed">
+                OAuth Playground বা গুগল কনসোল থেকে নেওয়া টেম্পোরারি Bearer টোকেন সরাসরি পেস্ট করে গুগল ড্রাইভ/শিটস অ্যাক্টিভেট করতে পারেন।
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="password"
+                  value={manualToken}
+                  onChange={(e) => setManualToken(e.target.value)}
+                  placeholder="ya29.a0Ac..."
+                  className="flex-1 bg-[#FDFCF8] border border-[#D9DED1] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2C3327]"
+                />
+                <button
+                  type="button"
+                  onClick={handleApplyManualToken}
+                  className="px-3.5 py-2 bg-[#2C3327] text-white rounded-xl text-xs font-bold hover:bg-black transition-colors"
+                >
+                  প্রয়োগ
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-[#5C6652] mb-1">
+                কাস্টম Google Cloud OAuth Client ID:
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={customClientId}
+                  onChange={(e) => setCustomClientId(e.target.value)}
+                  className="flex-1 bg-[#FDFCF8] border border-[#D9DED1] rounded-xl px-3 py-1.5 text-[11px] font-mono text-[#2C3327]"
+                />
+                <button
+                  type="button"
+                  onClick={handleSaveCustomClientId}
+                  className="px-3 py-1.5 bg-[#E8EAE2] text-[#4A5D3B] rounded-xl text-xs font-bold hover:bg-[#D9DED1]"
+                >
+                  সেভ
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Google Drive Asset Explorer (When authorized) */}
@@ -452,7 +694,7 @@ export const GoogleWorkspaceSync: React.FC = () => {
 
           {driveFiles.length === 0 ? (
             <div className="text-center py-8 text-xs text-[#8A957F]">
-              No files found in Google Drive or folder yet. Use &quot;Create Campaign Drive Folder&quot; above to organize assets.
+              গুগল ড্রাইভে কোনো ফাইল পাওয়া যায়নি। নতুন এসেট আপলোড বা ফোল্ডার তৈরি করতে পারেন।
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">

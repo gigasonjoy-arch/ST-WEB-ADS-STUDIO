@@ -118,7 +118,7 @@ export const Hero: React.FC<HeroProps> = ({
               
               {/* Top Profile Header */}
               <div className="flex items-center gap-5 pb-8 border-b border-[#3A4533]">
-                <div className="w-20 h-20 rounded-2xl bg-[#E8EAE2] overflow-hidden border-2 border-[#8A957F]/40 shrink-0">
+                <div className="w-20 h-20 rounded-2xl bg-[#E8EAE2] overflow-hidden border-2 border-[#8A957F]/40 shrink-0 shadow-inner">
                   <img
                     src={settings.sonjoyImage}
                     alt={settings.personalName}
@@ -126,17 +126,19 @@ export const Hero: React.FC<HeroProps> = ({
                   />
                 </div>
                 <div>
-                  <div className="inline-block px-2.5 py-0.5 bg-[#4A5D3B] rounded-full text-[10px] uppercase tracking-widest text-[#FDFCF8] font-bold mb-1.5">
-                    {t('hero.verifiedPractitioner')}
+                  <div className="inline-block px-2.5 py-0.5 bg-[#4A5D3B] rounded-full text-[10px] uppercase tracking-widest text-[#FDFCF8] font-bold mb-1.5 shadow-2xs">
+                    {settings.heroBadgeText || t('hero.verifiedPractitioner')}
                   </div>
                   <h2 className="text-xl font-serif text-[#FDFCF8] font-bold">{settings.personalName}</h2>
-                  <p className="text-xs text-[#8A957F]">{language === 'en' ? 'Performance Ads & Growth Specialist' : settings.sonjoyRole}</p>
+                  <p className="text-xs text-[#8A957F]">{settings.sonjoyRole || (language === 'en' ? 'Performance Ads & Growth Specialist' : 'পারফরম্যান্স অ্যাডস স্পেশালিস্ট')}</p>
                 </div>
               </div>
 
               {/* Bio Summary */}
               <div className="py-6">
-                <div className="text-[11px] uppercase tracking-wider font-bold text-[#8A957F] mb-2">{t('hero.profile.focus')}</div>
+                <div className="text-[11px] uppercase tracking-wider font-bold text-[#8A957F] mb-2">
+                  {settings.heroSpecialistFocusTitle || t('hero.profile.focus')}
+                </div>
                 <p className="text-xs leading-relaxed text-[#D9DED1]">
                   {language === 'en' ? t('hero.profile.bio') : settings.sonjoyBio}
                 </p>
@@ -152,19 +154,19 @@ export const Hero: React.FC<HeroProps> = ({
                 <div className="grid grid-cols-2 gap-4 pt-1">
                   <div>
                     <div className="text-[10px] text-[#8A957F] uppercase font-bold">{t('hero.stats.groups')}</div>
-                    <div className="text-xl font-serif font-bold text-[#FDFCF8]">126 Groups</div>
+                    <div className="text-xl font-serif font-bold text-[#FDFCF8]">{settings.heroStatAdGroups || '126 Groups'}</div>
                   </div>
                   <div>
                     <div className="text-[10px] text-[#8A957F] uppercase font-bold">{t('hero.stats.impressions')}</div>
-                    <div className="text-xl font-serif font-bold text-[#FDFCF8]">3.66M+</div>
+                    <div className="text-xl font-serif font-bold text-[#FDFCF8]">{settings.heroStatImpressions || '3.66M+'}</div>
                   </div>
                   <div>
                     <div className="text-[10px] text-[#8A957F] uppercase font-bold">{t('hero.stats.conversations')}</div>
-                    <div className="text-xl font-serif font-bold text-[#FDFCF8]">18,698</div>
+                    <div className="text-xl font-serif font-bold text-[#FDFCF8]">{settings.heroStatConversations || '18,698'}</div>
                   </div>
                   <div>
                     <div className="text-[10px] text-[#8A957F] uppercase font-bold">{t('hero.stats.leads')}</div>
-                    <div className="text-xl font-serif font-bold text-[#FDFCF8]">1,316</div>
+                    <div className="text-xl font-serif font-bold text-[#FDFCF8]">{settings.heroStatLeads || '1,316'}</div>
                   </div>
                 </div>
 
@@ -175,11 +177,11 @@ export const Hero: React.FC<HeroProps> = ({
 
               {/* Target Platforms */}
               <div className="pt-6 flex items-center justify-between text-xs text-[#8A957F]">
-                <span>{t('hero.platforms.primary')}: <strong className="text-[#FDFCF8]">TikTok Ads</strong></span>
+                <span>{t('hero.platforms.primary')}: <strong className="text-[#FDFCF8]">{settings.heroPrimaryPlatform || 'TikTok Ads'}</strong></span>
                 <span>•</span>
-                <span>{t('hero.platforms.secondary')}: <strong className="text-[#FDFCF8]">Facebook Ads</strong></span>
+                <span>{t('hero.platforms.secondary')}: <strong className="text-[#FDFCF8]">{settings.heroSecondaryPlatform || 'Facebook Ads'}</strong></span>
                 <span>•</span>
-                <span><strong className="text-[#FDFCF8]">Bangladesh</strong></span>
+                <span><strong className="text-[#FDFCF8]">{settings.heroTargetRegion || 'Bangladesh'}</strong></span>
               </div>
 
             </div>

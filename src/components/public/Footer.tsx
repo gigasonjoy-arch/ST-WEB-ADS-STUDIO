@@ -162,7 +162,7 @@ export const Footer: React.FC<FooterProps> = ({
               onClick={onOpenAdmin}
               className="flex items-center gap-1.5 text-[11px] text-[#8A957F] hover:text-[#FDFCF8] transition-colors p-1"
               id="admin-portal-link"
-              title="Admin Portal Login (Passcode: stweb2025)"
+              title="Admin Studio Portal"
             >
               <Lock className="w-3.5 h-3.5" />
               <span>Admin Studio</span>

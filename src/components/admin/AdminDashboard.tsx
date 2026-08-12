@@ -15,19 +15,22 @@ import {
   RefreshCw, 
   Database, 
   FileText,
-  Tag
+  Tag,
+  User,
+  Bot
 } from 'lucide-react';
-import { LeadSubmission, KnowledgeGapItem, AIConversation, AdminTab, AdminTask } from '../../types';
+import { Lead, LeadSubmission, KnowledgeGapItem, AIConversation, AdminTab, AdminTask } from '../../types';
 import { AutomationTaskService } from '../../services/automationTaskService';
 import { storageService } from '../../services/storageService';
 
 interface AdminDashboardProps {
-  leads: LeadSubmission[];
+  leads: Lead[] | LeadSubmission[];
   knowledgeGaps: KnowledgeGapItem[];
   conversations: AIConversation[];
   onNavigateTab: (tab: AdminTab, params?: any) => void;
   onUpdateLeadStatus: (leadId: string, status: any) => void;
   onOpenTaskDrawer?: () => void;
+  onOpenAiAssistant?: () => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
@@ -36,7 +39,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   conversations = [],
   onNavigateTab,
   onUpdateLeadStatus,
-  onOpenTaskDrawer
+  onOpenTaskDrawer,
+  onOpenAiAssistant
 }) => {
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [tasks, setTasks] = useState<AdminTask[]>(() => {
@@ -75,7 +79,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const newLeads = (leads || []).filter(l => l.status === 'NEW');
   const convertedLeads = (leads || []).filter(l => l.status === 'CONVERTED');
   const unresolvedGaps = (knowledgeGaps || []).filter(g => !g.resolved);
-  const totalCalculations = (leads || []).filter(l => l.calculatorSnapshot).length + 48; // Sample analytics baseline
+  const totalCalculations = (leads || []).filter(l => Boolean((l as any).calculatorSnapshot || (l as any).calculatorUsed)).length + 48; // Sample analytics baseline
 
   const criticalTasks = tasks.filter(t => t.priority === 'CRITICAL' || t.priority === 'HIGH');
 
@@ -94,13 +98,33 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          {onOpenAiAssistant && (
+            <button
+              onClick={onOpenAiAssistant}
+              className="px-4 py-2 bg-[#4A5D3B] text-[#FDFCF8] hover:bg-[#3D4D30] rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-xs ring-2 ring-[#4A5D3B]/20"
+              title="Admin AI Assistant খুলুন - সেটিংস ও কনফিগারেশন সার্চ করুন"
+            >
+              <Bot className="w-4 h-4" />
+              <span>Admin AI Assistant</span>
+            </button>
+          )}
+
+          <button
+            onClick={() => onNavigateTab('PROFILE')}
+            className="px-4 py-2 bg-[#FFFFFF] border border-[#D9DED1] text-[#2C3327] hover:bg-[#E8EAE2] rounded-xl text-xs font-semibold transition-all flex items-center gap-2 shadow-2xs"
+            title="আপনার প্রোফাইল, ছবি, বায়ো ও স্ট্যাটস সম্পাদনা করুন"
+          >
+            <User className="w-4 h-4 text-[#4A5D3B]" />
+            <span>প্রোফাইল এডিট</span>
+          </button>
+
           <button
             onClick={() => onNavigateTab('GTM_TRACKING')}
             className="px-4 py-2 bg-[#FFFFFF] border border-[#D9DED1] text-[#2C3327] hover:bg-[#E8EAE2] rounded-xl text-xs font-semibold transition-all flex items-center gap-2 shadow-2xs"
             title="Google Tag Manager ও পিক্সেল কনফিগারেশন"
           >
             <Tag className="w-4 h-4 text-[#4A5D3B]" />
-            <span>GTM ও পিক্সেল সেটআপ</span>
+            <span>GTM ও পিক্সেল</span>
           </button>
 
           {onOpenTaskDrawer && (
@@ -109,16 +133,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               className="px-4 py-2 bg-[#E8EAE2] border border-[#D9DED1] text-[#4A5D3B] hover:bg-[#D9DED1]/60 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 shadow-2xs"
             >
               <Sparkles className="w-4 h-4 text-[#4A5D3B]" />
-              <span>টাস্ক সাজেশন ({tasks.length})</span>
+              <span>টাস্ক ({tasks.length})</span>
             </button>
           )}
 
           <button
             onClick={() => onNavigateTab('LEADS')}
-            className="px-4 py-2 bg-[#4A5D3B] text-[#FDFCF8] rounded-xl text-xs font-semibold hover:bg-[#3A4533] transition-colors flex items-center gap-2 shadow-2xs"
+            className="px-4 py-2 bg-[#2C3327] text-[#FDFCF8] rounded-xl text-xs font-semibold hover:bg-[#1f241b] transition-colors flex items-center gap-2 shadow-2xs"
           >
             <Users className="w-4 h-4" />
-            <span>নতুন লিড দেখুন ({newLeads.length})</span>
+            <span>লিড ({newLeads.length})</span>
           </button>
         </div>
       </div>

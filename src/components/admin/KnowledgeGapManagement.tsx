@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   AlertCircle, 
   CheckCircle2, 
@@ -17,16 +17,51 @@ import { storageService } from '../../services/storageService';
 
 interface KnowledgeGapManagementProps {
   settings?: SiteSettings;
+  initialFilter?: string;
+  highlightGapId?: string;
+  targetElementId?: string;
   onRefresh?: () => void;
 }
 
-export const KnowledgeGapManagement: React.FC<KnowledgeGapManagementProps> = ({ settings, onRefresh }) => {
+export const KnowledgeGapManagement: React.FC<KnowledgeGapManagementProps> = ({
+  settings,
+  initialFilter,
+  highlightGapId,
+  targetElementId,
+  onRefresh
+}) => {
   const [gaps, setGaps] = useState<KnowledgeGap[]>(() => storageService.getKnowledgeGaps());
-  const [filterStatus, setFilterStatus] = useState<'ALL' | 'unresolved' | 'resolved' | 'added_to_kb'>('ALL');
+  const [filterStatus, setFilterStatus] = useState<'ALL' | 'unresolved' | 'resolved' | 'added_to_kb'>(() => {
+    if (initialFilter === 'UNRESOLVED' || initialFilter === 'unresolved') return 'unresolved';
+    return 'ALL';
+  });
   const [selectedGap, setSelectedGap] = useState<KnowledgeGap | null>(null);
   const [adminAnswer, setAdminAnswer] = useState('');
   const [addToKnowledgeBase, setAddToKnowledgeBase] = useState(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialFilter === 'UNRESOLVED' || initialFilter === 'unresolved') {
+      setFilterStatus('unresolved');
+    }
+  }, [initialFilter]);
+
+  // Deep-linking scroll & highlight effect
+  useEffect(() => {
+    const targetId = targetElementId || (highlightGapId ? `gap-item-${highlightGapId}` : null);
+    if (targetId) {
+      setTimeout(() => {
+        const el = document.getElementById(targetId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('ring-4', 'ring-[#4A5D3B]', 'ring-offset-2', 'transition-all');
+          setTimeout(() => {
+            el.classList.remove('ring-4', 'ring-[#4A5D3B]', 'ring-offset-2');
+          }, 3500);
+        }
+      }, 250);
+    }
+  }, [targetElementId, highlightGapId]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -127,7 +162,8 @@ export const KnowledgeGapManagement: React.FC<KnowledgeGapManagementProps> = ({ 
           {filteredGaps.map((gap) => (
             <div
               key={gap.id}
-              className="bg-white p-5 rounded-3xl border border-[#D9DED1] space-y-4 shadow-2xs flex flex-col justify-between"
+              id={`gap-item-${gap.id}`}
+              className="bg-white p-5 rounded-3xl border border-[#D9DED1] space-y-4 shadow-2xs flex flex-col justify-between transition-all"
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-2">

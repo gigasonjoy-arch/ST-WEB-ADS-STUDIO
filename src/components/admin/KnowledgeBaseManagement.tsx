@@ -249,7 +249,8 @@ export const KnowledgeBaseManagement: React.FC<KnowledgeBaseManagementProps> = (
         {filteredItems.map((item) => (
           <div
             key={item.id}
-            className="bg-white p-5 rounded-3xl border border-[#D9DED1] space-y-3.5 shadow-2xs flex flex-col justify-between"
+            id={`kb-item-${item.id}`}
+            className="bg-white p-5 rounded-3xl border border-[#D9DED1] space-y-3.5 shadow-2xs flex flex-col justify-between transition-all"
           >
             <div className="space-y-2.5">
               <div className="flex items-start justify-between gap-3">

@@ -35,8 +35,8 @@ export const AdsCalculator: React.FC<AdsCalculatorProps> = ({ onOpenLeadFormWith
   const { language } = useLanguage();
   const [siteSettings, setSiteSettings] = useState<SiteSettings>(storageService.getSiteSettings());
   const exchangeRate = siteSettings.exchangeRateUsdToBdt || 150;
-  const minBudgetUSD = siteSettings.minMonthlyBudgetUSD || 1;
-  const minBudgetBDT = siteSettings.minMonthlyBudgetBDT || Math.round(minBudgetUSD * exchangeRate);
+  const minBudgetUSD = siteSettings.minAdBudgetUSD || siteSettings.minMonthlyBudgetUSD || 1;
+  const minBudgetBDT = siteSettings.minAdBudgetBDT || siteSettings.minMonthlyBudgetBDT || Math.round(minBudgetUSD * exchangeRate);
 
   const [currency, setCurrency] = useState<'USD' | 'BDT'>('BDT');
   const [adBudgetUSD, setAdBudgetUSD] = useState<number>(200); // $200 default

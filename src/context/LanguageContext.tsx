@@ -208,10 +208,10 @@ export const translations = {
     'admin.login.title': 'Admin Studio Login',
     'admin.login.sub': 'Sonjoy Sarkar - TikTok & Facebook Ads Specialist',
     'admin.login.label': 'Admin Security Passcode',
-    'admin.login.placeholder': 'Enter admin passcode (e.g. stweb2025)',
+    'admin.login.placeholder': 'Enter your secure passcode',
     'admin.login.btn': 'Access Admin Studio',
     'admin.login.back': '← Back to Website',
-    'admin.login.hint': 'Default access passcode: stweb2025 (or admin123 / sonjoy)'
+    'admin.login.hint': 'Restricted access for authorized personnel only.'
   },
   bn: {
     // Navigation
@@ -411,10 +411,10 @@ export const translations = {
     'admin.login.title': 'অ্যাডমিন স্টুডিও লগইন',
     'admin.login.sub': 'সঞ্জয় সরকার - পারফরম্যান্স অ্যাড স্পেশালিস্ট',
     'admin.login.label': 'অ্যাডমিন সিকিউরিটি পাসকোড',
-    'admin.login.placeholder': 'অ্যাডমিন পাসকোড লিখুন (যেমন: stweb2025)',
+    'admin.login.placeholder': 'আপনার সিকিউরিটি পাসকোড লিখুন',
     'admin.login.btn': 'অ্যাডমিন প্যানেলে প্রবেশ করুন',
     'admin.login.back': '← ওয়েবসাইটে ফিরে যান',
-    'admin.login.hint': 'ডিফল্ট অ্যাক্সেস পাসকোড: stweb2025 (অথবা admin123 / sonjoy)'
+    'admin.login.hint': 'শুধুমাত্র অনুমোদিত অ্যাডমিনের জন্য সংরক্ষিত।'
   }
 };
 

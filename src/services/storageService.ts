@@ -23,7 +23,12 @@ import {
   MediaItem,
   FAQItem,
   ProductPriceRange,
-  AdminUser
+  AdminUser,
+  CustomPage,
+  SiteThemeSettings,
+  FaviconSettings,
+  HomePageSettings,
+  ServicePackage
 } from '../types';
 
 import {
@@ -37,9 +42,12 @@ import {
   initialMedia,
   initialUsers,
   initialProductPriceRanges,
-  initialAdminUsers
+  initialAdminUsers,
+  initialCustomPages,
+  initialHomePageSettings
 } from '../data/initialData';
 
+import { themeService, DEFAULT_THEME_SETTINGS, DEFAULT_FAVICON_SETTINGS } from './themeService';
 import { db, doc, setDoc } from './firebase';
 
 const syncLeadToFirestore = async (lead: Lead) => {
@@ -66,6 +74,10 @@ const syncLeadToFirestore = async (lead: Lead) => {
 
 const STORAGE_KEYS = {
   SITE_SETTINGS: 'st_site_settings_v1',
+  THEME_SETTINGS: 'st_theme_settings_v1',
+  FAVICON_SETTINGS: 'st_favicon_settings_v1',
+  HOME_PAGE_SETTINGS: 'st_home_page_settings_v1',
+  CUSTOM_PAGES: 'st_custom_pages_v1',
   SOCIAL_LINKS: 'st_social_links_v1',
   CASE_STUDIES: 'st_case_studies_v1',
   DISTRICTS: 'st_districts_v1',
@@ -136,6 +148,18 @@ class StorageService {
       if (!this.hasItem(STORAGE_KEYS.SITE_SETTINGS)) {
         this.setItem(STORAGE_KEYS.SITE_SETTINGS, initialSiteSettings);
       }
+      if (!this.hasItem(STORAGE_KEYS.THEME_SETTINGS)) {
+        this.setItem(STORAGE_KEYS.THEME_SETTINGS, DEFAULT_THEME_SETTINGS);
+      }
+      if (!this.hasItem(STORAGE_KEYS.FAVICON_SETTINGS)) {
+        this.setItem(STORAGE_KEYS.FAVICON_SETTINGS, DEFAULT_FAVICON_SETTINGS);
+      }
+      if (!this.hasItem(STORAGE_KEYS.HOME_PAGE_SETTINGS)) {
+        this.setItem(STORAGE_KEYS.HOME_PAGE_SETTINGS, initialHomePageSettings);
+      }
+      if (!this.hasItem(STORAGE_KEYS.CUSTOM_PAGES)) {
+        this.setItem(STORAGE_KEYS.CUSTOM_PAGES, initialCustomPages);
+      }
       if (!this.hasItem(STORAGE_KEYS.SOCIAL_LINKS)) {
         this.setItem(STORAGE_KEYS.SOCIAL_LINKS, initialSocialLinks);
       }
@@ -187,6 +211,12 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
         };
         this.setItem(STORAGE_KEYS.AI_SETTINGS, defaultAiSettings);
       }
+
+      // Initial apply of theme and favicon
+      const activeTheme = this.getItem<SiteThemeSettings>(STORAGE_KEYS.THEME_SETTINGS, DEFAULT_THEME_SETTINGS);
+      const activeFavicon = this.getItem<FaviconSettings>(STORAGE_KEYS.FAVICON_SETTINGS, DEFAULT_FAVICON_SETTINGS);
+      themeService.applyTheme(activeTheme);
+      themeService.updateFavicon(activeFavicon, activeTheme);
     } catch (e) {
       console.warn('Init defaults notice:', e);
     }
@@ -229,8 +259,8 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
       gtm: {
         ...initialSiteSettings.gtm,
         ...(saved?.gtm || {}),
-        enabled: saved?.gtm?.enabled ?? initialSiteSettings.gtm.enabled ?? false,
-        containerId: saved?.gtm?.containerId || initialSiteSettings.gtm.containerId || 'GTM-XXXXXXX',
+        enabled: saved?.gtm !== undefined ? saved.gtm.enabled : true,
+        containerId: (saved?.gtm?.containerId && saved.gtm.containerId !== 'GTM-XXXXXXX') ? saved.gtm.containerId : 'GTM-P3WLNDR6',
         tiktokPixelId: saved?.gtm?.tiktokPixelId || '',
         metaPixelId: saved?.gtm?.metaPixelId || '',
         googleAnalyticsId: saved?.gtm?.googleAnalyticsId || '',
@@ -240,6 +270,11 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
       sectionVisibility: {
         ...initialSiteSettings.sectionVisibility,
         ...(saved?.sectionVisibility || {})
+      },
+      header: {
+        ...initialSiteSettings.header,
+        ...(saved?.header || {}),
+        navLinks: saved?.header?.navLinks || initialSiteSettings.header?.navLinks || []
       }
     };
   }
@@ -249,6 +284,88 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
     const updated = { ...current, ...settings };
     this.setItem(STORAGE_KEYS.SITE_SETTINGS, updated);
     this.logAudit('EDIT_SETTINGS', 'SiteSettings', 'Updated global site settings');
+  }
+
+  // --- Theme & Color Management ---
+  public getThemeSettings(): SiteThemeSettings {
+    const saved = this.getItem<SiteThemeSettings>(STORAGE_KEYS.THEME_SETTINGS, DEFAULT_THEME_SETTINGS);
+    return { ...DEFAULT_THEME_SETTINGS, ...(saved || {}) };
+  }
+
+  public saveThemeSettings(theme: SiteThemeSettings): void {
+    this.setItem(STORAGE_KEYS.THEME_SETTINGS, theme);
+    themeService.applyTheme(theme);
+    const favicon = this.getFaviconSettings();
+    themeService.updateFavicon(favicon, theme);
+    this.logAudit('SAVE_THEME_SETTINGS', 'SiteTheme', `Saved site theme: ${theme.activePaletteId}`);
+  }
+
+  // --- Favicon Management ---
+  public getFaviconSettings(): FaviconSettings {
+    const saved = this.getItem<FaviconSettings>(STORAGE_KEYS.FAVICON_SETTINGS, DEFAULT_FAVICON_SETTINGS);
+    return { ...DEFAULT_FAVICON_SETTINGS, ...(saved || {}) };
+  }
+
+  public saveFaviconSettings(favicon: FaviconSettings): void {
+    this.setItem(STORAGE_KEYS.FAVICON_SETTINGS, favicon);
+    const theme = this.getThemeSettings();
+    themeService.updateFavicon(favicon, theme);
+    this.logAudit('SAVE_FAVICON', 'Favicon', `Updated favicon configuration`);
+  }
+
+  // --- Home Page Content Control ---
+  public getHomePageSettings(): HomePageSettings {
+    const saved = this.getItem<HomePageSettings>(STORAGE_KEYS.HOME_PAGE_SETTINGS, initialHomePageSettings);
+    return { ...initialHomePageSettings, ...(saved || {}) };
+  }
+
+  public saveHomePageSettings(settings: HomePageSettings): void {
+    this.setItem(STORAGE_KEYS.HOME_PAGE_SETTINGS, settings);
+    this.logAudit('SAVE_HOME_PAGE_SETTINGS', 'HomePageSettings', 'Updated home page dynamic content rules');
+  }
+
+  // --- WordPress-like Custom Page Management ---
+  public getCustomPages(includeDrafts: boolean = false): CustomPage[] {
+    const all = this.getItem<CustomPage[]>(STORAGE_KEYS.CUSTOM_PAGES, initialCustomPages);
+    const sorted = [...all].sort((a, b) => a.sortOrder - b.sortOrder);
+    if (includeDrafts) return sorted;
+    return sorted.filter(p => p.status === 'PUBLISHED');
+  }
+
+  public getCustomPageBySlug(slug: string, includeDrafts: boolean = false): CustomPage | null {
+    const all = this.getCustomPages(includeDrafts);
+    const cleanSlug = slug.toLowerCase().replace(/^\/page\//, '').replace(/^\//, '');
+    return all.find(p => p.slug.toLowerCase() === cleanSlug) || null;
+  }
+
+  public saveCustomPage(page: CustomPage): void {
+    const all = this.getItem<CustomPage[]>(STORAGE_KEYS.CUSTOM_PAGES, initialCustomPages);
+    const idx = all.findIndex(p => p.id === page.id);
+    const now = new Date().toISOString();
+    const updated: CustomPage = {
+      ...page,
+      updatedAt: now,
+      createdAt: page.createdAt || now
+    };
+    if (idx >= 0) {
+      all[idx] = updated;
+    } else {
+      all.push(updated);
+    }
+    this.setItem(STORAGE_KEYS.CUSTOM_PAGES, all);
+    this.logAudit('SAVE_PAGE', 'CustomPage', `Saved page: ${page.titleEn} (${page.slug}) [${page.status}]`);
+  }
+
+  public deleteCustomPage(id: string): void {
+    const all = this.getItem<CustomPage[]>(STORAGE_KEYS.CUSTOM_PAGES, initialCustomPages);
+    const target = all.find(p => p.id === id);
+    if (target?.isSystemPage) {
+      console.warn('System pages cannot be deleted, but status can be changed to DISABLED');
+      return;
+    }
+    const filtered = all.filter(p => p.id !== id);
+    this.setItem(STORAGE_KEYS.CUSTOM_PAGES, filtered);
+    this.logAudit('DELETE_PAGE', 'CustomPage', `Deleted page: ${id}`);
   }
 
   // --- Social Links ---
@@ -1119,6 +1236,24 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
     this.notify();
   }
 
+  public getAdminPasscode(): string {
+    return this.getItem<string>('st_admin_passcode', 'stweb2025');
+  }
+
+  public setAdminPasscode(newPasscode: string): void {
+    this.setItem('st_admin_passcode', newPasscode);
+    this.logAudit('UPDATE_PASSCODE', 'Security', 'Admin access passcode updated successfully');
+    this.notify();
+  }
+
+  public verifyAdminPasscode(passcode: string): boolean {
+    if (!passcode) return false;
+    const current = this.getAdminPasscode();
+    if (passcode.trim() === current.trim()) return true;
+    const users = this.getAdminUsers();
+    return users.some(u => u.status === 'ACTIVE' && u.passcode && u.passcode === passcode.trim());
+  }
+
   // Legacy user compatibility
   public getUsers(): UserProfile[] {
     return this.getItem<UserProfile[]>(STORAGE_KEYS.USERS, initialUsers);
@@ -1288,6 +1423,45 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
       notes: submission.notes || 'Submitted via In-Chat AI Assistant',
       location: 'Bangladesh'
     });
+  }
+
+  public getServices(): ServicePackage[] {
+    return [
+      {
+        id: 'srv-tiktok-scaling',
+        title: 'TikTok Ads Growth & Scaling System',
+        titleEn: 'TikTok Ads Growth & Scaling System',
+        titleBn: 'টিকটক অ্যাডস গ্রোথ ও স্কেলিং প্যাকেজ',
+        platform: 'TikTok',
+        pricingModel: 'Monthly Retainer + Performance',
+        descriptionEn: 'Full-funnel TikTok advertising management tailored for e-commerce brands in Bangladesh, UAE, and USA.',
+        descriptionBn: 'ই-কমার্স ব্র্যান্ডের সেলস বহুগুণ বাড়াতে টিকটক অ্যাড অ্যাকাউন্ট, পিক্সেল এবং ফুল-ফানেল স্কেলিং সলিউশন।',
+        features: [
+          'Business Center & Pixel Custom Event Tracking',
+          'UGC Video Creative Direction & Hook Testing',
+          'Advantage+ / Spark Ads Strategy & Scaling',
+          'Daily CPA, CPM & CVR Optimization'
+        ],
+        active: true
+      },
+      {
+        id: 'srv-meta-scaling',
+        title: 'Facebook & Instagram Direct ROAS Mastery',
+        titleEn: 'Facebook & Instagram Direct ROAS Mastery',
+        titleBn: 'ফেসবুক ও ইনস্টাগ্রাম অ্যাডস ROAS মাস্টারি',
+        platform: 'Facebook & Meta',
+        pricingModel: 'Monthly Retainer + Performance',
+        descriptionEn: 'High-conversion Meta ad campaigns combining dynamic catalog ads, CBO budget scaling, and custom Lookalike audiences.',
+        descriptionBn: 'অ্যাডভান্সড মেটা বিজনেস ম্যানেজার, CAPI কনভার্সন ট্র্যাকিং ও CBO স্কেলিংয়ের মাধ্যমে হাই-কনভার্টিং ক্যাম্পেইন।',
+        features: [
+          'Meta Business Manager & CAPI Server Tracking',
+          'Dynamic Product Catalog & Broad Audience Testing',
+          'Retargeting & Abandoned Cart Recovery Funnels',
+          'Weekly Performance Reports & Live Data Dashboard'
+        ],
+        active: true
+      }
+    ];
   }
 
   public resetToDefaults(): void {

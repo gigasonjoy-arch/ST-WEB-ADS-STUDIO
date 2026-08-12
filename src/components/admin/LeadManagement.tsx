@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   Search, 
@@ -17,58 +17,85 @@ import {
   FileSpreadsheet,
   RefreshCw
 } from 'lucide-react';
-import { LeadSubmission } from '../../types';
+import { Lead, LeadSubmission } from '../../types';
 import { storageService } from '../../services/storageService';
 import { googleWorkspaceService } from '../../services/googleWorkspaceService';
 
 interface LeadManagementProps {
-  leads?: LeadSubmission[];
+  leads?: (Lead | LeadSubmission)[];
+  initialStatusFilter?: string;
+  highlightLeadId?: string;
+  targetElementId?: string;
   onUpdateLead?: (lead: LeadSubmission) => void;
   onDeleteLead?: (leadId: string) => void;
   onAddLead?: (lead: LeadSubmission) => void;
   onRefresh?: () => void;
 }
 
+const normalizeLead = (l: Lead | LeadSubmission): LeadSubmission => {
+  if ('phone' in l && 'interestedService' in l) {
+    return l as LeadSubmission;
+  }
+  const rawLead = l as Lead;
+  return {
+    id: rawLead.id,
+    name: rawLead.name,
+    phone: rawLead.whatsapp || '',
+    email: undefined,
+    businessType: rawLead.businessType || 'General Business',
+    interestedService: 'TIKTOK_ADS',
+    monthlyBudget: rawLead.monthlyBudget,
+    notes: rawLead.notes,
+    status: (rawLead.status === 'NEW' ? 'NEW' : rawLead.status === 'CONTACTED' ? 'CONTACTED' : rawLead.status === 'QUALIFIED' ? 'QUALIFIED' : (rawLead.status as string) === 'WON' || rawLead.status === 'CONVERTED' ? 'CONVERTED' : 'NEW') as any,
+    createdAt: rawLead.createdAt,
+    visitorId: rawLead.visitorId
+  };
+};
+
 export const LeadManagement: React.FC<LeadManagementProps> = ({
   leads: propLeads,
+  initialStatusFilter,
+  highlightLeadId,
+  targetElementId,
   onUpdateLead,
   onDeleteLead,
   onAddLead,
   onRefresh
 }) => {
   const [internalLeads, setInternalLeads] = useState<LeadSubmission[]>(() => {
-    return storageService.getLeads().map(l => ({
-      id: l.id,
-      name: l.name,
-      phone: l.whatsapp,
-      email: undefined,
-      businessType: l.businessType || 'General Business',
-      interestedService: 'TIKTOK_ADS' as any,
-      monthlyBudget: l.monthlyBudget,
-      notes: l.notes,
-      status: (l.status === 'NEW' ? 'NEW' : l.status === 'CONTACTED' ? 'CONTACTED' : l.status === 'QUALIFIED' ? 'QUALIFIED' : (l.status as string) === 'WON' || l.status === 'CONVERTED' ? 'CONVERTED' : 'NEW') as any,
-      createdAt: l.createdAt
-    }));
+    return storageService.getLeads().map(normalizeLead);
   });
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [statusFilter, setStatusFilter] = useState<string>(initialStatusFilter || 'ALL');
   const [serviceFilter, setServiceFilter] = useState<string>('ALL');
+
+  useEffect(() => {
+    if (initialStatusFilter) {
+      setStatusFilter(initialStatusFilter);
+    }
+  }, [initialStatusFilter]);
+
+  // Deep-linking scroll & highlight effect
+  useEffect(() => {
+    const targetId = targetElementId || (highlightLeadId ? `lead-card-${highlightLeadId}` : null);
+    if (targetId) {
+      setTimeout(() => {
+        const el = document.getElementById(targetId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('bg-[#E8EAE2]/80', 'ring-2', 'ring-[#4A5D3B]', 'transition-all');
+          setTimeout(() => {
+            el.classList.remove('bg-[#E8EAE2]/80', 'ring-2', 'ring-[#4A5D3B]');
+          }, 3500);
+        }
+      }, 250);
+    }
+  }, [targetElementId, highlightLeadId]);
   
-  const leads = propLeads || internalLeads;
+  const leads = propLeads ? propLeads.map(normalizeLead) : internalLeads;
 
   const refreshData = () => {
-    setInternalLeads(storageService.getLeads().map(l => ({
-      id: l.id,
-      name: l.name,
-      phone: l.whatsapp,
-      email: undefined,
-      businessType: l.businessType || 'General Business',
-      interestedService: 'TIKTOK_ADS' as any,
-      monthlyBudget: l.monthlyBudget,
-      notes: l.notes,
-      status: (l.status === 'NEW' ? 'NEW' : l.status === 'CONTACTED' ? 'CONTACTED' : l.status === 'QUALIFIED' ? 'QUALIFIED' : (l.status as string) === 'WON' || l.status === 'CONVERTED' ? 'CONVERTED' : 'NEW') as any,
-      createdAt: l.createdAt
-    })));
+    setInternalLeads(storageService.getLeads().map(normalizeLead));
     if (onRefresh) onRefresh();
   };
   
@@ -301,7 +328,7 @@ export const LeadManagement: React.FC<LeadManagementProps> = ({
                   const rawPhone = lead.phone || (lead as any).whatsapp || '';
                   const cleanPhone = rawPhone ? rawPhone.replace(/\D/g, '') : '';
                   return (
-                    <tr key={lead.id} className="hover:bg-[#FDFCF8] transition-colors">
+                    <tr key={lead.id} id={`lead-card-${lead.id}`} className="hover:bg-[#FDFCF8] transition-all">
                       <td className="py-4 px-4">
                         <div className="font-bold text-[#2C3327]">{lead.name}</div>
                         <div className="text-[11px] text-[#5C6652]">{lead.phone}</div>

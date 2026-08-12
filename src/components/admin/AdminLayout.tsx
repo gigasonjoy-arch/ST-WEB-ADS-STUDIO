@@ -10,18 +10,23 @@ import {
   BarChart3, 
   Settings, 
   LogOut, 
-  ExternalLink,
-  ShieldCheck,
-  Sparkles,
-  ChevronRight,
-  Database,
-  Layers,
-  Cloud,
-  ArrowRight,
-  Tag
+  ExternalLink, 
+  ShieldCheck, 
+  Sparkles, 
+  ChevronRight, 
+  Database, 
+  Layers, 
+  Cloud, 
+  ArrowRight, 
+  Tag, 
+  User, 
+  Bot,
+  Palette,
+  Globe
 } from 'lucide-react';
 import { AdminTab, SiteSettings, AdminTask } from '../../types';
 import { AdminTaskSuggestionDrawer } from './AdminTaskSuggestionDrawer';
+import { AdminAiAssistantDrawer } from './AdminAiAssistantDrawer';
 import { AutomationTaskService } from '../../services/automationTaskService';
 import { storageService } from '../../services/storageService';
 
@@ -47,6 +52,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   children
 }) => {
   const [isTaskDrawerOpen, setIsTaskDrawerOpen] = useState<boolean>(false);
+  const [isAiAssistantOpen, setIsAiAssistantOpen] = useState<boolean>(false);
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [tasks, setTasks] = useState<AdminTask[]>(() => {
     return AutomationTaskService.generateTasks({
@@ -87,15 +93,19 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
   const navItems: Array<{ id: AdminTab; label: string; icon: React.ComponentType<any>; badge?: number }> = [
     { id: 'DASHBOARD', label: 'ওভারভিউ ড্যাশবোর্ড', icon: LayoutDashboard },
+    { id: 'THEME_COLORS', label: 'থিম ও কালার ইঞ্জিন (Colors & Theme)', icon: Palette },
+    { id: 'PAGES', label: 'পেজ ও কনটেন্ট রুলস (Custom Pages)', icon: Layers },
+    { id: 'PROFILE', label: 'প্রোফাইল ও ব্র্যান্ডিং (Profile Edit)', icon: User },
     { id: 'LEADS', label: 'লিড ও ক্লায়েন্ট CRM', icon: Users, badge: unreadLeadsCount },
     { id: 'WORKSPACE_SYNC', label: 'ক্লাউড ও ওয়ার্কস্পেস (Drive & Sheets)', icon: Cloud },
     { id: 'CASE_STUDIES', label: 'কেস স্টাডি ও প্রুফ', icon: FileText },
     { id: 'CALCULATOR_BENCHMARKS', label: 'ক্যালকুলেটর বেঞ্চমার্ক', icon: Calculator },
     { id: 'KNOWLEDGE_BASE', label: 'নলেজ বেস (AI গ্রাউন্ডিং)', icon: HelpCircle },
     { id: 'KNOWLEDGE_GAPS', label: 'অজানা প্রশ্ন (Knowledge Gaps)', icon: AlertCircle, badge: unresolvedGapsCount },
-    { id: 'AI_CONVERSATIONS', label: 'এআই চ্যাট হিস্ট্রি', icon: MessageSquare },
+    { id: 'AI_CONVERSATIONS', label: 'এআই চ্যাট হিস্ট্রি ও ট্রেন্ড', icon: MessageSquare },
     { id: 'ANALYTICS', label: 'ভিজিটর ও ফানেল অ্যানালিটিক্স', icon: BarChart3 },
     { id: 'GTM_TRACKING', label: 'GTM ও পিক্সেল ট্র্যাকিং (GTM & Pixels)', icon: Tag },
+    { id: 'FIREBASE_STATUS', label: 'ডাটাবেস কানেকশন (Firebase Cloud)', icon: Database },
     { id: 'SETTINGS', label: 'সাইট ও সিস্টেম সেটিংস', icon: Settings },
   ];
 
@@ -108,7 +118,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           
           {/* Top Admin Branding */}
           <div className="flex items-center gap-3 pb-6 border-b border-[#D9DED1]">
-            <div className="w-10 h-10 rounded-2xl bg-[#4A5D3B] text-[#FDFCF8] flex items-center justify-center font-serif text-lg font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-[#4A5D3B] text-[#FDFCF8] flex items-center justify-center font-serif text-lg font-bold shadow-xs">
               ST
             </div>
             <div>
@@ -122,7 +132,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             </div>
           </div>
 
-          {/* Quick Return to Live Site */}
+          {/* Quick Action Hub (Live Site + AI Assistant + Tasks) */}
           <div className="py-4 space-y-2">
             <button
               onClick={onReturnToSite}
@@ -133,6 +143,20 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 <span>লাইভ ওয়েবসাইট দেখুন</span>
               </span>
               <ChevronRight className="w-3.5 h-3.5 text-[#8A957F]" />
+            </button>
+
+            {/* Admin AI Assistant Trigger */}
+            <button
+              onClick={() => setIsAiAssistantOpen(true)}
+              className="w-full bg-[#2C3327] hover:bg-[#1f241b] text-[#FDFCF8] px-4 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors shadow-2xs group"
+            >
+              <span className="flex items-center gap-2">
+                <Bot className="w-3.5 h-3.5 text-emerald-400 group-hover:rotate-12 transition-transform" />
+                <span>Admin AI Assistant</span>
+              </span>
+              <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-[#4A5D3B] text-white">
+                AI Help
+              </span>
             </button>
 
             {/* Smart Task Suggestion Trigger Button */}
@@ -216,11 +240,33 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
       {/* Main Content Area */}
       <main className="flex-1 p-6 sm:p-10 max-h-screen overflow-y-auto bg-[#FDFCF8] relative">
-        {children}
+        {React.Children.map(children, child => {
+          if (React.isValidElement(child)) {
+            return React.cloneElement(child, {
+              onOpenAiAssistant: () => setIsAiAssistantOpen(true),
+              onOpenTaskDrawer: () => setIsTaskDrawerOpen(true),
+              ...(child.props as any)
+            });
+          }
+          return child;
+        })}
       </main>
 
-      {/* FLOATING ACTION BUTTON (ONLY FOR ADMIN PANEL) */}
-      <div className="fixed bottom-6 right-6 z-40">
+      {/* FLOATING ACTION BUTTONS (ONLY FOR ADMIN PANEL) */}
+      <div className="fixed bottom-6 right-6 z-40 flex items-center gap-3">
+        {/* Admin AI Assistant Float */}
+        <button
+          onClick={() => setIsAiAssistantOpen(true)}
+          className="group relative flex items-center gap-2 px-3.5 py-3 bg-[#2C3327] hover:bg-[#1f241b] text-[#FDFCF8] rounded-2xl shadow-xl hover:shadow-2xl border-2 border-white/20 transition-all hover:scale-105"
+          title="Admin AI Assistant খুলুন"
+        >
+          <Bot className="w-5 h-5 text-emerald-400 group-hover:rotate-12 transition-transform" />
+          <span className="text-xs font-bold tracking-wide font-sans hidden sm:inline-block">
+            AI Assistant
+          </span>
+        </button>
+
+        {/* Task Suggestion Float */}
         <button
           onClick={() => setIsTaskDrawerOpen(true)}
           className="group relative flex items-center gap-2.5 px-4 py-3 bg-[#4A5D3B] hover:bg-[#3A4533] text-[#FDFCF8] rounded-2xl shadow-xl hover:shadow-2xl border-2 border-[#FFFFFF]/20 transition-all hover:scale-105"
@@ -254,6 +300,17 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         }}
         onRefreshScan={handleRefreshTasks}
         isScanning={isScanning}
+      />
+
+      {/* Interactive Admin AI Assistant Drawer */}
+      <AdminAiAssistantDrawer
+        isOpen={isAiAssistantOpen}
+        onClose={() => setIsAiAssistantOpen(false)}
+        onNavigateTab={(tab, params) => {
+          onSelectTab(tab, params);
+          setIsAiAssistantOpen(false);
+        }}
+        settings={settings}
       />
 
     </div>

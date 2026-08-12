@@ -1,27 +1,49 @@
-import React, { useState } from 'react';
-import { CaseStudy } from '../../types';
-import { CheckCircle2, TrendingUp, ExternalLink, ShieldCheck, Eye, Sparkles, Filter, ChevronRight, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { CaseStudy, HomePageSettings } from '../../types';
+import { storageService } from '../../services/storageService';
+import { CheckCircle2, TrendingUp, ExternalLink, ShieldCheck, Eye, Sparkles, Filter, ChevronRight, X, Play, Video, ArrowRight, Layers, Image as ImageIcon } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { VideoEmbedPlayer } from '../common/VideoEmbedPlayer';
 
 interface CaseStudiesSectionProps {
   caseStudies?: CaseStudy[];
   onOpenLeadForm?: () => void;
   onOpenLeadFormWithContext?: (data: any) => void;
+  onNavigateToPage?: (slug: string) => void;
 }
 
 export const CaseStudiesSection: React.FC<CaseStudiesSectionProps> = ({
   caseStudies = [],
   onOpenLeadForm,
-  onOpenLeadFormWithContext
+  onOpenLeadFormWithContext,
+  onNavigateToPage
 }) => {
   const { language, t } = useLanguage();
   const [selectedIndustry, setSelectedIndustry] = useState<string>('All');
   const [activeProofModal, setActiveProofModal] = useState<CaseStudy | null>(null);
+  const [homeSettings, setHomeSettings] = useState<HomePageSettings>(storageService.getHomePageSettings());
+
+  useEffect(() => {
+    setHomeSettings(storageService.getHomePageSettings());
+  }, []);
 
   const safeCaseStudies = caseStudies || [];
-  const industries = ['All', ...Array.from(new Set(safeCaseStudies.map(c => c.industry).filter(Boolean)))];
+  
+  // Apply home page filtering rules
+  let displayedCaseStudies = safeCaseStudies;
+  if (homeSettings?.showOnlyFeaturedCaseStudies) {
+    const featuredOnly = safeCaseStudies.filter(c => c.isFeaturedOnHome);
+    if (featuredOnly.length > 0) {
+      displayedCaseStudies = featuredOnly;
+    }
+  }
 
-  const filtered = safeCaseStudies.filter(c => {
+  const limit = homeSettings?.featuredCaseStudiesLimit || 3;
+  const limitedList = displayedCaseStudies.slice(0, limit);
+
+  const industries = ['All', ...Array.from(new Set(limitedList.map(c => c.industry).filter(Boolean)))];
+
+  const filtered = limitedList.filter(c => {
     if (selectedIndustry === 'All') return true;
     return c.industry === selectedIndustry;
   });
@@ -31,6 +53,14 @@ export const CaseStudiesSection: React.FC<CaseStudiesSectionProps> = ({
       onOpenLeadFormWithContext({ interestedService: 'Case Study Strategy Consultation' });
     } else if (onOpenLeadForm) {
       onOpenLeadForm();
+    }
+  };
+
+  const handleViewAllArchive = () => {
+    if (onNavigateToPage) {
+      onNavigateToPage('case-studies');
+    } else {
+      window.location.hash = '#page/case-studies';
     }
   };
 
@@ -77,141 +107,200 @@ export const CaseStudiesSection: React.FC<CaseStudiesSectionProps> = ({
               key={cs.id}
               className={`bg-[#FFFFFF] rounded-[32px] border ${
                 cs.isVerifiedReport ? 'border-[#4A5D3B]/40 ring-2 ring-[#4A5D3B]/10' : 'border-[#D9DED1]'
-              } p-7 flex flex-col justify-between shadow-sm hover:shadow-md transition-all group`}
+              } overflow-hidden flex flex-col justify-between shadow-sm hover:shadow-md transition-all group`}
             >
-              <div>
-                {/* Top Meta & Badges */}
-                <div className="flex items-center justify-between gap-2 mb-4">
-                  <span className="px-3 py-1 bg-[#F5F1EB] rounded-full text-[10px] uppercase tracking-wider font-bold text-[#A69076]">
-                    {language === 'en' ? (cs.industryEn || cs.industry) : (cs.industryBn || cs.industry)}
-                  </span>
-                  <span className="px-2.5 py-0.5 bg-[#E8EAE2] rounded-full text-[10px] font-semibold text-[#4A5D3B]">
-                    {cs.platform} Ads
-                  </span>
-                </div>
-
-                {/* Title */}
-                <h3 className="font-serif text-xl font-bold text-[#2C3327] mb-3 leading-snug group-hover:text-[#4A5D3B] transition-colors">
-                  {language === 'en' ? (cs.titleEn || cs.title) : (cs.titleBn || cs.title)}
-                </h3>
-
-                {/* Verified internal banner */}
-                {cs.isVerifiedReport && (
-                  <div className="mb-4 bg-[#E8EAE2]/60 rounded-xl p-3 border border-[#D9DED1] flex items-start gap-2.5">
-                    <ShieldCheck className="w-4 h-4 text-[#4A5D3B] shrink-0 mt-0.5" />
-                    <p className="text-[11px] text-[#4A5D3B] font-medium leading-relaxed">
-                      {language === 'en' ? 'Verified internal audit dataset across 126 active ad groups.' : 'অভ্যন্তরীণ ১২৬টি অ্যাড গ্রুপ সমন্বিত ভেরিফায়েড অডিট ডেটা।'}
-                    </p>
+              {/* Media banner if exists */}
+              {cs.proofImage ? (
+                <div 
+                  onClick={() => setActiveProofModal(cs)}
+                  className="relative h-48 w-full bg-[#E8EAE2] overflow-hidden border-b border-[#D9DED1] cursor-pointer group/img"
+                >
+                  <img
+                    src={cs.proofImage}
+                    alt={cs.title}
+                    className="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black/20 group-hover/img:bg-black/40 transition-colors flex items-center justify-center">
+                    <span className="px-3 py-1.5 bg-black/60 backdrop-blur-xs text-white rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>{t('cs.viewProof')}</span>
+                    </span>
                   </div>
-                )}
-
-                {/* Result Summary */}
-                <p className="text-xs text-[#5C6652] leading-relaxed mb-6">
-                  {language === 'en' ? (cs.resultSummaryEn || cs.resultSummary) : (cs.resultSummaryBn || cs.resultSummary)}
-                </p>
-
-                {/* Core Metrics Grid */}
-                <div className="grid grid-cols-2 gap-3 py-4 border-y border-[#D9DED1]/60 mb-6 bg-[#FDFCF8] rounded-2xl p-3.5">
-                  {cs.adSpendBDT !== undefined && (
-                    <div>
-                      <div className="text-[10px] uppercase font-bold text-[#8A957F]">{t('cs.spend')}</div>
-                      <div className="text-sm font-serif font-bold text-[#2C3327]">
-                        ৳{cs.adSpendBDT.toLocaleString('en-IN')}
-                      </div>
-                    </div>
-                  )}
-
-                  {cs.impressions !== undefined && (
-                    <div>
-                      <div className="text-[10px] uppercase font-bold text-[#8A957F]">{t('cs.impressions')}</div>
-                      <div className="text-sm font-serif font-bold text-[#2C3327]">
-                        {cs.impressions > 1000000 
-                          ? `${(cs.impressions / 1000000).toFixed(2)}M` 
-                          : cs.impressions.toLocaleString('en-IN')}
-                      </div>
-                    </div>
-                  )}
-
-                  {cs.conversations !== undefined && (
-                    <div>
-                      <div className="text-[10px] uppercase font-bold text-[#8A957F]">Conversations</div>
-                      <div className="text-sm font-serif font-bold text-[#4A5D3B]">
-                        {cs.conversations.toLocaleString('en-IN')}
-                      </div>
-                    </div>
-                  )}
-
-                  {cs.leads !== undefined && (
-                    <div>
-                      <div className="text-[10px] uppercase font-bold text-[#8A957F]">{t('cs.leads')}</div>
-                      <div className="text-sm font-serif font-bold text-[#4A5D3B]">
-                        {cs.leads.toLocaleString('en-IN')}
-                      </div>
-                    </div>
-                  )}
-
-                  {cs.purchases !== undefined && (
-                    <div>
-                      <div className="text-[10px] uppercase font-bold text-[#8A957F]">Purchases</div>
-                      <div className="text-sm font-serif font-bold text-[#4A5D3B]">
-                        {cs.purchases.toLocaleString('en-IN')}
-                      </div>
-                    </div>
-                  )}
-
-                  {cs.roas !== undefined && (
-                    <div>
-                      <div className="text-[10px] uppercase font-bold text-[#8A957F]">{t('cs.roas')}</div>
-                      <div className="text-sm font-serif font-bold text-[#E2725B]">
-                        {cs.roas}x
-                      </div>
-                    </div>
-                  )}
-
-                  {cs.cpa !== undefined && (
-                    <div>
-                      <div className="text-[10px] uppercase font-bold text-[#8A957F]">CPA / Cost</div>
-                      <div className="text-sm font-serif font-bold text-[#2C3327]">
-                        ৳{cs.cpa}
-                      </div>
-                    </div>
-                  )}
-
-                  {cs.ctr !== undefined && (
-                    <div>
-                      <div className="text-[10px] uppercase font-bold text-[#8A957F]">CTR</div>
-                      <div className="text-sm font-serif font-bold text-[#2C3327]">
-                        {cs.ctr}%
-                      </div>
-                    </div>
-                  )}
                 </div>
-              </div>
+              ) : (cs.videoUrl || cs.youtubeEmbed || cs.tiktokEmbed) ? (
+                <div className="p-3 bg-[#F5F1EB] border-b border-[#D9DED1]">
+                  <VideoEmbedPlayer 
+                    url={cs.videoUrl} 
+                    embedCode={cs.youtubeEmbed || cs.tiktokEmbed} 
+                    title={cs.title} 
+                    aspectRatio="16:9"
+                  />
+                </div>
+              ) : null}
 
-              {/* Action Button & Proof Trigger */}
-              <div className="flex items-center justify-between pt-2">
-                {cs.proofImage ? (
+              <div className="p-7 flex-1 flex flex-col justify-between">
+                <div>
+                  {/* Top Meta & Badges */}
+                  <div className="flex items-center justify-between gap-2 mb-4">
+                    <span className="px-3 py-1 bg-[#F5F1EB] rounded-full text-[10px] uppercase tracking-wider font-bold text-[#A69076]">
+                      {language === 'en' ? (cs.industryEn || cs.industry) : (cs.industryBn || cs.industry)}
+                    </span>
+                    <span className="px-2.5 py-0.5 bg-[#E8EAE2] rounded-full text-[10px] font-semibold text-[#4A5D3B]">
+                      {cs.platform} Ads
+                    </span>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="font-serif text-xl font-bold text-[#2C3327] mb-3 leading-snug group-hover:text-[#4A5D3B] transition-colors">
+                    {language === 'en' ? (cs.titleEn || cs.title) : (cs.titleBn || cs.title)}
+                  </h3>
+
+                  {/* Verified internal banner */}
+                  {cs.isVerifiedReport && (
+                    <div className="mb-4 bg-[#E8EAE2]/60 rounded-xl p-3 border border-[#D9DED1] flex items-start gap-2.5">
+                      <ShieldCheck className="w-4 h-4 text-[#4A5D3B] shrink-0 mt-0.5" />
+                      <p className="text-[11px] text-[#4A5D3B] font-medium leading-relaxed">
+                        {language === 'en' ? 'Verified internal audit dataset across 126 active ad groups.' : 'অভ্যন্তরীণ ১২৬টি অ্যাড গ্রুপ সমন্বিত ভেরিফায়েড অডিট ডেটা।'}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Result Summary */}
+                  <p className="text-xs text-[#5C6652] leading-relaxed mb-6">
+                    {language === 'en' ? (cs.resultSummaryEn || cs.resultSummary) : (cs.resultSummaryBn || cs.resultSummary)}
+                  </p>
+
+                  {/* Core Metrics Grid */}
+                  <div className="grid grid-cols-2 gap-3 py-4 border-y border-[#D9DED1]/60 mb-6 bg-[#FDFCF8] rounded-2xl p-3.5">
+                    {cs.adSpendBDT !== undefined && (
+                      <div>
+                        <div className="text-[10px] uppercase font-bold text-[#8A957F]">{t('cs.spend')}</div>
+                        <div className="text-sm font-serif font-bold text-[#2C3327]">
+                          ৳{cs.adSpendBDT.toLocaleString('en-IN')}
+                        </div>
+                      </div>
+                    )}
+
+                    {cs.impressions !== undefined && (
+                      <div>
+                        <div className="text-[10px] uppercase font-bold text-[#8A957F]">{t('cs.impressions')}</div>
+                        <div className="text-sm font-serif font-bold text-[#2C3327]">
+                          {cs.impressions > 1000000 
+                            ? `${(cs.impressions / 1000000).toFixed(2)}M` 
+                            : cs.impressions.toLocaleString('en-IN')}
+                        </div>
+                      </div>
+                    )}
+
+                    {cs.conversations !== undefined && (
+                      <div>
+                        <div className="text-[10px] uppercase font-bold text-[#8A957F]">Conversations</div>
+                        <div className="text-sm font-serif font-bold text-[#4A5D3B]">
+                          {cs.conversations.toLocaleString('en-IN')}
+                        </div>
+                      </div>
+                    )}
+
+                    {cs.leads !== undefined && (
+                      <div>
+                        <div className="text-[10px] uppercase font-bold text-[#8A957F]">{t('cs.leads')}</div>
+                        <div className="text-sm font-serif font-bold text-[#4A5D3B]">
+                          {cs.leads.toLocaleString('en-IN')}
+                        </div>
+                      </div>
+                    )}
+
+                    {cs.purchases !== undefined && (
+                      <div>
+                        <div className="text-[10px] uppercase font-bold text-[#8A957F]">Purchases</div>
+                        <div className="text-sm font-serif font-bold text-[#4A5D3B]">
+                          {cs.purchases.toLocaleString('en-IN')}
+                        </div>
+                      </div>
+                    )}
+
+                    {cs.roas !== undefined && (
+                      <div>
+                        <div className="text-[10px] uppercase font-bold text-[#8A957F]">{t('cs.roas')}</div>
+                        <div className="text-sm font-serif font-bold text-[#E2725B]">
+                          {cs.roas}x
+                        </div>
+                      </div>
+                    )}
+
+                    {cs.cpa !== undefined && (
+                      <div>
+                        <div className="text-[10px] uppercase font-bold text-[#8A957F]">CPA / Cost</div>
+                        <div className="text-sm font-serif font-bold text-[#2C3327]">
+                          ৳{cs.cpa}
+                        </div>
+                      </div>
+                    )}
+
+                    {cs.ctr !== undefined && (
+                      <div>
+                        <div className="text-[10px] uppercase font-bold text-[#8A957F]">CTR</div>
+                        <div className="text-sm font-serif font-bold text-[#2C3327]">
+                          {cs.ctr}%
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Action Button & Proof Trigger */}
+                <div className="flex items-center justify-between pt-2">
                   <button
                     onClick={() => setActiveProofModal(cs)}
-                    className="text-xs font-semibold text-[#4A5D3B] hover:text-[#2C3327] flex items-center gap-1.5 transition-colors"
+                    className="text-xs font-semibold text-[#4A5D3B] hover:text-[#2C3327] flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <Eye className="w-3.5 h-3.5" />
-                    <span>{t('cs.viewProof')}</span>
+                    <span>{cs.proofImage || cs.videoUrl ? t('cs.viewProof') : 'বিস্তারিত রিপোর্ট'}</span>
                   </button>
-                ) : (
-                  <span className="text-[11px] text-[#8A957F]">Verified Metrics</span>
-                )}
 
-                <button
-                  onClick={handleOpenLead}
-                  className="p-2.5 rounded-full bg-[#E8EAE2] text-[#4A5D3B] hover:bg-[#4A5D3B] hover:text-[#FDFCF8] transition-colors"
-                  title={language === 'en' ? 'Discuss Similar Campaign' : 'এই ধরণের রেজাল্ট আলোচনা করুন'}
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
+                  <button
+                    onClick={handleOpenLead}
+                    className="p-2.5 rounded-full bg-[#E8EAE2] text-[#4A5D3B] hover:bg-[#4A5D3B] hover:text-[#FDFCF8] transition-colors cursor-pointer"
+                    title={language === 'en' ? 'Discuss Similar Campaign' : 'এই ধরণের রেজাল্ট আলোচনা করুন'}
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Prominent Bottom CTA Bar Linking to Full Archive */}
+        <div className="mt-14 p-8 rounded-3xl bg-[#FFFFFF] border border-[#D9DED1] shadow-2xs flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+          <div className="space-y-2 max-w-2xl">
+            <div className="flex items-center justify-center md:justify-start gap-2 text-xs font-bold text-[#4A5D3B]">
+              <Layers className="w-4 h-4" />
+              <span>{language === 'en' ? 'Comprehensive Campaign Archive' : '১০০+ ভেরিফায়েড ক্যাম্পেইন ডেটাসেট'}</span>
+            </div>
+            <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#2C3327]">
+              {language === 'en' 
+                ? 'Want to see niche-specific results for your industry?' 
+                : 'আপনার নির্দিষ্ট প্রোডাক্ট ও ক্যাটাগরির বাস্তব ফলাফল দেখতে চান?'}
+            </h3>
+            <p className="text-xs text-[#5C6652]">
+              {language === 'en'
+                ? 'Browse our complete library of verified TikTok, Meta & Google Ads performance audits with ROAS breakdown.'
+                : 'স্কিনকেয়ার, ফ্যাশন, গ্যাজেট ও লোকাল বিজনেসের সম্পূর্ণ অডিট ও ক্যাম্পেইন স্ক্রিনশট আর্কাইভ ব্রাউজ করুন।'}
+            </p>
+          </div>
+
+          <button
+            onClick={handleViewAllArchive}
+            className="px-8 py-3.5 rounded-full bg-[#4A5D3B] text-[#FFFFFF] text-xs font-bold hover:bg-[#3A4533] transition-all flex items-center gap-2 shadow-xs shrink-0 group"
+          >
+            <span>
+              {language === 'en'
+                ? (homeSettings.viewAllCaseStudiesButtonTextEn || 'View All 100+ Case Studies & Reports →')
+                : (homeSettings.viewAllCaseStudiesButtonTextBn || 'সকল কেস স্টাডি ও ভেরিফায়েড রিপোর্ট দেখুন →')}
+            </span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </button>
         </div>
 
         {/* Disclaimer Note */}
@@ -247,12 +336,25 @@ export const CaseStudiesSection: React.FC<CaseStudiesSectionProps> = ({
             </div>
 
             <div className="py-6 space-y-4">
+              {/* Proof Image */}
               {activeProofModal.proofImage && (
                 <div className="rounded-2xl overflow-hidden border border-[#D9DED1] bg-[#F5F1EB]">
                   <img
                     src={activeProofModal.proofImage}
                     alt={activeProofModal.title}
-                    className="w-full h-auto object-cover max-h-80"
+                    className="w-full h-auto object-cover max-h-96"
+                  />
+                </div>
+              )}
+
+              {/* Video Embed */}
+              {(activeProofModal.videoUrl || activeProofModal.youtubeEmbed || activeProofModal.tiktokEmbed) && (
+                <div className="rounded-2xl overflow-hidden border border-[#D9DED1]">
+                  <VideoEmbedPlayer
+                    url={activeProofModal.videoUrl || activeProofModal.tiktokEmbed}
+                    embedCode={activeProofModal.youtubeEmbed || activeProofModal.tiktokEmbed}
+                    title={activeProofModal.title}
+                    aspectRatio="auto"
                   />
                 </div>
               )}
@@ -285,7 +387,7 @@ export const CaseStudiesSection: React.FC<CaseStudiesSectionProps> = ({
                   setActiveProofModal(null);
                   handleOpenLead();
                 }}
-                className="px-6 py-2.5 rounded-full bg-[#4A5D3B] text-[#FDFCF8] text-xs font-semibold"
+                className="px-6 py-2.5 rounded-full bg-[#4A5D3B] text-[#FDFCF8] text-xs font-semibold hover:bg-[#3A4533] transition-colors"
               >
                 {language === 'en' ? 'Deploy Similar Strategy' : 'একই স্ট্র্যাটেজিতে কাজ করতে চান?'}
               </button>

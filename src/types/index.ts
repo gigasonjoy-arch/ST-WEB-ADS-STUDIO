@@ -15,14 +15,19 @@ export interface ProductPriceRange {
   id: string;
   labelEn: string;
   labelBn: string;
-  minPriceBDT: number;
-  maxPriceBDT: number;
-  cvrMultiplier: number;
-  cpcMultiplier: number;
-  recommendedGoal: 'Purchase' | 'Messages' | 'Lead';
-  averageTicketBDT: number;
+  minPriceBDT?: number;
+  maxPriceBDT?: number;
+  cvrMultiplier?: number;
+  cpcMultiplier?: number;
+  recommendedGoal?: 'Purchase' | 'Messages' | 'Lead';
+  averageTicketBDT?: number;
   active: boolean;
-  sortOrder: number;
+  sortOrder?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  tier?: string;
+  expectedCVR?: number;
+  notes?: string;
 }
 
 export interface UserProfile {
@@ -113,8 +118,10 @@ export interface CaseStudy {
   notesEn?: string;
   notesBn?: string;
   isPublished: boolean;
+  status?: 'PUBLISHED' | 'DRAFT';
   sortOrder: number;
   isVerifiedReport?: boolean;
+  isFeaturedOnHome?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -396,6 +403,9 @@ export interface SeoSettings {
   ogImage: string;
   canonicalUrl: string;
   robotsIndex: boolean;
+  keywords?: string | string[];
+  metaTitle?: string;
+  metaDescription?: string;
 }
 
 export interface GtmSettings {
@@ -408,6 +418,43 @@ export interface GtmSettings {
   customBodyScript?: string;
 }
 
+export type LogoDisplayMode = 'BOTH' | 'LOGO_ONLY' | 'NAME_ONLY' | 'NONE';
+
+export interface HeaderNavLink {
+  id: string;
+  labelEn: string;
+  labelBn: string;
+  sectionId: string;
+  enabled: boolean;
+  sortOrder: number;
+}
+
+export interface HeaderSettings {
+  logoDisplayMode: LogoDisplayMode;
+  mobileLogoDisplayMode: LogoDisplayMode;
+  showLogo: boolean;
+  showBrandName: boolean;
+  showPersonalName: boolean;
+  showTagline: boolean;
+  logoType: 'TEXT_BADGE' | 'IMAGE_URL';
+  logoText: string;
+  logoImageUrl?: string;
+  logoWidth?: number;
+  logoHeight?: number;
+  customTaglineEn?: string;
+  customTaglineBn?: string;
+  sticky: boolean;
+  showLanguageSwitcher: boolean;
+  showAdminButton: boolean;
+  showWhatsAppButton: boolean;
+  ctaEnabled: boolean;
+  ctaTextEn: string;
+  ctaTextBn: string;
+  ctaAction: 'LEAD_FORM' | 'WHATSAPP' | 'CALCULATOR' | 'CUSTOM_URL';
+  ctaCustomUrl?: string;
+  navLinks: HeaderNavLink[];
+}
+
 export interface SectionVisibility {
   hero: boolean;
   results: boolean;
@@ -415,6 +462,7 @@ export interface SectionVisibility {
   audience: boolean;
   process: boolean;
   tiktokEducation: boolean;
+  tiktokGuide?: boolean;
   calculator: boolean;
   caseStudies: boolean;
   faq: boolean;
@@ -431,6 +479,125 @@ export interface ContentBlock {
   meta?: Record<string, any>;
 }
 
+export interface ColorPalette {
+  id: string;
+  nameEn: string;
+  nameBn: string;
+  backgroundColor: string;
+  textColor: string;
+  headingColor: string;
+  buttonBgColor: string;
+  buttonTextColor: string;
+  buttonHoverBgColor: string;
+  accentColor: string;
+  linkColor: string;
+  borderColor: string;
+  cardBgColor: string;
+  sectionBgColor: string;
+  headerBgColor: string;
+  headerTextColor: string;
+  footerBgColor: string;
+  footerTextColor: string;
+  badgeBgColor: string;
+  badgeTextColor: string;
+}
+
+export interface SiteThemeSettings {
+  activePaletteId: string;
+  backgroundColor: string;
+  textColor: string;
+  headingColor: string;
+  buttonBgColor: string;
+  buttonTextColor: string;
+  buttonHoverBgColor: string;
+  accentColor: string;
+  linkColor: string;
+  borderColor: string;
+  cardBgColor: string;
+  sectionBgColor: string;
+  headerBgColor: string;
+  headerTextColor: string;
+  footerBgColor: string;
+  footerTextColor: string;
+  badgeBgColor: string;
+  badgeTextColor: string;
+  customCss?: string;
+}
+
+export interface FaviconSettings {
+  faviconUrl: string;
+  appleTouchIconUrl?: string;
+  faviconType: 'URL' | 'EMOJI' | 'SVG_TEXT';
+  faviconEmoji?: string;
+  badgeText?: string;
+}
+
+export interface ServicePackage {
+  id: string;
+  title: string;
+  titleEn: string;
+  titleBn: string;
+  platform: string;
+  pricingModel: string;
+  description?: string;
+  descriptionEn: string;
+  descriptionBn: string;
+  features: string[];
+  active?: boolean;
+}
+
+export type PageStatus = 'PUBLISHED' | 'DRAFT' | 'DISABLED';
+
+export type PageType = 
+  | 'CUSTOM_CONTENT' 
+  | 'CASE_STUDIES_ARCHIVE' 
+  | 'SERVICES_ARCHIVE' 
+  | 'TIKTOK_PLAYBOOK' 
+  | 'FACEBOOK_ADS' 
+  | 'CALCULATOR_STANDALONE' 
+  | 'CONTACT_STANDALONE'
+  | 'ABOUT_SONJOY';
+
+export type PageTemplate = 'DEFAULT' | 'FULL_WIDTH' | 'CONTAINED' | 'LANDING';
+
+export interface CustomPage {
+  id: string;
+  titleEn: string;
+  titleBn: string;
+  slug: string;
+  contentEn: string;
+  contentBn: string;
+  excerptEn?: string;
+  excerptBn?: string;
+  featuredImage?: string;
+  pageType: PageType;
+  template: PageTemplate;
+  status: PageStatus;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string;
+  showInHeaderNav: boolean;
+  showInFooterNav: boolean;
+  sortOrder: number;
+  isSystemPage?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface HomePageSettings {
+  featuredCaseStudiesLimit: number;
+  showOnlyFeaturedCaseStudies: boolean;
+  caseStudiesHeadlineEn?: string;
+  caseStudiesHeadlineBn?: string;
+  caseStudiesSubheadlineEn?: string;
+  caseStudiesSubheadlineBn?: string;
+  viewAllCaseStudiesButtonTextEn?: string;
+  viewAllCaseStudiesButtonTextBn?: string;
+  viewAllCaseStudiesUrl?: string;
+  featuredServicesLimit?: number;
+  showServicesViewAll?: boolean;
+}
+
 export interface SiteSettings {
   brandName: string;
   personalName: string;
@@ -443,6 +610,8 @@ export interface SiteSettings {
   exchangeRateUsdToBdt: number;
   minAdBudgetUSD?: number;
   minAdBudgetBDT?: number;
+  minMonthlyBudgetUSD?: number;
+  minMonthlyBudgetBDT?: number;
   sonjoyBio: string;
   sonjoyRole: string;
   sonjoyImage: string;
@@ -450,6 +619,16 @@ export interface SiteSettings {
   sonjoyExperienceYears?: number;
   sonjoyTotalAdSpendManaged?: string;
   sonjoyCampaignsCount?: string;
+  heroBadgeText?: string;
+  heroStatAdGroups?: string;
+  heroStatImpressions?: string;
+  heroStatConversations?: string;
+  heroStatLeads?: string;
+  heroPrimaryPlatform?: string;
+  heroSecondaryPlatform?: string;
+  heroTargetRegion?: string;
+  heroSpecialistFocusTitle?: string;
+  googleSheetsWebhookUrl?: string;
   email?: string;
   phone?: string;
   whatsappNumber?: string;
@@ -458,6 +637,10 @@ export interface SiteSettings {
   whatsapp: WhatsAppSettings;
   seo: SeoSettings;
   gtm: GtmSettings;
+  header?: HeaderSettings;
+  theme?: SiteThemeSettings;
+  favicon?: FaviconSettings;
+  homePage?: HomePageSettings;
   heroVideoMediaId?: string;
   tiktokEducationVideoMediaId?: string;
 }
@@ -491,6 +674,8 @@ export interface MediaItem {
 
 export type AdminTab = 
   | 'DASHBOARD'
+  | 'PAGES'
+  | 'THEME_COLORS'
   | 'LEADS'
   | 'CASE_STUDIES'
   | 'CALCULATOR_BENCHMARKS'
@@ -503,6 +688,7 @@ export type AdminTab =
   | 'AI_CONVERSATIONS'
   | 'ANALYTICS'
   | 'GTM_TRACKING'
+  | 'FIREBASE_STATUS'
   | 'SETTINGS';
 
 export interface FAQItem {
@@ -569,6 +755,8 @@ export interface AdminTask {
   priority: TaskPriority;
   category: TaskCategory;
   targetTab: AdminTab;
+  targetSubTab?: string;
+  targetElementId?: string;
   targetParams?: Record<string, any>;
   actionLabel: string;
   actionLabelBn: string;
@@ -577,6 +765,29 @@ export interface AdminTask {
   isCompleted?: boolean;
   isDismissed?: boolean;
   metadata?: Record<string, any>;
+}
+
+export interface AdminAiAction {
+  id: string;
+  label: string;
+  labelBn: string;
+  tab: AdminTab;
+  subTab?: string;
+  elementId?: string;
+  params?: Record<string, any>;
+  description?: string;
+  descriptionBn?: string;
+  type: 'NAVIGATE' | 'OPEN_MODAL' | 'EXECUTE_QUERY' | 'CONFIRM_ACTION';
+}
+
+export interface AdminAiMessage {
+  id: string;
+  sender: 'user' | 'assistant' | 'system';
+  text: string;
+  timestamp: string;
+  actions?: AdminAiAction[];
+  suggestions?: string[];
+  meta?: Record<string, any>;
 }
 
 export interface FirebaseDiagnosticStep {

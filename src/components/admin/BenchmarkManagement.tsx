@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Calculator, 
   Plus, 
@@ -12,7 +12,9 @@ import {
   Layers, 
   HelpCircle,
   TrendingUp,
-  RefreshCw
+  RefreshCw,
+  Tag,
+  Percent
 } from 'lucide-react';
 import { 
   CalculatorBenchmark, 
@@ -20,23 +22,45 @@ import {
   RecommendationRule, 
   CreativeType, 
   ConversionGoal,
+  ProductPriceRange,
   SiteSettings 
 } from '../../types';
 import { storageService } from '../../services/storageService';
 
 interface BenchmarkManagementProps {
   settings?: SiteSettings;
+  initialSubTab?: string;
+  targetElementId?: string;
+  highlightCategory?: string;
   onRefresh?: () => void;
 }
 
-export const BenchmarkManagement: React.FC<BenchmarkManagementProps> = ({ settings, onRefresh }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'BENCHMARKS' | 'DISTRICTS' | 'RECOMMENDATIONS'>('BENCHMARKS');
+export const BenchmarkManagement: React.FC<BenchmarkManagementProps> = ({ 
+  settings, 
+  initialSubTab,
+  targetElementId,
+  highlightCategory,
+  onRefresh 
+}) => {
+  const getSubTabFromProp = (tabProp?: string): 'BENCHMARKS' | 'DISTRICTS' | 'RECOMMENDATIONS' | 'PRICE_RANGES' => {
+    if (tabProp === 'PRICE_RANGES') return 'PRICE_RANGES';
+    if (tabProp === 'DISTRICTS') return 'DISTRICTS';
+    if (tabProp === 'RECOMMENDATIONS') return 'RECOMMENDATIONS';
+    return 'BENCHMARKS';
+  };
+
+  const [activeSubTab, setActiveSubTab] = useState<'BENCHMARKS' | 'DISTRICTS' | 'RECOMMENDATIONS' | 'PRICE_RANGES'>(() => getSubTabFromProp(initialSubTab));
   
   // Benchmarks state
   const [benchmarks, setBenchmarks] = useState<CalculatorBenchmark[]>(() => storageService.getBenchmarks(true));
   const [editingBenchmark, setEditingBenchmark] = useState<CalculatorBenchmark | null>(null);
   const [isCreatingBenchmark, setIsCreatingBenchmark] = useState(false);
   
+  // Price Ranges state
+  const [priceRanges, setPriceRanges] = useState<ProductPriceRange[]>(() => storageService.getProductPriceRanges(false));
+  const [editingPriceRange, setEditingPriceRange] = useState<ProductPriceRange | null>(null);
+  const [isCreatingPriceRange, setIsCreatingPriceRange] = useState(false);
+
   // Districts state
   const [districts, setDistricts] = useState<District[]>(() => storageService.getDistricts(true));
   
@@ -47,6 +71,28 @@ export const BenchmarkManagement: React.FC<BenchmarkManagementProps> = ({ settin
 
   // Success notifications
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialSubTab) {
+      setActiveSubTab(getSubTabFromProp(initialSubTab));
+    }
+  }, [initialSubTab]);
+
+  // Deep-linking scroll & highlight effect
+  useEffect(() => {
+    if (targetElementId) {
+      setTimeout(() => {
+        const el = document.getElementById(targetElementId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('ring-4', 'ring-[#4A5D3B]', 'ring-offset-2', 'transition-all');
+          setTimeout(() => {
+            el.classList.remove('ring-4', 'ring-[#4A5D3B]', 'ring-offset-2');
+          }, 3500);
+        }
+      }, 250);
+    }
+  }, [targetElementId, activeSubTab]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -59,6 +105,7 @@ export const BenchmarkManagement: React.FC<BenchmarkManagementProps> = ({ settin
     setEditingBenchmark(null);
     setIsCreatingBenchmark(false);
     showToast('বেঞ্চমার্ক সফলভাবে সংরক্ষণ করা হয়েছে!');
+    if (onRefresh) onRefresh();
   };
 
   const handleDeleteBenchmark = (id: string) => {
@@ -66,6 +113,25 @@ export const BenchmarkManagement: React.FC<BenchmarkManagementProps> = ({ settin
       storageService.deleteBenchmark(id);
       setBenchmarks(storageService.getBenchmarks(true));
       showToast('বেঞ্চমার্ক মুছে ফেলা হয়েছে।');
+      if (onRefresh) onRefresh();
+    }
+  };
+
+  const handleSavePriceRange = (range: ProductPriceRange) => {
+    storageService.saveProductPriceRange(range);
+    setPriceRanges(storageService.getProductPriceRanges(false));
+    setEditingPriceRange(null);
+    setIsCreatingPriceRange(false);
+    showToast('প্রাইস রেঞ্জ টায়ার সফলভাবে সংরক্ষণ করা হয়েছে!');
+    if (onRefresh) onRefresh();
+  };
+
+  const handleDeletePriceRange = (id: string) => {
+    if (confirm('আপনি কি নিশ্চিত যে এই প্রাইস রেঞ্জটি মুছে ফেলতে চান?')) {
+      storageService.deleteProductPriceRange(id);
+      setPriceRanges(storageService.getProductPriceRanges(false));
+      showToast('প্রাইস রেঞ্জ মুছে ফেলা হয়েছে।');
+      if (onRefresh) onRefresh();
     }
   };
 
@@ -73,6 +139,7 @@ export const BenchmarkManagement: React.FC<BenchmarkManagementProps> = ({ settin
     const updated = { ...d, enabled: !d.enabled };
     storageService.saveDistrict(updated);
     setDistricts(storageService.getDistricts(true));
+    if (onRefresh) onRefresh();
   };
 
   const handleSaveRec = (rec: RecommendationRule) => {
@@ -81,6 +148,7 @@ export const BenchmarkManagement: React.FC<BenchmarkManagementProps> = ({ settin
     setEditingRec(null);
     setIsCreatingRec(false);
     showToast('সুপারিশ নিয়ম সফলভাবে সেভ করা হয়েছে!');
+    if (onRefresh) onRefresh();
   };
 
   return (
@@ -97,7 +165,7 @@ export const BenchmarkManagement: React.FC<BenchmarkManagementProps> = ({ settin
         </div>
 
         {/* Sub-tabs */}
-        <div className="flex items-center gap-1 bg-[#E8EAE2] p-1 rounded-2xl border border-[#D9DED1]">
+        <div className="flex flex-wrap items-center gap-1 bg-[#E8EAE2] p-1 rounded-2xl border border-[#D9DED1]">
           <button
             onClick={() => setActiveSubTab('BENCHMARKS')}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
@@ -107,6 +175,16 @@ export const BenchmarkManagement: React.FC<BenchmarkManagementProps> = ({ settin
             }`}
           >
             বেঞ্চমার্ক রেট ({benchmarks.length})
+          </button>
+          <button
+            onClick={() => setActiveSubTab('PRICE_RANGES')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              activeSubTab === 'PRICE_RANGES' 
+                ? 'bg-[#4A5D3B] text-white shadow-2xs' 
+                : 'text-[#5C6652] hover:text-[#2C3327]'
+            }`}
+          >
+            প্রাইস রেঞ্জ ও টায়ার ({priceRanges.length})
           </button>
           <button
             onClick={() => setActiveSubTab('DISTRICTS')}
@@ -179,7 +257,7 @@ export const BenchmarkManagement: React.FC<BenchmarkManagementProps> = ({ settin
           </div>
 
           {/* Benchmark Table */}
-          <div className="bg-white rounded-3xl border border-[#D9DED1] overflow-hidden shadow-2xs">
+          <div id="benchmarks-table-view" className="bg-white rounded-3xl border border-[#D9DED1] overflow-hidden shadow-2xs transition-all">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
@@ -382,6 +460,104 @@ export const BenchmarkManagement: React.FC<BenchmarkManagementProps> = ({ settin
                   )}
                   <span className={`px-2 py-0.5 rounded-md font-bold ${rec.active ? 'text-emerald-700 bg-emerald-50' : 'text-stone-500 bg-stone-100'}`}>
                     {rec.active ? 'সক্রিয়' : 'বন্ধ'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* --- TAB 4: PRICE RANGES --- */}
+      {activeSubTab === 'PRICE_RANGES' && (
+        <div id="price-ranges-section" className="space-y-6 transition-all">
+          <div className="flex items-center justify-between">
+            <div className="text-xs text-[#5C6652]">
+              প্রোডাক্ট প্রাইস টিয়ার ও ক্যাটাগরি রেঞ্জ ম্যানেজ করুন (ক্যালকুলেটর সিলেকশন অপশন)।
+            </div>
+            <button
+              onClick={() => {
+                setEditingPriceRange({
+                  id: 'pr-' + Date.now().toString(36),
+                  minPrice: 500,
+                  maxPrice: 2000,
+                  labelEn: '৳500 - ৳2,000 (Mid Tier)',
+                  labelBn: '৳৫০০ - ৳২,০০০ (মিডিয়াম রেঞ্জ)',
+                  tier: 'MID_TICKET',
+                  expectedCVR: 2.5,
+                  notes: 'জনপ্রিয় ই-কমার্স পোশাক ও পণ্য',
+                  active: true
+                });
+                setIsCreatingPriceRange(true);
+              }}
+              className="bg-[#4A5D3B] hover:bg-[#3D4D30] text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-xs"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>নতুন প্রাইস টায়ার যোগ করুন</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {priceRanges.map((pr) => (
+              <div 
+                key={pr.id}
+                id={`price-tier-${pr.id}`}
+                className="bg-white p-5 rounded-3xl border border-[#D9DED1] space-y-3 shadow-2xs transition-all flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="w-7 h-7 rounded-lg bg-[#E8EAE2] text-[#4A5D3B] flex items-center justify-center font-bold text-xs">
+                        <Tag className="w-3.5 h-3.5" />
+                      </span>
+                      <h3 className="font-bold text-sm text-[#2C3327]">{pr.labelBn || pr.labelEn}</h3>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => {
+                          setEditingPriceRange(pr);
+                          setIsCreatingPriceRange(false);
+                        }}
+                        className="p-1.5 text-[#5C6652] hover:text-[#2C3327] hover:bg-[#E8EAE2] rounded-lg transition-colors"
+                        title="এডিট করুন"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeletePriceRange(pr.id)}
+                        className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                        title="মুছে ফেলুন"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 space-y-1.5 text-xs text-[#5C6652]">
+                    <div className="flex justify-between">
+                      <span>প্রাইস সীমা:</span>
+                      <span className="font-bold text-[#2C3327]">৳{pr.minPrice} - ৳{pr.maxPrice}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>টিয়ার লেভেল:</span>
+                      <span className="font-bold text-[#4A5D3B]">{pr.tier}</span>
+                    </div>
+                    {pr.expectedCVR && (
+                      <div className="flex justify-between">
+                        <span>প্রত্যাশিত CVR:</span>
+                        <span className="font-bold text-[#2C3327]">{pr.expectedCVR}%</span>
+                      </div>
+                    )}
+                    {pr.notes && (
+                      <p className="text-[11px] text-[#8A957F] pt-1">{pr.notes}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-[#D9DED1]/60 flex items-center justify-between text-[11px]">
+                  <span className="text-[#8A957F]">ID: <code>{pr.id}</code></span>
+                  <span className={`px-2 py-0.5 rounded-md font-bold ${pr.active !== false ? 'text-emerald-700 bg-emerald-50' : 'text-stone-500 bg-stone-100'}`}>
+                    {pr.active !== false ? 'সক্রিয়' : 'বন্ধ'}
                   </span>
                 </div>
               </div>
@@ -651,6 +827,139 @@ export const BenchmarkManagement: React.FC<BenchmarkManagementProps> = ({ settin
                 >
                   <Save className="w-4 h-4" />
                   <span>সেভ করুন</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* --- EDIT / CREATE PRICE RANGE MODAL --- */}
+      {(editingPriceRange || isCreatingPriceRange) && editingPriceRange && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#FDFCF8] w-full max-w-lg rounded-3xl border border-[#D9DED1] p-6 sm:p-8 space-y-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#D9DED1] pb-4">
+              <h2 className="font-serif font-bold text-xl text-[#2C3327]">
+                {isCreatingPriceRange ? 'নতুন প্রাইস রেঞ্জ যোগ করুন' : 'প্রাইস রেঞ্জ এডিট করুন'}
+              </h2>
+              <button
+                onClick={() => {
+                  setEditingPriceRange(null);
+                  setIsCreatingPriceRange(false);
+                }}
+                className="p-2 text-[#8A957F] hover:text-[#2C3327] rounded-xl hover:bg-[#E8EAE2] transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSavePriceRange(editingPriceRange);
+              }}
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-[#2C3327] mb-1.5">লেবেল (বাংলা)</label>
+                  <input
+                    type="text"
+                    value={editingPriceRange.labelBn || ''}
+                    onChange={(e) => setEditingPriceRange({ ...editingPriceRange, labelBn: e.target.value })}
+                    className="w-full bg-white border border-[#D9DED1] px-3.5 py-2.5 rounded-xl text-xs font-semibold text-[#2C3327]"
+                    placeholder="৳৫০০ - ৳২,০০০"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#2C3327] mb-1.5">Label (English)</label>
+                  <input
+                    type="text"
+                    value={editingPriceRange.labelEn || ''}
+                    onChange={(e) => setEditingPriceRange({ ...editingPriceRange, labelEn: e.target.value })}
+                    className="w-full bg-white border border-[#D9DED1] px-3.5 py-2.5 rounded-xl text-xs font-semibold text-[#2C3327]"
+                    placeholder="৳500 - ৳2,000"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-[#2C3327] mb-1.5">সর্বনিম্ন মূল্য (৳)</label>
+                  <input
+                    type="number"
+                    value={editingPriceRange.minPrice}
+                    onChange={(e) => setEditingPriceRange({ ...editingPriceRange, minPrice: Number(e.target.value) })}
+                    className="w-full bg-white border border-[#D9DED1] px-3.5 py-2.5 rounded-xl text-xs font-semibold text-[#2C3327]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#2C3327] mb-1.5">সর্বোচ্চ মূল্য (৳)</label>
+                  <input
+                    type="number"
+                    value={editingPriceRange.maxPrice}
+                    onChange={(e) => setEditingPriceRange({ ...editingPriceRange, maxPrice: Number(e.target.value) })}
+                    className="w-full bg-white border border-[#D9DED1] px-3.5 py-2.5 rounded-xl text-xs font-semibold text-[#2C3327]"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-[#2C3327] mb-1.5">টিয়ার লেভেল</label>
+                  <select
+                    value={editingPriceRange.tier}
+                    onChange={(e) => setEditingPriceRange({ ...editingPriceRange, tier: e.target.value as any })}
+                    className="w-full bg-white border border-[#D9DED1] px-3.5 py-2.5 rounded-xl text-xs font-semibold text-[#2C3327]"
+                  >
+                    <option value="LOW_TICKET">LOW_TICKET (Low Cost)</option>
+                    <option value="MID_TICKET">MID_TICKET (Medium Range)</option>
+                    <option value="HIGH_TICKET">HIGH_TICKET (High Value / Luxury)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#2C3327] mb-1.5">প্রত্যাশিত CVR (%)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={editingPriceRange.expectedCVR || 2.5}
+                    onChange={(e) => setEditingPriceRange({ ...editingPriceRange, expectedCVR: Number(e.target.value) })}
+                    className="w-full bg-white border border-[#D9DED1] px-3.5 py-2.5 rounded-xl text-xs font-semibold text-[#2C3327]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#2C3327] mb-1.5">নোট / বিবরণ</label>
+                <input
+                  type="text"
+                  value={editingPriceRange.notes || ''}
+                  onChange={(e) => setEditingPriceRange({ ...editingPriceRange, notes: e.target.value })}
+                  className="w-full bg-white border border-[#D9DED1] px-3.5 py-2.5 rounded-xl text-xs font-semibold text-[#2C3327]"
+                  placeholder="যেমন: ফ্যাশন, লাইফস্টাইল বা গ্যাজেট পণ্য"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-[#D9DED1]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingPriceRange(null);
+                    setIsCreatingPriceRange(false);
+                  }}
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold text-[#5C6652] hover:bg-[#E8EAE2] transition-colors"
+                >
+                  বাতিল
+                </button>
+                <button
+                  type="submit"
+                  className="bg-[#4A5D3B] hover:bg-[#3D4D30] text-white px-6 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-xs transition-all"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>সংরক্ষণ করুন</span>
                 </button>
               </div>
             </form>
