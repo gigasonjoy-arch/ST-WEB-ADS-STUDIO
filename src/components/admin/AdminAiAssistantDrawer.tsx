@@ -74,14 +74,16 @@ export const AdminAiAssistantDrawer: React.FC<AdminAiAssistantDrawerProps> = ({
   settings
 }) => {
   const [messages, setMessages] = useState<AdminAiMessage[]>(() => {
-    const saved = localStorage.getItem('st_admin_ai_chat_history');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) {
-        // fallback to initial
+    try {
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        const saved = localStorage.getItem('st_admin_ai_chat_history');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
       }
+    } catch (e) {
+      // fallback to initial
     }
     return INITIAL_MESSAGES;
   });
@@ -198,7 +200,9 @@ export const AdminAiAssistantDrawer: React.FC<AdminAiAssistantDrawerProps> = ({
 
   useEffect(() => {
     try {
-      localStorage.setItem('st_admin_ai_chat_history', JSON.stringify(messages));
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.setItem('st_admin_ai_chat_history', JSON.stringify(messages));
+      }
     } catch (e) {}
   }, [messages]);
 
@@ -214,7 +218,11 @@ export const AdminAiAssistantDrawer: React.FC<AdminAiAssistantDrawerProps> = ({
 
   const handleClearHistory = () => {
     setMessages(INITIAL_MESSAGES);
-    localStorage.removeItem('st_admin_ai_chat_history');
+    try {
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.removeItem('st_admin_ai_chat_history');
+      }
+    } catch (e) {}
   };
 
   const handleActionClick = (action: AdminAiAction) => {

@@ -150,6 +150,7 @@ const KEY_TO_COLLECTION_MAP: Record<string, string> = {
 
 class StorageService {
   private listeners: Set<() => void> = new Set();
+  private memoryCache: Map<string, string> = new Map();
   private isFirestoreSyncActive = false;
   private isOnlineDbSyncActive = false;
   private isBatchInitializing = false;
@@ -157,8 +158,18 @@ class StorageService {
 
   constructor() {
     this.initDefaults();
-    this.initOnlineDbSync();
-    this.initFirestoreSync();
+    if (typeof window !== 'undefined') {
+      this.initOnlineDbSync();
+      this.initFirestoreSync();
+    }
+  }
+
+  private isLocalStorageAvailable(): boolean {
+    try {
+      return typeof window !== 'undefined' && typeof localStorage !== 'undefined' && localStorage !== null;
+    } catch {
+      return false;
+    }
   }
 
   private initOnlineDbSync(): void {
@@ -176,9 +187,9 @@ class StorageService {
           if (remoteDb[collectionName] !== undefined && remoteDb[collectionName] !== null) {
             try {
               const remoteStr = JSON.stringify(remoteDb[collectionName]);
-              const localStr = localStorage.getItem(storageKey);
+              const localStr = this.getRawItem(storageKey);
               if (remoteStr !== localStr) {
-                localStorage.setItem(storageKey, remoteStr);
+                this.setRawItem(storageKey, remoteStr);
                 hasChanges = true;
               }
             } catch (err) {
@@ -328,9 +339,32 @@ class StorageService {
     this.listeners.forEach(cb => cb());
   }
 
+  private getRawItem(key: string): string | null {
+    if (this.isLocalStorageAvailable()) {
+      try {
+        const item = localStorage.getItem(key);
+        if (item !== null) return item;
+      } catch {
+        // Fallback to memory
+      }
+    }
+    return this.memoryCache.get(key) ?? null;
+  }
+
+  private setRawItem(key: string, value: string): void {
+    this.memoryCache.set(key, value);
+    if (this.isLocalStorageAvailable()) {
+      try {
+        localStorage.setItem(key, value);
+      } catch (err) {
+        console.warn('LocalStorage setItem notice:', err);
+      }
+    }
+  }
+
   private getItem<T>(key: string, fallback: T): T {
     try {
-      const data = localStorage.getItem(key);
+      const data = this.getRawItem(key);
       if (!data) return fallback;
       return JSON.parse(data);
     } catch {
@@ -340,11 +374,12 @@ class StorageService {
 
   private setItem<T>(key: string, value: T): void {
     try {
-      localStorage.setItem(key, JSON.stringify(value));
+      const str = JSON.stringify(value);
+      this.setRawItem(key, str);
       this.notify();
 
       // Automatically queue batch sync with Online Cloud Database
-      if (!this.isBatchInitializing && !this.isApplyingRemoteUpdate) {
+      if (!this.isBatchInitializing && !this.isApplyingRemoteUpdate && typeof window !== 'undefined') {
         const collectionName = KEY_TO_COLLECTION_MAP[key];
         if (collectionName) {
           onlineDbClient.queueCollectionSync(collectionName, value);
@@ -357,7 +392,7 @@ class StorageService {
 
   private hasItem(key: string): boolean {
     try {
-      return localStorage.getItem(key) !== null;
+      return this.getRawItem(key) !== null;
     } catch {
       return false;
     }
@@ -468,10 +503,10 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
 
   // --- Visitor Management ---
   public getVisitorId(): string {
-    let vid = localStorage.getItem(STORAGE_KEYS.VISITOR_ID);
+    let vid = this.getRawItem(STORAGE_KEYS.VISITOR_ID);
     if (!vid) {
       vid = 'v-' + Math.random().toString(36).substring(2, 9) + '-' + Date.now().toString(36);
-      localStorage.setItem(STORAGE_KEYS.VISITOR_ID, vid);
+      this.setRawItem(STORAGE_KEYS.VISITOR_ID, vid);
     }
     return vid;
   }
@@ -2015,7 +2050,14 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
   }
 
   public resetToDefaults(): void {
-    localStorage.clear();
+    this.memoryCache.clear();
+    if (this.isLocalStorageAvailable()) {
+      try {
+        localStorage.clear();
+      } catch (err) {
+        console.warn('LocalStorage clear notice:', err);
+      }
+    }
     this.initDefaults();
     this.notify();
     this.logAudit('RESET_DEFAULTS', 'System', 'Reset all settings and database to factory defaults');

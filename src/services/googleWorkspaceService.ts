@@ -20,27 +20,34 @@ export interface GoogleSheetExportResult {
 class GoogleWorkspaceService {
   private accessToken: string | null = null;
   private tokenExpiry: number = 0;
-  private oAuthClientId: string = firebaseConfig.oAuthClientId || '';
+  private oAuthClientId: string = (firebaseConfig as any)?.oAuthClientId || '';
   private customWebhookUrl: string = '';
 
   constructor() {
-    // Load stored token if valid
-    const savedToken = localStorage.getItem('st_gsuite_access_token');
-    const savedExpiry = localStorage.getItem('st_gsuite_token_expiry');
-    const savedWebhook = localStorage.getItem('st_gsheet_webhook_url');
-    const customClientId = localStorage.getItem('st_custom_google_client_id');
-
-    if (customClientId) {
-      this.oAuthClientId = customClientId;
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      return;
     }
+    try {
+      // Load stored token if valid
+      const savedToken = localStorage.getItem('st_gsuite_access_token');
+      const savedExpiry = localStorage.getItem('st_gsuite_token_expiry');
+      const savedWebhook = localStorage.getItem('st_gsheet_webhook_url');
+      const customClientId = localStorage.getItem('st_custom_google_client_id');
 
-    if (savedWebhook) {
-      this.customWebhookUrl = savedWebhook;
-    }
+      if (customClientId) {
+        this.oAuthClientId = customClientId;
+      }
 
-    if (savedToken && savedExpiry && Date.now() < Number(savedExpiry)) {
-      this.accessToken = savedToken;
-      this.tokenExpiry = Number(savedExpiry);
+      if (savedWebhook) {
+        this.customWebhookUrl = savedWebhook;
+      }
+
+      if (savedToken && savedExpiry && Date.now() < Number(savedExpiry)) {
+        this.accessToken = savedToken;
+        this.tokenExpiry = Number(savedExpiry);
+      }
+    } catch {
+      // ignore
     }
   }
 
@@ -61,30 +68,52 @@ class GoogleWorkspaceService {
 
   public setOAuthClientId(clientId: string): void {
     this.oAuthClientId = clientId.trim();
-    localStorage.setItem('st_custom_google_client_id', clientId.trim());
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem('st_custom_google_client_id', clientId.trim());
+      } catch {}
+    }
   }
 
   public getWebhookUrl(): string {
-    return this.customWebhookUrl || localStorage.getItem('st_gsheet_webhook_url') || '';
+    if (this.customWebhookUrl) return this.customWebhookUrl;
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        return localStorage.getItem('st_gsheet_webhook_url') || '';
+      } catch {}
+    }
+    return '';
   }
 
   public setWebhookUrl(url: string): void {
     this.customWebhookUrl = url.trim();
-    localStorage.setItem('st_gsheet_webhook_url', url.trim());
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem('st_gsheet_webhook_url', url.trim());
+      } catch {}
+    }
   }
 
   public setAccessToken(token: string, expiresInSeconds: number = 3600): void {
     this.accessToken = token.trim();
     this.tokenExpiry = Date.now() + (expiresInSeconds * 1000);
-    localStorage.setItem('st_gsuite_access_token', token.trim());
-    localStorage.setItem('st_gsuite_token_expiry', String(this.tokenExpiry));
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem('st_gsuite_access_token', token.trim());
+        localStorage.setItem('st_gsuite_token_expiry', String(this.tokenExpiry));
+      } catch {}
+    }
   }
 
   public clearToken(): void {
     this.accessToken = null;
     this.tokenExpiry = 0;
-    localStorage.removeItem('st_gsuite_access_token');
-    localStorage.removeItem('st_gsuite_token_expiry');
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        localStorage.removeItem('st_gsuite_access_token');
+        localStorage.removeItem('st_gsuite_token_expiry');
+      } catch {}
+    }
   }
 
   /**

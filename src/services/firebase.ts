@@ -49,7 +49,8 @@ let googleAuthProviderInstance: any = null;
 try {
   if (activeFirebaseConfig && activeFirebaseConfig.apiKey && activeFirebaseConfig.apiKey.startsWith('AIza') && activeFirebaseConfig.projectId) {
     appInstance = !getApps().length ? initializeApp(activeFirebaseConfig) : getApp();
-    dbInstance = getFirestore(appInstance);
+    const dbId = (rawConfig as any).firestoreDatabaseId || (activeFirebaseConfig as any).firestoreDatabaseId;
+    dbInstance = dbId ? getFirestore(appInstance, dbId) : getFirestore(appInstance);
     authInstance = getAuth(appInstance);
     googleAuthProviderInstance = new GoogleAuthProvider();
     googleAuthProviderInstance.addScope('https://www.googleapis.com/auth/drive.file');
@@ -57,6 +58,7 @@ try {
   }
 } catch (e) {
   // Graceful fallback for offline / mock mode
+  console.warn('Firebase initialization error:', e);
   appInstance = null;
   dbInstance = null;
 }

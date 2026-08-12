@@ -199,10 +199,19 @@ export const AiChatWidget: React.FC<AiChatWidgetProps> = ({
 
   // Initialize conversation session
   useEffect(() => {
-    let convId = localStorage.getItem('active_ai_conv_id');
-    if (!convId) {
+    let convId = '';
+    try {
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        convId = localStorage.getItem('active_ai_conv_id') || '';
+        if (!convId) {
+          convId = `conv_${Date.now()}`;
+          localStorage.setItem('active_ai_conv_id', convId);
+        }
+      } else {
+        convId = `conv_${Date.now()}`;
+      }
+    } catch {
       convId = `conv_${Date.now()}`;
-      localStorage.setItem('active_ai_conv_id', convId);
     }
     setConversationId(convId);
 

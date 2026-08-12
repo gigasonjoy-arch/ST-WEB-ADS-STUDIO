@@ -1,29 +1,238 @@
 {
   "siteSettings": {
-    "siteNameBn": "Test Save",
-    "sonjoyName": "Sonjoy Sarkar"
+    "brandName": "ST Web & Ads Studio",
+    "personalName": "Sonjoy Sarkar",
+    "titleBadge": "Performance Marketing Specialist (TikTok & Facebook Ads)",
+    "designation": "Performance Marketing Specialist & Media Buyer",
+    "heroHeadline": "Data-Driven TikTok & Facebook Ads Engineered for High-Growth E-Commerce.",
+    "heroSubheadline": "No generic claims or vanity metrics. We construct precision tracking architectures, deploy rapid creative testing, and maximize every dollar of your ad budget for measurable ROAS.",
+    "primaryCtaText": "Claim Strategy Audit",
+    "secondaryCtaText": "Run Ads Prediction",
+    "exchangeRateUsdToBdt": 150,
+    "minAdBudgetUSD": 1,
+    "minAdBudgetBDT": 150,
+    "sonjoyBio": "Performance Marketing Executive and Paid Media Strategist specializing in TikTok Ads, Facebook Ads Manager, CAPI/Pixel architecture, creative UGC funnels, and ROAS scaling for Bangladeshi & international e-commerce brands.",
+    "sonjoyRole": "Senior Ads Strategist & Founder",
+    "sonjoyImage": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+    "sonjoyDetailedBio": "Sonjoy Sarkar is a results-focused digital marketing practitioner who has managed over ৳3.2 Crore ($210,000+) in cumulative ad spend across TikTok, Facebook, and Google for high-converting brands in Bangladesh and international DTC markets. His methodology fuses analytical audience segmentation, granular pixel/server-side tracking, and creative hook velocity to deliver profitable unit economics.",
+    "sonjoyExperienceYears": 4,
+    "sonjoyTotalAdSpendManaged": "৳3.2Cr+ ($210K+)",
+    "sonjoyCampaignsCount": "126+ Campaigns",
+    "heroBadgeText": "VERIFIED PRACTITIONER",
+    "heroStatAdGroups": "126 Groups",
+    "heroStatImpressions": "3.66M+",
+    "heroStatConversations": "18,698",
+    "heroStatLeads": "1,316",
+    "heroPrimaryPlatform": "TikTok Ads",
+    "heroSecondaryPlatform": "Facebook Ads",
+    "heroTargetRegion": "Bangladesh",
+    "heroSpecialistFocusTitle": "SPECIALIST FOCUS:",
+    "email": "giga.sonjoy@gmail.com",
+    "phone": "+8801815124970",
+    "whatsappNumber": "+8801815124970",
+    "officeLocation": "Dhaka, Bangladesh",
+    "sectionVisibility": {
+      "hero": true,
+      "results": true,
+      "services": true,
+      "audience": true,
+      "process": true,
+      "tiktokEducation": true,
+      "calculator": true,
+      "caseStudies": true,
+      "faq": true,
+      "leadForm": true,
+      "footer": true
+    },
+    "whatsapp": {
+      "number": "+8801815124970",
+      "defaultMessage": "Hello Sonjoy, I would like to schedule a strategy session for TikTok & Facebook Ads campaigns.",
+      "enabled": true,
+      "floatingPosition": "bottom-right",
+      "ctaText": "Chat on WhatsApp"
+    },
+    "seo": {
+      "siteTitle": "ST Web & Ads Studio | Sonjoy Sarkar - TikTok & Facebook Ads Bangladesh",
+      "siteDescription": "Measurable, data-driven TikTok & Facebook ads management in Bangladesh for e-commerce, fashion, beauty, cosmetics & local businesses.",
+      "ogTitle": "ST Web & Ads Studio | Sonjoy Sarkar",
+      "ogDescription": "Data-driven TikTok and Facebook ads optimization for Bangladeshi brands.",
+      "ogImage": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
+      "canonicalUrl": "https://stwebads.com",
+      "robotsIndex": true
+    },
+    "gtm": {
+      "enabled": true,
+      "containerId": "GTM-P3WLNDR6",
+      "tiktokPixelId": "",
+      "metaPixelId": "",
+      "googleAnalyticsId": "",
+      "customHeadScript": "",
+      "customBodyScript": ""
+    },
+    "header": {
+      "logoDisplayMode": "BOTH",
+      "mobileLogoDisplayMode": "BOTH",
+      "showLogo": true,
+      "showBrandName": true,
+      "showPersonalName": true,
+      "showTagline": true,
+      "logoType": "TEXT_BADGE",
+      "logoText": "ST",
+      "logoImageUrl": "",
+      "logoWidth": 40,
+      "logoHeight": 40,
+      "customTaglineEn": "Sonjoy Sarkar • Performance Marketing",
+      "customTaglineBn": "সঞ্জয় সরকার • পারফরম্যান্স মার্কেটিং",
+      "sticky": true,
+      "showLanguageSwitcher": true,
+      "showAdminButton": true,
+      "showWhatsAppButton": true,
+      "ctaEnabled": true,
+      "ctaTextEn": "Book Free Audit",
+      "ctaTextBn": "ফ্রি স্ট্র্যাটেজি অডিট বুক করুন",
+      "ctaAction": "LEAD_FORM",
+      "ctaCustomUrl": "",
+      "navLinks": [
+        {
+          "id": "nav-services",
+          "labelEn": "Services",
+          "labelBn": "সেবাসমূহ",
+          "sectionId": "services",
+          "enabled": true,
+          "sortOrder": 1
+        },
+        {
+          "id": "nav-results",
+          "labelEn": "Results & ROI",
+          "labelBn": "ফলাফল ও ROI",
+          "sectionId": "results",
+          "enabled": true,
+          "sortOrder": 2
+        },
+        {
+          "id": "nav-calculator",
+          "labelEn": "Ads Calculator",
+          "labelBn": "অ্যাড ক্যালকুলেটর",
+          "sectionId": "calculator",
+          "enabled": true,
+          "sortOrder": 3
+        },
+        {
+          "id": "nav-case-studies",
+          "labelEn": "Case Studies",
+          "labelBn": "কেস স্টাডিজ",
+          "sectionId": "case-studies",
+          "enabled": true,
+          "sortOrder": 4
+        },
+        {
+          "id": "nav-tiktok-guide",
+          "labelEn": "TikTok Playbook",
+          "labelBn": "টিকটক গাইড",
+          "sectionId": "tiktok-education",
+          "enabled": true,
+          "sortOrder": 5
+        },
+        {
+          "id": "nav-faq",
+          "labelEn": "FAQ",
+          "labelBn": "সাধারণ জিজ্ঞাসা",
+          "sectionId": "faq",
+          "enabled": true,
+          "sortOrder": 6
+        }
+      ]
+    },
+    "theme": {
+      "activePaletteId": "classic-olive",
+      "id": "classic-olive",
+      "nameEn": "Classic Olive & Warm Cream (Signature)",
+      "nameBn": "ক্লাসিক অলিভ ও ওয়ার্ম ক্রিম (সিগনেচার)",
+      "backgroundColor": "#FDFCF8",
+      "textColor": "#2C3327",
+      "headingColor": "#1E231B",
+      "buttonBgColor": "#4A5D3B",
+      "buttonTextColor": "#FFFFFF",
+      "buttonHoverBgColor": "#3A4533",
+      "accentColor": "#E2725B",
+      "linkColor": "#4A5D3B",
+      "borderColor": "#D9DED1",
+      "cardBgColor": "#FFFFFF",
+      "sectionBgColor": "#F4F6F0",
+      "headerBgColor": "#FDFCF8",
+      "headerTextColor": "#2C3327",
+      "footerBgColor": "#1E231B",
+      "footerTextColor": "#D9DED1",
+      "badgeBgColor": "#E8EAE2",
+      "badgeTextColor": "#4A5D3B",
+      "customCss": ""
+    },
+    "favicon": {
+      "faviconUrl": "",
+      "faviconType": "SVG_TEXT",
+      "badgeText": "ST",
+      "faviconEmoji": "📈"
+    },
+    "homePage": {
+      "featuredCaseStudiesLimit": 3,
+      "showOnlyFeaturedCaseStudies": true,
+      "caseStudiesHeadlineEn": "Verified Campaigns & Client Growth Case Studies",
+      "caseStudiesHeadlineBn": "বাস্তব ক্যাম্পেইন ডেটা ও ক্লায়েন্ট ফলাফলের কেস স্টাডি",
+      "caseStudiesSubheadlineEn": "Concrete, data-backed proof from real TikTok & Meta campaigns across Bangladesh e-commerce brands.",
+      "caseStudiesSubheadlineBn": "কোনো অনুমান বা মুখস্থ কথা নয় — বাজেট অপটিমাইজেশন ও কনভার্সন ট্র্যাকিংয়ের বাস্তব প্রমাণ।",
+      "viewAllCaseStudiesButtonTextEn": "View All 100+ Case Studies & Reports →",
+      "viewAllCaseStudiesButtonTextBn": "সকল কেস স্টাডি ও ভেরিফায়েড রিপোর্ট দেখুন →",
+      "viewAllCaseStudiesUrl": "/page/case-studies",
+      "featuredServicesLimit": 4,
+      "showServicesViewAll": true
+    },
+    "robots": {
+      "content": "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\n\nSitemap: https://stwebads.com/sitemap.xml",
+      "allowAll": true,
+      "disallowAdmin": true,
+      "sitemapUrl": "https://stwebads.com/sitemap.xml",
+      "customRules": "",
+      "lastUpdated": "2026-08-12"
+    },
+    "sitemap": {
+      "baseUrl": "https://stwebads.com",
+      "includeCustomPages": true,
+      "includeServices": true,
+      "includeCaseStudies": true,
+      "changefreq": "weekly",
+      "priority": 0.8,
+      "lastGenerated": "2026-08-12"
+    }
   },
   "themeSettings": {
-    "mode": "light",
-    "preset": "forest_sage",
-    "colors": {
-      "primary": "#4A5D3B",
-      "primaryHover": "#3A4533",
-      "secondary": "#8A957F",
-      "accent": "#D4A373",
-      "accentHover": "#BC8A5F",
-      "background": "#FDFCF8",
-      "surface": "#FFFFFF",
-      "surfaceMuted": "#F4F6F0",
-      "textPrimary": "#2C3327",
-      "textSecondary": "#5C6652",
-      "textMuted": "#8A957F",
-      "border": "#D9DED1",
-      "borderSubtle": "#EAEFE5"
-    },
-    "heroLayout": "centered",
-    "badgeStyle": "soft",
-    "cardElevation": "flat"
+    "activePaletteId": "classic-olive",
+    "id": "classic-olive",
+    "nameEn": "Classic Olive & Warm Cream (Signature)",
+    "nameBn": "ক্লাসিক অলিভ ও ওয়ার্ম ক্রিম (সিগনেচার)",
+    "backgroundColor": "#FDFCF8",
+    "textColor": "#2C3327",
+    "headingColor": "#1E231B",
+    "buttonBgColor": "#4A5D3B",
+    "buttonTextColor": "#FFFFFF",
+    "buttonHoverBgColor": "#3A4533",
+    "accentColor": "#E2725B",
+    "linkColor": "#4A5D3B",
+    "borderColor": "#D9DED1",
+    "cardBgColor": "#FFFFFF",
+    "sectionBgColor": "#F4F6F0",
+    "headerBgColor": "#FDFCF8",
+    "headerTextColor": "#2C3327",
+    "footerBgColor": "#1E231B",
+    "footerTextColor": "#D9DED1",
+    "badgeBgColor": "#E8EAE2",
+    "badgeTextColor": "#4A5D3B",
+    "customCss": ""
+  },
+  "faviconSettings": {
+    "faviconUrl": "",
+    "faviconType": "SVG_TEXT",
+    "badgeText": "ST",
+    "faviconEmoji": "📈"
   },
   "homePageSettings": {
     "featuredCaseStudiesLimit": 3,
@@ -41,298 +250,604 @@
   "customPages": [
     {
       "id": "page-case-studies",
+      "titleEn": "All Case Studies & Verified Results",
+      "titleBn": "সকল কেস স্টাডিজ ও ভেরিফায়েড ক্লায়েন্ট ফলাফল",
       "slug": "case-studies",
-      "title": "All Case Studies & Client Success Reports",
-      "titleBn": "সকল কেস স্টাডি ও ক্লায়েন্ট সাকসেস রিপোর্টস",
-      "content": "## ভেরিফায়েড ক্যাম্পেইন কেস স্টাডিজ\n\nএখানে রয়েছে বাংলাদেশের শীর্ষস্থানীয় ই-কমার্স ও ফ্যাশন ব্র্যান্ডের লাইভ অ্যাড ক্যাম্পেইন ডেটা।\n\n- **ফ্যাশন ও ক্লদিং**: ৪.২X পর্যন্ত গড় ROAS অর্জিত\n- **স্কিনকেয়ার ও বিউটি**: ৩.৮X গড় ROAS\n- **ক্যাড ও গ্যাজেট**: ৫.১X সর্বোচ্চ পিক সিজন ROAS\n\nপ্রতিটি ক্যাম্পেইনে সঠিক অডিয়েন্স রিসার্চ, মেটা/টিকটক কনভার্সন পিক্সেল এবং রিটার্গেটিং ফানেল ব্যবহার করা হয়েছে।",
-      "contentBn": "## ভেরিফায়েড ক্যাম্পেইন কেস স্টাডিজ\n\nএখানে রয়েছে বাংলাদেশের শীর্ষস্থানীয় ই-কমার্স ও ফ্যাশন ব্র্যান্ডের লাইভ অ্যাড ক্যাম্পেইন ডেটা।\n\n- **ফ্যাশন ও ক্লদিং**: ৪.২X পর্যন্ত গড় ROAS অর্জিত\n- **স্কিনকেয়ার ও বিউটি**: ৩.৮X গড় ROAS\n- **ক্যাড ও গ্যাজেট**: ৫.১X সর্বোচ্চ পিক সিজন ROAS\n\nপ্রতিটি ক্যাম্পেইনে সঠিক অডিয়েন্স রিসার্চ, মেটা/টিকটক কনভার্সন পিক্সেল এবং রিটার্গেটিং ফানেল ব্যবহার করা হয়েছে।",
-      "metaTitle": "Case Studies & Live Results | ST Web & Ads Studio",
-      "metaDescription": "Explore verified real-world ROAS, ad spend, and conversion case studies in Bangladesh.",
-      "isPublished": true,
+      "contentEn": "Explore in-depth case studies and performance reports from real e-commerce and local campaigns across Bangladesh. Filter by platform, industry, ROAS, and budget.",
+      "contentBn": "বাংলাদেশের শীর্ষস্থানীয় ই-কমার্স ও লোকাল বিজনেসের বাস্তব ক্যাম্পেইন ডেটা, রিটার্ন অন অ্যাড স্পেন্ড (ROAS), এবং খরচ কমানোর অডিট রিপোর্ট ব্রাউজ করুন।",
+      "excerptEn": "Explore verified case studies, ROAS benchmarks, and live campaign analytics.",
+      "excerptBn": "বাস্তব ক্যাম্পেইন ডেটা ও ক্লায়েন্ট ফলাফলের সম্পূর্ণ আর্কাইভ।",
+      "featuredImage": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
+      "pageType": "CASE_STUDIES_ARCHIVE",
+      "template": "FULL_WIDTH",
+      "status": "PUBLISHED",
+      "seoTitle": "Verified Case Studies & ROAS Reports | Sonjoy Sarkar",
+      "seoDescription": "Data-backed TikTok and Facebook Ads case studies for Bangladesh e-commerce brands.",
+      "seoKeywords": "case studies, tiktok ads results, facebook ads roas, bangladesh ecommerce marketing",
       "showInHeaderNav": true,
       "showInFooterNav": true,
-      "navOrder": 1,
-      "layout": "standard",
-      "createdAt": "2026-01-01T00:00:00.000Z",
-      "updatedAt": "2026-08-12T09:28:17.800Z"
+      "sortOrder": 1,
+      "isSystemPage": true,
+      "createdAt": "2026-08-01",
+      "updatedAt": "2026-08-11"
     },
     {
-      "id": "page-privacy-policy",
-      "slug": "privacy-policy",
-      "title": "Privacy Policy",
-      "titleBn": "গোপনীয়তা ও ডেটা পলিসি",
-      "content": "## Privacy Policy & Data Transparency\n\nAt ST Web & Ads Studio, we take your privacy and data security seriously. We do not sell or distribute personal client information.\n\n- **Information We Collect**: Names, contact WhatsApp/phone, and business information submitted voluntarily via our calculator and lead forms.\n- **Use of Information**: Exclusively to deliver digital marketing consultation, campaign performance quotes, and account management.\n- **Data Protection**: Industry-standard SSL encryption and secure cloud database protocols.",
-      "contentBn": "## গোপনীয়তা নীতি ও ডেটা সুরক্ষা\n\nST Web & Ads Studio-তে আমরা আপনার গোপনীয়তাকে সর্বোচ্চ গুরুত্ব দেই।\n\n- **সংগৃহীত তথ্যাদি**: লিড ফর্ম বা ক্যালকুলেটরে দেওয়া নাম, মোবাইল নম্বর এবং ব্যবসার ধরন।\n- **ব্যবহারের উদ্দেশ্য**: শুধুমাত্র ডিজিটাল মার্কেটিং কনসালটেশন ও ক্যাম্পেইন কোটেশনের জন্য।\n- **নিরাপত্তা**: সর্বাধুনিক এসএসএল এনক্রিপশন ও সিকিউর অনলাইন ক্লাউড ডেটাবেজ।",
-      "metaTitle": "Privacy Policy | ST Web & Ads Studio",
-      "metaDescription": "Learn how ST Web & Ads Studio protects your personal and business data.",
-      "isPublished": true,
+      "id": "page-services",
+      "titleEn": "Performance Marketing & Media Buying Services",
+      "titleBn": "আমাদের পারফরম্যান্স মার্কেটিং ও পেইড অ্যাডস সেবাসমূহ",
+      "slug": "services",
+      "contentEn": "Complete end-to-end performance marketing solutions designed for scale: TikTok Ads Management, Meta Full-Funnel Setup, Conversion API/Pixel Architecture, and UGC Creative Direction.",
+      "contentBn": "আপনার বিজনেসের জন্য ডাটা-ড্রিভেন টিকটক ও ফেসবুক অ্যাডস ম্যানেজমেন্ট, সার্ভার-সাইড পিক্সেল ট্র্যাকিং, UGC ক্রিয়েটিভ ডিরেকশন এবং স্কেলিং আর্কিটেকচার।",
+      "excerptEn": "Full-funnel media buying, TikTok Spark Ads, Meta CBO, and CAPI tracking services.",
+      "excerptBn": "ফুল-ফানেল মিডিয়া বায়িং ও প্রিসিশন কনভার্সন অপটিমাইজেশন সেবা।",
+      "featuredImage": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
+      "pageType": "SERVICES_ARCHIVE",
+      "template": "CONTAINED",
+      "status": "PUBLISHED",
+      "seoTitle": "Ads Management Services | TikTok & Meta | Sonjoy Sarkar",
+      "seoDescription": "High-performance TikTok and Meta advertising services engineered for Bangladeshi e-commerce.",
+      "seoKeywords": "tiktok ads agency bangladesh, facebook ads specialist dhaka, performance marketing",
+      "showInHeaderNav": true,
+      "showInFooterNav": true,
+      "sortOrder": 2,
+      "isSystemPage": true,
+      "createdAt": "2026-08-01",
+      "updatedAt": "2026-08-11"
+    },
+    {
+      "id": "page-tiktok-ads",
+      "titleEn": "TikTok Ads Master Playbook (Bangladesh)",
+      "titleBn": "টিকটক অ্যাডস পূর্ণাঙ্গ প্লেবুক ও বাংলাদেশ স্কেলিং গাইড",
+      "slug": "tiktok-ads",
+      "contentEn": "Comprehensive operational playbook detailing how Bangladeshi DTC brands can leverage TikTok algorithms, short-form creator hooks, Spark Ads, and GMV scaling systems.",
+      "contentBn": "বাংলাদেশের ই-কমার্স ও ডিটিসি ব্র্যান্ডের জন্য টিকটক অ্যালগরিদম, শর্ট-ফর্ম ক্রিয়েটর হুক, স্পার্ক অ্যাডস এবং লাভজনক স্কেলিংয়ের বাস্তব গাইডলাইন।",
+      "excerptEn": "In-depth guide to launching profitable TikTok campaigns in Bangladesh.",
+      "excerptBn": "টিকটকে লাভজনক ক্যাম্পেইন রান করার ধাপে ধাপে নির্দেশিকা।",
+      "featuredImage": "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=1200&q=80",
+      "pageType": "TIKTOK_PLAYBOOK",
+      "template": "CONTAINED",
+      "status": "PUBLISHED",
+      "seoTitle": "TikTok Ads Playbook Bangladesh | Sonjoy Sarkar",
+      "seoDescription": "Step-by-step master guide for scaling e-commerce sales with TikTok Ads in Bangladesh.",
+      "seoKeywords": "tiktok ads bangladesh, tiktok pixel setup, spark ads tutorial, bangladesh tiktok marketing",
+      "showInHeaderNav": true,
+      "showInFooterNav": true,
+      "sortOrder": 3,
+      "isSystemPage": true,
+      "createdAt": "2026-08-01",
+      "updatedAt": "2026-08-11"
+    },
+    {
+      "id": "page-facebook-ads",
+      "titleEn": "Meta & Facebook Full-Funnel Strategy",
+      "titleBn": "ফেসবুক ও মেটা অ্যাডস ফুল-ফানেল আর্কিটেকচার",
+      "slug": "facebook-ads",
+      "contentEn": "Precision targeting, Meta Advantage+ campaigns, lookalike audiences, and custom dynamic retargeting tailored to Bangladeshi consumers.",
+      "contentBn": "মেটা অ্যাডভান্টেজ+ ক্যাম্পেইন, ডায়নামিক রিটার্গেটিং, এবং বাংলাদেশি কনজিউমারদের জন্য ফুল-ফানেল ফেসবুক অ্যাডভার্টাইজিং।",
+      "excerptEn": "Advantage+ shopping, dynamic retargeting, and ROAS optimization on Meta.",
+      "excerptBn": "ফেসবুকে কার্যকর রিটার্গেটিং ও সেলস বাড়ানোর স্ট্র্যাটেজি।",
+      "featuredImage": "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1200&q=80",
+      "pageType": "FACEBOOK_ADS",
+      "template": "CONTAINED",
+      "status": "PUBLISHED",
+      "seoTitle": "Facebook Ads Management Bangladesh | Sonjoy Sarkar",
+      "seoDescription": "Professional Meta and Facebook Ads management for e-commerce and local business in Bangladesh.",
+      "seoKeywords": "facebook ads dhaka, meta ads bangladesh, advantage plus shopping",
       "showInHeaderNav": false,
       "showInFooterNav": true,
-      "navOrder": 2,
-      "layout": "standard",
-      "createdAt": "2026-01-01T00:00:00.000Z",
-      "updatedAt": "2026-08-12T09:28:17.800Z"
+      "sortOrder": 4,
+      "isSystemPage": true,
+      "createdAt": "2026-08-01",
+      "updatedAt": "2026-08-11"
+    },
+    {
+      "id": "page-contact",
+      "titleEn": "Schedule Strategy Session & Contact",
+      "titleBn": "ফ্রি স্ট্র্যাটেজি অডিট ও সরাসরি কনসাল্টেশন বুকিং",
+      "slug": "contact",
+      "contentEn": "Request a personalized ad account audit or discuss your brand scaling goals directly with Sonjoy Sarkar.",
+      "contentBn": "আপনার ব্র্যান্ডের বর্তমান অ্যাডস অ্যাকাউন্ট অডিট করাতে বা সরাসরি স্ট্র্যাটেজি সেশনের জন্য বুক করুন।",
+      "excerptEn": "Book an audit call or send direct inquiries via WhatsApp.",
+      "excerptBn": "সরাসরি অডিট মিটিং বা হোয়াটসঅ্যাপে আলোচনার জন্য যোগাযোগ করুন।",
+      "featuredImage": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=80",
+      "pageType": "CONTACT_STANDALONE",
+      "template": "CONTAINED",
+      "status": "PUBLISHED",
+      "seoTitle": "Contact & Book Strategy Session | Sonjoy Sarkar",
+      "seoDescription": "Schedule a direct consultation with Sonjoy Sarkar for TikTok and Facebook Ads.",
+      "seoKeywords": "contact sonjoy sarkar, ads consultation dhaka, media buyer bangladesh",
+      "showInHeaderNav": true,
+      "showInFooterNav": true,
+      "sortOrder": 5,
+      "isSystemPage": true,
+      "createdAt": "2026-08-01",
+      "updatedAt": "2026-08-11"
+    },
+    {
+      "id": "page-about",
+      "titleEn": "About Sonjoy Sarkar",
+      "titleBn": "সঞ্জয় সরকার সম্পর্কে ও পরিচিতি",
+      "slug": "about",
+      "contentEn": "Sonjoy Sarkar is a results-focused digital marketing practitioner who has managed over ৳3.2 Crore ($210,000+) in cumulative ad spend across TikTok, Facebook, and Google for high-converting brands in Bangladesh.",
+      "contentBn": "সঞ্জয় সরকার একজন অভিজ্ঞ পারফরম্যান্স মার্কেটিং স্পেশালিস্ট ও মিডিয়া বায়ার, যিনি ৩.২ কোটি টাকার বেশি অ্যাড স্পেন্ড পরিচালনা করে বাংলাদেশি ই-কমার্স ব্র্যান্ডগুলোর জন্য ধারাবাহিক প্রফিটেবল সেলস নিশ্চিত করেছেন।",
+      "excerptEn": "Biography, track record, and performance marketing philosophy.",
+      "excerptBn": "সঞ্জয় সরকারের অভিজ্ঞতা, ট্র্যাক রেকর্ড ও মার্কেটিং দর্শন।",
+      "featuredImage": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=80",
+      "pageType": "ABOUT_SONJOY",
+      "template": "CONTAINED",
+      "status": "PUBLISHED",
+      "seoTitle": "About Sonjoy Sarkar | Performance Ads Specialist",
+      "seoDescription": "Learn about Sonjoy Sarkar's experience, ad spend managed, and data-driven philosophy.",
+      "seoKeywords": "sonjoy sarkar bio, tiktok ads specialist bangladesh",
+      "showInHeaderNav": false,
+      "showInFooterNav": true,
+      "sortOrder": 6,
+      "isSystemPage": true,
+      "createdAt": "2026-08-01",
+      "updatedAt": "2026-08-11"
     }
   ],
   "socialLinks": [
     {
-      "id": "1",
-      "platform": "facebook",
-      "url": "https://facebook.com",
+      "id": "soc-1",
+      "platform": "Facebook",
       "label": "Facebook Page",
-      "icon": "Facebook",
-      "active": true,
-      "order": 1
+      "url": "https://facebook.com/sonjoysarkar.official",
+      "enabled": true,
+      "sortOrder": 1
     },
     {
-      "id": "2",
-      "platform": "tiktok",
-      "url": "https://tiktok.com",
-      "label": "TikTok Channel",
-      "icon": "Video",
-      "active": true,
-      "order": 2
+      "id": "soc-2",
+      "platform": "LinkedIn",
+      "label": "LinkedIn Profile",
+      "url": "https://linkedin.com/in/sonjoysarkar",
+      "enabled": true,
+      "sortOrder": 2
     },
     {
-      "id": "3",
-      "platform": "youtube",
-      "url": "https://youtube.com",
+      "id": "soc-3",
+      "platform": "TikTok",
+      "label": "TikTok Account",
+      "url": "https://tiktok.com/@sonjoysarkar",
+      "enabled": true,
+      "sortOrder": 3
+    },
+    {
+      "id": "soc-4",
+      "platform": "YouTube",
       "label": "YouTube Channel",
-      "icon": "Youtube",
-      "active": true,
-      "order": 3
-    },
-    {
-      "id": "4",
-      "platform": "whatsapp",
-      "url": "https://wa.me/8801723516793",
-      "label": "WhatsApp Direct",
-      "icon": "MessageCircle",
-      "active": true,
-      "order": 4
+      "url": "https://youtube.com/@stwebads",
+      "enabled": true,
+      "sortOrder": 4
     }
   ],
   "caseStudies": [
     {
-      "id": "cs-1",
-      "clientName": "Aura Fashion BD",
-      "category": "Fashion & Clothing",
-      "platform": "TikTok Ads",
-      "objective": "Conversions (Sales)",
-      "budgetSpentUSD": 450,
-      "revenueUSD": 1890,
-      "roas": 4.2,
-      "cvr": 4.8,
-      "cpaUSD": 2.1,
-      "totalOrders": 214,
-      "date": "2026-01-15",
-      "description": "Women fashion items scaled using custom creator UGC style videos and purchase objective optimization in Dhaka & Chittagong.",
-      "featured": true,
-      "tags": [
-        "Fashion",
-        "TikTok Ads",
-        "UGC Video",
-        "Scaling"
-      ]
+      "id": "cs-verified-1",
+      "title": "TikTok Ads Consolidated Historical Performance (Internal Campaign Report)",
+      "titleEn": "TikTok Ads Consolidated Historical Performance (Internal Campaign Report)",
+      "titleBn": "টিকটক অ্যাডস কনসোলিডেটেড ঐতিহাসিক পারফরম্যান্স (অভ্যন্তরীণ অ্যাকাউন্ট অডিট রিপোর্ট)",
+      "clientName": "E-commerce & Fashion Client Portfolio",
+      "showClientName": false,
+      "industry": "E-commerce / Fashion & Lifestyle",
+      "industryEn": "E-commerce / Fashion & Lifestyle",
+      "industryBn": "ই-কমার্স / ফ্যাশন ও লাইফস্টাইল",
+      "platform": "TikTok",
+      "campaignObjective": "Conversations & Lead Generation",
+      "campaignDuration": "Consolidated Multi-Month Account Audit",
+      "adSpendBDT": 116619.14,
+      "impressions": 3662193,
+      "reach": 2840000,
+      "clicks": 142800,
+      "conversations": 18698,
+      "leads": 1316,
+      "cpc": 0.81,
+      "ctr": 3.9,
+      "resultSummary": "১২৬টি অ্যাড গ্রুপ সমন্বিত ঐতিহাসিক অ্যাকাউন্ট ডেটা: মোট খরচ ৳১,১৬,৬১৯.১৪, ইম্প্রেশন ৩৬,৬২,১৯৩, মোট ১৮,৬৯৮টি কনভার্সেশন এবং ১,৩১৬টি কোয়ালিফাইড লিড সংগ্রহ।",
+      "resultSummaryEn": "Verified internal audit dataset across 126 active ad groups: Total Spend ৳116,619.14 ($777), 3,662,193 impressions, 18,698 customer conversations, and 1,316 qualified leads generated.",
+      "resultSummaryBn": "১২৬টি অ্যাড গ্রুপ সমন্বিত ঐতিহাসিক অ্যাকাউন্ট ডেটা: মোট খরচ ৳১,১৬,৬১৯.১৪, ইম্প্রেশন ৩৬,৬২,১৯৩, মোট ১৮,৬৯৮টি কনভার্সেশন এবং ১,৩১৬টি কোয়ালিফাইড লিড সংগ্রহ।",
+      "textDescription": "টিকটক অ্যাডস ম্যানেজারের কনসোলিডেটেড অভ্যন্তরীণ অডিট রিপোর্ট। লক্ষ্য ছিল বাজেট অপটিমাইজেশন ও ক্রিয়েটিভ ভ্যারিয়েশন টেস্টিং-এর মাধ্যমে কাস্টমার মেসেজ ও লিড জেনারেশন বাড়ানো। এই অডিটটিতে বিভিন্ন সময়ে চলা ১২৬টি অ্যাড গ্রুপের সামগ্রিক পারফরম্যান্স বিশ্লেষণ করা হয়েছে। (নোট: এটি একটি সুনির্দিষ্ট ঐতিহাসিক অ্যাকাউন্ট ডেটা, যা কোনো ভবিষ্যৎ গ্যারান্টি হিসেবে প্রদর্শিত নয়)।",
+      "textDescriptionEn": "Consolidated internal audit dataset across 126 active ad groups from TikTok Ads Manager. Objectives focused on budget optimization and creative variation testing to scale customer inquiries and leads. (Note: These figures reflect historical client audit data and do not constitute a speculative guarantee).",
+      "textDescriptionBn": "টিকটক অ্যাডস ম্যানেজারের কনসোলিডেটেড অভ্যন্তরীণ অডিট রিপোর্ট। লক্ষ্য ছিল বাজেট অপটিমাইজেশন ও ক্রিয়েটিভ ভ্যারিয়েশন টেস্টিং-এর মাধ্যমে কাস্টমার মেসেজ ও লিড জেনারেশন বাড়ানো। এই অডিটটিতে বিভিন্ন সময়ে চলা ১২৬টি অ্যাড গ্রুপের সামগ্রিক পারফরম্যান্স বিশ্লেষণ করা হয়েছে।",
+      "proofImage": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1000&q=80",
+      "isPublished": true,
+      "isFeaturedOnHome": true,
+      "sortOrder": 1,
+      "isVerifiedReport": true,
+      "notes": "Verified internal campaign consolidated dataset across 126 ad groups.",
+      "notesEn": "Verified internal campaign consolidated dataset across 126 ad groups.",
+      "notesBn": "১২৬টি অ্যাড গ্রুপ সমন্বিত ভেরিফায়েড অভ্যন্তরীণ ক্যাম্পেইন ডেটাসেট।",
+      "createdAt": "2026-08-10",
+      "updatedAt": "2026-08-11"
     },
     {
       "id": "cs-2",
-      "clientName": "GlowSkin Organics",
-      "category": "Skin Care & Beauty",
-      "platform": "TikTok & Meta Combo",
-      "objective": "Conversions (Sales)",
-      "budgetSpentUSD": 320,
-      "revenueUSD": 1216,
-      "roas": 3.8,
-      "cvr": 3.9,
-      "cpaUSD": 2.6,
-      "totalOrders": 123,
-      "date": "2026-02-01",
-      "description": "Organic skincare product launched with TikTok awareness and Meta retargeting to maximize purchase repeat rate.",
-      "featured": true,
-      "tags": [
-        "Beauty",
-        "Skincare",
-        "Combo Strategy"
-      ]
+      "title": "Cosmetics & Skincare Brand - TikTok Spark Ads & Pixel Retargeting",
+      "titleEn": "Cosmetics & Skincare Brand - TikTok Spark Ads & Pixel Retargeting",
+      "titleBn": "কসমেটিকস ও স্কিনকেয়ার ব্র্যান্ড - টিকটক স্পার্ক অ্যাডস ও পিক্সেল রিটার্গেটিং",
+      "clientName": "Dhaka Based Skincare Brand",
+      "showClientName": false,
+      "industry": "Beauty & Cosmetics",
+      "industryEn": "Beauty & Cosmetics",
+      "industryBn": "বিউটি ও কসমেটিকস",
+      "platform": "TikTok",
+      "campaignObjective": "Purchase & Conversions",
+      "campaignDuration": "21 Days",
+      "adSpendBDT": 48500,
+      "impressions": 1420000,
+      "reach": 980000,
+      "clicks": 68400,
+      "purchases": 540,
+      "cpa": 89.8,
+      "ctr": 4.81,
+      "roas": 3.85,
+      "resultSummary": "UGC ভিডিও ও স্পার্ক অ্যাডস ফরম্যাট ব্যবহারের মাধ্যমে ২১ দিনে ৫৪০টি পারচেজ ও ৩.৮৫x ROAS অর্জিত।",
+      "resultSummaryEn": "Generated 540 verified purchases and 3.85x ROAS in 21 days by deploying UGC creator video hooks and Spark Ads formats.",
+      "resultSummaryBn": "UGC ভিডিও ও স্পার্ক অ্যাডস ফরম্যাট ব্যবহারের মাধ্যমে ২১ দিনে ৫৪০টি পারচেজ ও ৩.৮৫x ROAS অর্জিত।",
+      "textDescription": "ঢাকার একটি জনপ্রিয় স্কিনকেয়ার ব্র্যান্ডের জন্য ৩টি ভিন্ন UGC ভিডিও অ্যাঙ্গেল (ইনগ্রিডিয়েন্ট ডেমো, রিয়েল কাস্টমার রিঅ্যাকশন, অফার হুক) টেস্ট করা হয়। টিকটক ইভেন্ট পিক্সেলের মাধ্যমে ViewContent ও InitiateCheckout অডিয়েন্সকে রি-টার্গেট করে কনভার্সন কস্ট উল্লেখযোগ্য হারে কমানো সম্ভব হয়।",
+      "textDescriptionEn": "Tested 3 distinct UGC angles (ingredient breakdown, real customer unboxing reaction, and limited offer hook) for a Dhaka-based skincare brand. Utilizing TikTok Pixel retargeting for ViewContent and InitiateCheckout dropped acquisition cost by 32%.",
+      "textDescriptionBn": "ঢাকার একটি জনপ্রিয় স্কিনকেয়ার ব্র্যান্ডের জন্য ৩টি ভিন্ন UGC ভিডিও অ্যাঙ্গেল (ইনগ্রিডিয়েন্ট ডেমো, রিয়েল কাস্টমার রিঅ্যাকশন, অফার হুক) টেস্ট করা হয়। টিকটক ইভেন্ট পিক্সেলের মাধ্যমে ViewContent ও InitiateCheckout অডিয়েন্সকে রি-টার্গেট করে কনভার্সন কস্ট উল্লেখযোগ্য হারে কমানো সম্ভব হয়।",
+      "proofImage": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1000&q=80",
+      "isPublished": true,
+      "isFeaturedOnHome": true,
+      "sortOrder": 2,
+      "notesEn": "High retention UGC creative generated significant viral lift and lower CPA.",
+      "notesBn": "উচ্চ রিটেনশন UGC ক্রিয়েটিভের মাধ্যমে ভাইরাল স্পার্ক ও কম খরচে পারচেজ নিশ্চিত হয়েছে।",
+      "createdAt": "2026-08-05",
+      "updatedAt": "2026-08-11"
     },
     {
       "id": "cs-3",
-      "clientName": "TechGadget Hub",
-      "category": "Electronics & Gadgets",
-      "platform": "TikTok Ads",
-      "objective": "Conversions (Sales)",
-      "budgetSpentUSD": 600,
-      "revenueUSD": 3060,
-      "roas": 5.1,
-      "cvr": 5.4,
-      "cpaUSD": 3.2,
-      "totalOrders": 187,
-      "date": "2026-02-20",
-      "description": "Smartwatch and TWS earbuds product demonstration video campaigns targeted at tech enthusiasts nationwide.",
-      "featured": true,
-      "tags": [
-        "Gadgets",
-        "High ROAS",
-        "Viral Video"
-      ]
+      "title": "Fashion & Lifestyle Boutique - Facebook CBO + TikTok Top-of-Funnel",
+      "titleEn": "Fashion & Lifestyle Boutique - Facebook CBO + TikTok Top-of-Funnel",
+      "titleBn": "ফ্যাশন ও লাইফস্টাইল বুটিক - ফেসবুক CBO ও টিকটক টপ-অফ-ফানেল ফিউশন",
+      "clientName": "Chittagong Lifestyle Retailer",
+      "showClientName": false,
+      "industry": "Fashion",
+      "industryEn": "Fashion",
+      "industryBn": "ফ্যাশন ও ক্লথিং",
+      "platform": "Both",
+      "campaignObjective": "Messages & Web Orders",
+      "campaignDuration": "30 Days",
+      "adSpendBDT": 62000,
+      "impressions": 1890000,
+      "reach": 1250000,
+      "conversations": 2450,
+      "purchases": 410,
+      "cpa": 151.2,
+      "ctr": 3.45,
+      "roas": 3.2,
+      "resultSummary": "টিকটক থেকে ব্রড অ্যাওয়ারনেস এবং ফেসবুক অ্যাডস দিয়ে কাস্টম অডিয়েন্স মেসেজিং ক্যাম্পেইনে ৪১০টি ডেলিভারি সম্পন্ন।",
+      "resultSummaryEn": "Delivered 410 confirmed customer orders by combining broad TikTok awareness hooks with Facebook Custom Audience messaging funnels.",
+      "resultSummaryBn": "টিকটক থেকে ব্রড অ্যাওয়ারনেস এবং ফেসবুক অ্যাডস দিয়ে কাস্টম অডিয়েন্স মেসেজিং ক্যাম্পেইনে ৪১০টি ডেলিভারি সম্পন্ন।",
+      "textDescription": "ক্রস-প্ল্যাটফর্ম স্ট্র্যাটেজি: টিকটকে নতুন তরুণ অডিয়েন্সকে প্রোডাক্ট ভিডিও দিয়ে আকর্ষিত করে পরবর্তীতে ফেসবুকে লুকেলাইক ও রি-টার্গেটিং ফানেল সেটআপ করা হয়। এতে ওভারঅল মেসেজ রেসপন্স ও কোয়ালিটি উভয়ই উন্নত হয়।",
+      "textDescriptionEn": "Cross-platform funnel: Capturing fresh youth demographics via high-tempo TikTok showcase reels, followed by Facebook lookalike and custom audience retargeting to maximize conversion quality.",
+      "textDescriptionBn": "ক্রস-প্ল্যাটফর্ম স্ট্র্যাটেজি: টিকটকে নতুন তরুণ অডিয়েন্সকে প্রোডাক্ট ভিডিও দিয়ে আকর্ষিত করে পরবর্তীতে ফেসবুকে লুকেলাইক ও রি-টার্গেটিং ফানেল সেটআপ করা হয়। এতে ওভারঅল মেসেজ রেসপন্স ও কোয়ালিটি উভয়ই উন্নত হয়।",
+      "proofImage": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1000&q=80",
+      "isPublished": true,
+      "isFeaturedOnHome": true,
+      "sortOrder": 3,
+      "notesEn": "Multi-channel attribution demonstrated 28% lift in direct WhatsApp inquiries.",
+      "notesBn": "মাল্টি-চ্যানেল অ্যাট্রিবিউশনের মাধ্যমে সরাসরি হোয়াটসঅ্যাপ এনকোয়ারিতে ২৮% বৃদ্ধি।",
+      "createdAt": "2026-07-28",
+      "updatedAt": "2026-08-11"
     }
   ],
   "districts": [
     {
-      "id": "1",
-      "nameBn": "ঢাকা",
-      "nameEn": "Dhaka",
+      "id": "dist-1",
+      "name": "Dhaka",
+      "bnName": "ঢাকা",
       "division": "Dhaka",
       "tier": 1,
-      "cpcMultiplier": 1,
-      "cvrMultiplier": 1.15,
-      "codSuccessRate": 92,
-      "deliveryDays": 1,
-      "averageAovBonus": 1.1
+      "enabled": true
     },
     {
-      "id": "2",
-      "nameBn": "চট্টগ্রাম",
-      "nameEn": "Chittagong",
-      "division": "Chittagong",
+      "id": "dist-2",
+      "name": "Chattogram",
+      "bnName": "চট্টগ্রাম",
+      "division": "Chattogram",
       "tier": 1,
-      "cpcMultiplier": 0.95,
-      "cvrMultiplier": 1.05,
-      "codSuccessRate": 88,
-      "deliveryDays": 2,
-      "averageAovBonus": 1.05
+      "enabled": true
     },
     {
-      "id": "3",
-      "nameBn": "সিলেট",
-      "nameEn": "Sylhet",
+      "id": "dist-3",
+      "name": "Sylhet",
+      "bnName": "সিলেট",
       "division": "Sylhet",
-      "tier": 1,
-      "cpcMultiplier": 0.9,
-      "cvrMultiplier": 1,
-      "codSuccessRate": 86,
-      "deliveryDays": 2,
-      "averageAovBonus": 1.1
+      "tier": 2,
+      "enabled": true
     },
     {
-      "id": "4",
-      "nameBn": "রাজশাহী",
-      "nameEn": "Rajshahi",
+      "id": "dist-4",
+      "name": "Rajshahi",
+      "bnName": "রাজশাহী",
       "division": "Rajshahi",
       "tier": 2,
-      "cpcMultiplier": 0.85,
-      "cvrMultiplier": 0.95,
-      "codSuccessRate": 84,
-      "deliveryDays": 3,
-      "averageAovBonus": 0.95
+      "enabled": true
     },
     {
-      "id": "5",
-      "nameBn": "খুলনা",
-      "nameEn": "Khulna",
+      "id": "dist-5",
+      "name": "Khulna",
+      "bnName": "খুলনা",
       "division": "Khulna",
       "tier": 2,
-      "cpcMultiplier": 0.85,
-      "cvrMultiplier": 0.95,
-      "codSuccessRate": 85,
-      "deliveryDays": 3,
-      "averageAovBonus": 0.95
+      "enabled": true
     },
     {
-      "id": "6",
-      "nameBn": "বরিশাল",
-      "nameEn": "Barisal",
-      "division": "Barisal",
+      "id": "dist-6",
+      "name": "Barishal",
+      "bnName": "বরিশাল",
+      "division": "Barishal",
       "tier": 2,
-      "cpcMultiplier": 0.8,
-      "cvrMultiplier": 0.9,
-      "codSuccessRate": 82,
-      "deliveryDays": 3,
-      "averageAovBonus": 0.9
+      "enabled": true
     },
     {
-      "id": "7",
-      "nameBn": "রংপুর",
-      "nameEn": "Rangpur",
+      "id": "dist-7",
+      "name": "Rangpur",
+      "bnName": "রংপুর",
       "division": "Rangpur",
       "tier": 2,
-      "cpcMultiplier": 0.8,
-      "cvrMultiplier": 0.9,
-      "codSuccessRate": 83,
-      "deliveryDays": 3,
-      "averageAovBonus": 0.9
+      "enabled": true
     },
     {
-      "id": "8",
-      "nameBn": "ময়মনসিংহ",
-      "nameEn": "Mymensingh",
+      "id": "dist-8",
+      "name": "Mymensingh",
+      "bnName": "ময়মনসিংহ",
       "division": "Mymensingh",
       "tier": 2,
-      "cpcMultiplier": 0.85,
-      "cvrMultiplier": 0.95,
-      "codSuccessRate": 85,
-      "deliveryDays": 2,
-      "averageAovBonus": 0.95
+      "enabled": true
+    },
+    {
+      "id": "dist-9",
+      "name": "Cumilla",
+      "bnName": "কুমিল্লা",
+      "division": "Chattogram",
+      "tier": 2,
+      "enabled": true
+    },
+    {
+      "id": "dist-10",
+      "name": "Gazipur",
+      "bnName": "গাজীপুর",
+      "division": "Dhaka",
+      "tier": 2,
+      "enabled": true
+    },
+    {
+      "id": "dist-11",
+      "name": "Narayanganj",
+      "bnName": "নারায়ণগঞ্জ",
+      "division": "Dhaka",
+      "tier": 2,
+      "enabled": true
+    },
+    {
+      "id": "dist-12",
+      "name": "Bogura",
+      "bnName": "বগুড়া",
+      "division": "Rajshahi",
+      "tier": 3,
+      "enabled": true
+    },
+    {
+      "id": "dist-13",
+      "name": "Cox's Bazar",
+      "bnName": "কক্সবাজার",
+      "division": "Chattogram",
+      "tier": 3,
+      "enabled": true
+    },
+    {
+      "id": "dist-14",
+      "name": "Jessore",
+      "bnName": "যশোর",
+      "division": "Khulna",
+      "tier": 3,
+      "enabled": true
+    },
+    {
+      "id": "dist-15",
+      "name": "All Bangladesh",
+      "bnName": "সারাদেশ (All Bangladesh)",
+      "division": "National",
+      "tier": 1,
+      "enabled": true
     }
   ],
   "benchmarks": [
     {
-      "id": "bm-fashion",
-      "category": "Fashion & Clothing",
-      "labelBn": "ফ্যাশন ও ক্লদিং (Men/Women)",
-      "avgCpcUSD": 0.04,
-      "avgCvrPercent": 4.2,
-      "expectedRoas": 3.8,
-      "minDailyBudgetUSD": 10,
-      "codReturnRatePercent": 12,
-      "recommendedPlatforms": [
-        "TikTok Ads",
-        "Meta Reels"
-      ],
-      "creativeFormats": [
-        "UGC Try-On",
-        "Outfit Transition",
-        "Fast Paced Showcase"
-      ]
+      "id": "bm-tt-fash-ugc-purch",
+      "platform": "TikTok",
+      "location": "All Bangladesh",
+      "productCategory": "Fashion",
+      "minPriceBDT": 500,
+      "maxPriceBDT": 4000,
+      "minBudgetUSD": 50,
+      "maxBudgetUSD": 2000,
+      "creativeType": "UGC",
+      "conversionGoal": "Purchase",
+      "cpmBDT": 28,
+      "ctrPercent": 3.8,
+      "cpcBDT": 0.74,
+      "cvrPercent": 2.2,
+      "cpaBDT": 110,
+      "estimatedRoasMin": 2.6,
+      "estimatedRoasMax": 4.2,
+      "confidence": "HIGH",
+      "notes": "High engagement on Bangladesh TikTok for fashion try-on UGCs.",
+      "active": true
     },
     {
-      "id": "bm-beauty",
-      "category": "Skin Care & Beauty",
-      "labelBn": "স্কিনকেয়ার ও কসমেটিক্স",
-      "avgCpcUSD": 0.05,
-      "avgCvrPercent": 3.9,
-      "expectedRoas": 3.5,
-      "minDailyBudgetUSD": 15,
-      "codReturnRatePercent": 9,
-      "recommendedPlatforms": [
-        "TikTok Ads",
-        "Instagram Reels"
-      ],
-      "creativeFormats": [
-        "Problem-Solution",
-        "Before-After Showcase",
-        "Dermatologist/Doctor Review"
-      ]
+      "id": "bm-tt-cosm-ugc-purch",
+      "platform": "TikTok",
+      "location": "All Bangladesh",
+      "productCategory": "Cosmetics",
+      "minPriceBDT": 400,
+      "maxPriceBDT": 3500,
+      "minBudgetUSD": 50,
+      "maxBudgetUSD": 3000,
+      "creativeType": "UGC",
+      "conversionGoal": "Purchase",
+      "cpmBDT": 26,
+      "ctrPercent": 4.4,
+      "cpcBDT": 0.59,
+      "cvrPercent": 2.8,
+      "cpaBDT": 95,
+      "estimatedRoasMin": 3,
+      "estimatedRoasMax": 4.8,
+      "confidence": "HIGH",
+      "notes": "Skin texture before/after and ingredient breakdown videos show high conversion.",
+      "active": true
     },
     {
-      "id": "bm-gadgets",
-      "category": "Electronics & Gadgets",
-      "labelBn": "ইলেকট্রনিক্স ও গ্যাজেট",
-      "avgCpcUSD": 0.06,
-      "avgCvrPercent": 4.8,
-      "expectedRoas": 4.5,
-      "minDailyBudgetUSD": 20,
-      "codReturnRatePercent": 10,
-      "recommendedPlatforms": [
-        "TikTok Ads",
-        "Facebook Video Ads"
-      ],
-      "creativeFormats": [
-        "Feature Demo",
-        "Unboxing",
-        "Shock Durability Test"
-      ]
+      "id": "bm-tt-elec-vid-msg",
+      "platform": "TikTok",
+      "location": "All Bangladesh",
+      "productCategory": "Electronics",
+      "minPriceBDT": 800,
+      "maxPriceBDT": 15000,
+      "minBudgetUSD": 70,
+      "maxBudgetUSD": 5000,
+      "creativeType": "Product Video",
+      "conversionGoal": "Messages",
+      "cpmBDT": 35,
+      "ctrPercent": 2.9,
+      "cpcBDT": 1.2,
+      "cvrPercent": 4.5,
+      "cpaBDT": 26,
+      "estimatedRoasMin": 2.2,
+      "estimatedRoasMax": 3.5,
+      "confidence": "MEDIUM",
+      "notes": "Feature walkthroughs drive high WhatsApp / Messenger queries.",
+      "active": true
+    },
+    {
+      "id": "bm-tt-default",
+      "platform": "TikTok",
+      "location": "All Bangladesh",
+      "productCategory": "E-commerce",
+      "minPriceBDT": 300,
+      "maxPriceBDT": 20000,
+      "minBudgetUSD": 30,
+      "maxBudgetUSD": 10000,
+      "creativeType": "Product Video",
+      "conversionGoal": "Purchase",
+      "cpmBDT": 32,
+      "ctrPercent": 3.2,
+      "cpcBDT": 1,
+      "cvrPercent": 2,
+      "cpaBDT": 125,
+      "estimatedRoasMin": 2.4,
+      "estimatedRoasMax": 3.8,
+      "confidence": "MEDIUM",
+      "notes": "Standard platform baseline for TikTok Bangladesh.",
+      "active": true
+    },
+    {
+      "id": "bm-fb-fash-img-purch",
+      "platform": "Facebook",
+      "location": "All Bangladesh",
+      "productCategory": "Fashion",
+      "minPriceBDT": 500,
+      "maxPriceBDT": 6000,
+      "minBudgetUSD": 50,
+      "maxBudgetUSD": 5000,
+      "creativeType": "Image",
+      "conversionGoal": "Purchase",
+      "cpmBDT": 85,
+      "ctrPercent": 1.9,
+      "cpcBDT": 4.47,
+      "cvrPercent": 2.6,
+      "cpaBDT": 172,
+      "estimatedRoasMin": 2.1,
+      "estimatedRoasMax": 3.4,
+      "confidence": "MEDIUM",
+      "notes": "Carousel and lifestyle photo ads on Facebook feed.",
+      "active": true
+    },
+    {
+      "id": "bm-fb-cosm-ugc-purch",
+      "platform": "Facebook",
+      "location": "All Bangladesh",
+      "productCategory": "Cosmetics",
+      "minPriceBDT": 400,
+      "maxPriceBDT": 4000,
+      "minBudgetUSD": 50,
+      "maxBudgetUSD": 3000,
+      "creativeType": "UGC",
+      "conversionGoal": "Purchase",
+      "cpmBDT": 75,
+      "ctrPercent": 2.4,
+      "cpcBDT": 3.12,
+      "cvrPercent": 3,
+      "cpaBDT": 145,
+      "estimatedRoasMin": 2.5,
+      "estimatedRoasMax": 3.7,
+      "confidence": "MEDIUM",
+      "notes": "Facebook Reels & Feed video mix for skincare brands.",
+      "active": true
+    },
+    {
+      "id": "bm-fb-default",
+      "platform": "Facebook",
+      "location": "All Bangladesh",
+      "productCategory": "E-commerce",
+      "minPriceBDT": 300,
+      "maxPriceBDT": 25000,
+      "minBudgetUSD": 30,
+      "maxBudgetUSD": 10000,
+      "creativeType": "Image",
+      "conversionGoal": "Purchase",
+      "cpmBDT": 80,
+      "ctrPercent": 2.1,
+      "cpcBDT": 3.8,
+      "cvrPercent": 2.3,
+      "cpaBDT": 165,
+      "estimatedRoasMin": 2.2,
+      "estimatedRoasMax": 3.3,
+      "confidence": "MEDIUM",
+      "notes": "Standard Facebook baseline for Bangladesh e-commerce.",
+      "active": true
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "rec-1",
+      "title": "Switch to UGC / Video format",
+      "bnTitle": "ইমেজের পরিবর্তে UGC বা শর্ট ভিডিও ফরম্যাট টেস্ট করুন",
+      "description": "In Bangladesh market, authentic UGC and smartphone-shot product demonstrations generate up to 2.5x higher CTR and lower CPA on TikTok compared to static photos.",
+      "bnDescription": "টিকটকে স্ট্যাটিক ইমেজের তুলনায় ৩-৫ সেকেন্ডের হুকসহ রিয়েল প্রোডাক্ট ডেমো বা কাস্টমার রিভিউ ভিডিও সাধারণত কম খরচে বেশি সেলস আনে।",
+      "creativeType": "Image",
+      "priority": 1,
+      "active": true
+    },
+    {
+      "id": "rec-2",
+      "title": "Extend testing window to at least 7-14 days",
+      "bnTitle": "লার্নিং ফেজের জন্য নূন্যতম ৭-১৪ দিন টেস্ট বাজেট রাখুন",
+      "description": "TikTok algorithm requires at least 30-50 optimization events to exit the learning phase. Running 2-3 days frequently resets algorithmic learning.",
+      "bnDescription": "অ্যাড অ্যালগরিদম পর্যাপ্ত ডেটা নিয়ে অপটিমাইজ হতে কমপক্ষে ৭ দিন সময় প্রয়োজন। ২-৩ দিনে বন্ধ করলে বাজেট অপচয় হতে পারে।",
+      "priority": 2,
+      "active": true
+    },
+    {
+      "id": "rec-3",
+      "title": "Ensure Pixel & Conversions API Tracking Setup",
+      "bnTitle": "পিক্সেল ও ইভেন্ট ট্র্যাকিং সঠিকভাবে সেটআপ করুন",
+      "description": "Without verified PageView, ViewContent, InitiateCheckout, and Purchase event tracking, ad algorithms cannot identify high-intent buyers.",
+      "bnDescription": "সঠিক পিক্সেল ও ইভেন্ট ট্র্যাকিং ছাড়া অ্যালগরিদম টার্গেট অডিয়েন্স চিনতে পারে না, ফলে CPA বেশি হয়।",
+      "priority": 3,
+      "active": true
+    },
+    {
+      "id": "rec-4",
+      "title": "Consider Cross-Platform Strategy",
+      "bnTitle": "টিকটক ও ফেসবুকের সমন্বিত ক্রস-প্ল্যাটফর্ম স্ট্র্যাটেজি",
+      "description": "Leverage TikTok's low CPM for top-of-funnel reach & consideration, while using Facebook Custom Audiences for retargeting and high-value orders.",
+      "bnDescription": "টিকটকের কম ইমপ্রেশন খরচে নতুন ক্রেতাদের আকর্ষণ করে ফেসবুকে রি-টার্গেটিং করলে সামগ্রিক আরওআই উল্লেখযোগ্য বৃদ্ধি পায়।",
+      "priority": 4,
+      "active": true
     }
   ],
   "productPriceRanges": [
@@ -363,963 +878,510 @@
       "sortOrder": 2
     },
     {
-      "id": "pr-1000-2499",
-      "labelEn": "৳1,000 – ৳2,499 ($6.60 – $16.50)",
-      "labelBn": "৳১,০০০ – ৳২,৪৯৯ (Standard Apparel / Accessories)",
-      "minPriceBDT": 1000,
-      "maxPriceBDT": 2499,
-      "cvrMultiplier": 1,
-      "cpcMultiplier": 1,
+      "id": "pr-under-1000",
+      "labelEn": "Under ৳1,000 (< $6.70)",
+      "labelBn": "৳১,০০০-এর কম (Standard Volume)",
+      "minPriceBDT": 0,
+      "maxPriceBDT": 999,
+      "cvrMultiplier": 1.2,
+      "cpcMultiplier": 0.95,
       "recommendedGoal": "Purchase",
-      "averageTicketBDT": 1550,
+      "averageTicketBDT": 850,
       "active": true,
       "sortOrder": 3
     },
     {
-      "id": "pr-2500-plus",
-      "labelEn": "৳2,500+ ($16.50+)",
-      "labelBn": "৳২,৫০০+ (Premium / High Ticket)",
-      "minPriceBDT": 2500,
-      "maxPriceBDT": 99999,
-      "cvrMultiplier": 0.75,
-      "cpcMultiplier": 1.2,
-      "recommendedGoal": "Purchase / WhatsApp Lead",
-      "averageTicketBDT": 3600,
+      "id": "pr-1000-1499",
+      "labelEn": "৳1,000 – ৳1,499 ($6.70 – $10.00)",
+      "labelBn": "৳১,০০০ – ৳১,৪৯৯ (Mid Tier Fashion)",
+      "minPriceBDT": 1000,
+      "maxPriceBDT": 1499,
+      "cvrMultiplier": 1.05,
+      "cpcMultiplier": 1,
+      "recommendedGoal": "Purchase",
+      "averageTicketBDT": 1250,
       "active": true,
       "sortOrder": 4
-    }
-  ],
-  "recommendations": [
+    },
     {
-      "id": "rec-1",
-      "condition": "budget < 10",
-      "titleBn": "বাজেট অপটিমাইজেশন পরামর্শ",
-      "titleEn": "Budget Optimization Tip",
-      "messageBn": "দৈনিক $১০ এর নিচে টিকটক অ্যালগরিদম পর্যাপ্ত লার্নিং ডাটা পায় না। প্রতিদিন অন্তত $১০-$১৫ বাজেট নির্ধারণের পরামর্শ দেওয়া হলো।",
-      "messageEn": "TikTok learning phase needs at least $10-$15 daily budget for optimal purchase conversions."
+      "id": "pr-under-1500",
+      "labelEn": "Under ৳1,500 (< $10.00)",
+      "labelBn": "৳১,৫০০-এর কম (Standard E-com)",
+      "minPriceBDT": 0,
+      "maxPriceBDT": 1499,
+      "cvrMultiplier": 1,
+      "cpcMultiplier": 1,
+      "recommendedGoal": "Purchase",
+      "averageTicketBDT": 1200,
+      "active": true,
+      "sortOrder": 5
+    },
+    {
+      "id": "pr-1500-2499",
+      "labelEn": "৳1,500 – ৳2,499 ($10.00 – $16.60)",
+      "labelBn": "৳১,৫০০ – ৳২,৪৯৯ (Premium Lifestyle)",
+      "minPriceBDT": 1500,
+      "maxPriceBDT": 2499,
+      "cvrMultiplier": 0.88,
+      "cpcMultiplier": 1.08,
+      "recommendedGoal": "Purchase",
+      "averageTicketBDT": 1950,
+      "active": true,
+      "sortOrder": 6
+    },
+    {
+      "id": "pr-2500-4999",
+      "labelEn": "৳2,500 – ৳4,999 ($16.60 – $33.30)",
+      "labelBn": "৳২,৫০০ – ৳৪,৯৯৯ (High Ticket / Gadgets)",
+      "minPriceBDT": 2500,
+      "maxPriceBDT": 4999,
+      "cvrMultiplier": 0.72,
+      "cpcMultiplier": 1.18,
+      "recommendedGoal": "Purchase",
+      "averageTicketBDT": 3600,
+      "active": true,
+      "sortOrder": 7
+    },
+    {
+      "id": "pr-5000-plus",
+      "labelEn": "৳5,000+ ($33.30+ High Ticket)",
+      "labelBn": "৳৫,০০০+ (Luxury / Direct Consultation)",
+      "minPriceBDT": 5000,
+      "maxPriceBDT": 999999,
+      "cvrMultiplier": 0.52,
+      "cpcMultiplier": 1.3,
+      "recommendedGoal": "Messages",
+      "averageTicketBDT": 7500,
+      "active": true,
+      "sortOrder": 8
     }
   ],
   "leads": [],
   "knowledgeBase": [
     {
       "id": "kb-1",
-      "category": "Services",
-      "question": "What services does ST Web & Ads Studio offer?",
-      "questionBn": "এসটি ওয়েব অ্যান্ড অ্যাডস স্টুডিও কী কী সেবা প্রদান করে?",
-      "answer": "We provide specialized TikTok Ads management, Meta Ads (Facebook & Instagram), Conversion Pixel & GTM Server-Side tracking, Creative Video Scripting, and E-commerce Scaling Consultation in Bangladesh.",
-      "answerBn": "আমরা বাংলাদেশে টিকটক অ্যাড ম্যানেজমেন্ট, মেটা বিজ্ঞাপন (ফেসবুক ও ইনস্টাগ্রাম), কনভার্সন পিক্সেল ও সার্ভার-সাইড ট্র্যাকিং, ভিডিও কনটেন্ট স্ট্র্যাটেজি এবং ই-কমার্স ব্র্যান্ড স্কেলিং সেবা দিয়ে থাকি।",
-      "tags": [
-        "services",
-        "tiktok",
-        "meta",
-        "agency"
-      ]
+      "title": "Who is Sonjoy Sarkar and what is ST Web & Ads Studio?",
+      "category": "Sonjoy",
+      "categoryEn": "Services & Bio",
+      "categoryBn": "সেবা ও পরিচিতি",
+      "question": "সঞ্জয় সরকার কে এবং ST Web & Ads Studio কী সেবা প্রদান করে?",
+      "questionBn": "সঞ্জয় সরকার কে এবং ST Web & Ads Studio কী সেবা প্রদান করে?",
+      "questionEn": "Who is Sonjoy Sarkar and what services does ST Web & Ads Studio provide?",
+      "answer": "সঞ্জয় সরকার একজন ডিজিটাল মার্কেটিং এক্সিকিউটিভ এবং পারফরম্যান্স অ্যাড স্পেশালিস্ট। ST Web & Ads Studio-এর মাধ্যমে তিনি বাংলাদেশের ই-কমার্স, ফ্যাশন, কসমেটিক্স, ফুড এবং লোকাল ব্যবসার জন্য ডেটা-চালিত টিকটক অ্যাডস (TikTok Ads) এবং ফেসবুক অ্যাডস (Facebook Ads) ক্যাম্পেইন প্ল্যানিং, পিক্সেল ট্র্যাকিং, বাজেট অপটিমাইজেশন ও আরওআই বৃদ্ধির কাজ করেন।",
+      "answerBn": "সঞ্জয় সরকার একজন ডিজিটাল মার্কেটিং এক্সিকিউটিভ এবং পারফরম্যান্স অ্যাড স্পেশালিস্ট। ST Web & Ads Studio-এর মাধ্যমে তিনি বাংলাদেশের ই-কমার্স, ফ্যাশন, কসমেটিক্স, ফুড এবং লোকাল ব্যবসার জন্য ডেটা-চালিত টিকটক অ্যাডস (TikTok Ads) এবং ফেসবুক অ্যাডস (Facebook Ads) ক্যাম্পেইন প্ল্যানিং, পিক্সেল ট্র্যাকিং, বাজেট অপটিমাইজেশন ও আরওআই বৃদ্ধির কাজ করেন।",
+      "answerEn": "Sonjoy Sarkar is a Digital Marketing Executive and Performance Ads Specialist. Through ST Web & Ads Studio, he provides data-driven TikTok Ads and Facebook Ads campaign planning, pixel tracking, budget optimization, and measurable ROI scaling for e-commerce, fashion, beauty/cosmetics, and local businesses in Bangladesh.",
+      "keywords": [
+        "sonjoy",
+        "sarkar",
+        "st web",
+        "ads studio",
+        "who is",
+        "সঞ্জয়",
+        "পরিচয়"
+      ],
+      "priority": 10,
+      "status": "published",
+      "createdAt": "2026-08-01",
+      "updatedAt": "2026-08-11"
     },
     {
       "id": "kb-2",
-      "category": "Budget & Pricing",
-      "question": "What is the minimum budget required to start TikTok Ads in Bangladesh?",
-      "questionBn": "বাংলাদেশে টিকটক অ্যাড শুরু করতে সর্বনিম্ন কত বাজেট প্রয়োজন?",
-      "answer": "You can start with a minimum testing budget of $10 to $15 per day (approx ৳1,200 - ৳1,800 BDT) for 5-7 days to train the TikTok Pixel and find winning creatives.",
-      "answerBn": "সাধারণত প্রতিদিন $১০ থেকে $১৫ (আনুমানিক ১২০০-১৮০০ টাকা) টেস্ট বাজেট দিয়ে ৫-৭ দিনের মধ্যে বিজয়ী অডিয়েন্স ও ক্রিয়েটিভ খুঁজে পাওয়া সম্ভব।",
-      "tags": [
-        "budget",
+      "title": "Why choose TikTok Ads for Bangladesh business?",
+      "category": "TikTok Ads",
+      "categoryEn": "TikTok Ads",
+      "categoryBn": "টিকটক অ্যাডস",
+      "question": "বাংলাদেশে ব্যবসার জন্য টিকটক অ্যাড কেন কার্যকর?",
+      "questionBn": "বাংলাদেশে ব্যবসার জন্য টিকটক অ্যাড কেন কার্যকর?",
+      "questionEn": "Why are TikTok Ads effective for businesses in Bangladesh?",
+      "answer": "বাংলাদেশে টিকটকে ১৮-৩৪ বছর বয়সী অ্যাক্টিভ ব্যবহারকারীর সংখ্যা অত্যন্ত দ্রুত বৃদ্ধি পাচ্ছে। এখানে ফেসবুকের তুলনায় CPM (ইমপ্রেশন কস্ট) সাধারণত কম এবং ব্যবহারকারীরা শর্ট ভিডিও কন্টেন্টে বেশি সময় দেন (গড়ে ৪৩ মিনিট/দিন)। আকর্ষণীয় UGC বা প্রোডাক্ট ভিডিও থাকলে কম বাজেটে ব্যাপক ব্র্যান্ড পরিচিতি ও সেলস বাড়ানো সম্ভব।",
+      "answerBn": "বাংলাদেশে টিকটকে ১৮-৩৪ বছর বয়সী অ্যাক্টিভ ব্যবহারকারীর সংখ্যা অত্যন্ত দ্রুত বৃদ্ধি পাচ্ছে। এখানে ফেসবুকের তুলনায় CPM (ইমপ্রেশন কস্ট) সাধারণত কম এবং ব্যবহারকারীরা শর্ট ভিডিও কন্টেন্টে বেশি সময় দেন (গড়ে ৪৩ মিনিট/দিন)। আকর্ষণীয় UGC বা প্রোডাক্ট ভিডিও থাকলে কম বাজেটে ব্যাপক ব্র্যান্ড পরিচিতি ও সেলস বাড়ানো সম্ভব।",
+      "answerEn": "TikTok's active user base aged 18–35 in Bangladesh is expanding rapidly with significantly lower CPM (cost per 1,000 impressions) compared to Meta. Bangladeshi users spend an average of 43 minutes daily engaging with video content. Authentic UGC and smartphone product demos generate high conversion velocity at an optimized ad spend.",
+      "keywords": [
+        "tiktok ads bangladesh",
+        "why tiktok",
+        "টিকটক অ্যাড কেন",
+        "সুবিধা"
+      ],
+      "priority": 9,
+      "status": "published",
+      "createdAt": "2026-08-01",
+      "updatedAt": "2026-08-11"
+    },
+    {
+      "id": "kb-3",
+      "title": "What services are included in TikTok & Facebook Ads Management?",
+      "category": "Services",
+      "categoryEn": "Pricing & Process",
+      "categoryBn": "খরচ ও প্রক্রিয়া",
+      "question": "বিজ্ঞাপন ম্যানেজমেন্ট সেবায় কী কী অন্তর্ভুক্ত রয়েছে?",
+      "questionBn": "বিজ্ঞাপন ম্যানেজমেন্ট সেবায় কী কী অন্তর্ভুক্ত রয়েছে?",
+      "questionEn": "What is included in the TikTok & Facebook Ads Management service?",
+      "answer": "সেবাসমূহের মধ্যে রয়েছে: ১) বিজনেস অ্যাড অ্যাকাউন্ট ও পিক্সেল/ইভেন্ট ট্র্যাকিং সেটআপ, ২) অডিয়েন্স রিসার্চ ও কমপিটিটর অ্যানালাইসিস, ৩) ক্রিয়েটিভ ও ভিডিও স্ক্রিপ্ট গাইডলাইন, ৪) ক্যাম্পেইন স্ট্রাকচার (CBO/ABO, স্কেলিং), ৫) বাজেট অপটিমাইজেশন, ৬) রি-টার্গেটিং ফানেল সেটআপ, এবং ৭) সাপ্তাহিক পারফরম্যান্স অ্যানালাইসিস ও রিপোর্টিং।",
+      "answerBn": "সেবাসমূহের মধ্যে রয়েছে: ১) বিজনেস অ্যাড অ্যাকাউন্ট ও পিক্সেল/ইভেন্ট ট্র্যাকিং সেটআপ, ২) অডিয়েন্স রিসার্চ ও কমপিটিটর অ্যানালাইসিস, ৩) ক্রিয়েটিভ ও ভিডিও স্ক্রিপ্ট গাইডলাইন, ৪) ক্যাম্পেইন স্ট্রাকচার (CBO/ABO, স্কেলিং), ৫) বাজেট অপটিমাইজেশন, ৬) রি-টার্গেটিং ফানেল সেটআপ, এবং ৭) সাপ্তাহিক পারফরম্যান্স অ্যানালাইসিস ও রিপোর্টিং।",
+      "answerEn": "Our full-funnel management includes: 1) Business Manager and TikTok/Meta Pixel & Events API setup, 2) Competitor research and target audience persona mapping, 3) Creative direction and UGC smartphone video hooks, 4) Campaign structure (CBO/ABO, budget scaling), 5) Retargeting funnels (ViewContent, AddToCart, InitiateCheckout), and 6) Weekly analytics and ROI reporting.",
+      "keywords": [
+        "services",
+        "what is included",
+        "সেবা",
+        "কী কী কাজ"
+      ],
+      "priority": 8,
+      "status": "published",
+      "createdAt": "2026-08-01",
+      "updatedAt": "2026-08-11"
+    },
+    {
+      "id": "kb-4",
+      "title": "Do you guarantee sales or ROAS?",
+      "category": "Policies",
+      "categoryEn": "Pricing & Process",
+      "categoryBn": "খরচ ও প্রক্রিয়া",
+      "question": "আপনারা কি সেলস বা ROAS-এর গ্যারান্টি দেন?",
+      "questionBn": "আপনারা কি সেলস বা ROAS-এর গ্যারান্টি দেন?",
+      "questionEn": "Do you guarantee sales numbers or specific ROAS returns?",
+      "answer": "না, আমরা কোনো মিথ্যা বা অবাস্তব সেলসের গ্যারান্টি দিই না। বিজ্ঞাপনের ফলাফল নির্ভর করে প্রোডাক্টের অফার, মূল্য, ল্যান্ডিং পেজ স্পিড, ক্রিয়েটিভের মান, সিজন এবং প্রতিযোগিতার ওপর। আমাদের দায়িত্ব হলো ট্র্যাকিং নিশ্চিত করা, সঠিক অডিয়েন্স টার্গেট করা এবং ডেটার ওপর ভিত্তি করে নিয়মিত টেস্ট ও অপটিমাইজ করে আরওআই সর্বোচ্চ করার জন্য কাজ করা।",
+      "answerBn": "না, আমরা কোনো মিথ্যা বা অবাস্তব সেলসের গ্যারান্টি দিই না। বিজ্ঞাপনের ফলাফল নির্ভর করে প্রোডাক্টের অফার, মূল্য, ল্যান্ডিং পেজ স্পিড, ক্রিয়েটিভের মান, সিজন এবং প্রতিযোগিতার ওপর। আমাদের দায়িত্ব হলো ট্র্যাকিং নিশ্চিত করা, সঠিক অডিয়েন্স টার্গেট করা এবং ডেটার ওপর ভিত্তি করে নিয়মিত টেস্ট ও অপটিমাইজ করে আরওআই সর্বোচ্চ করার জন্য কাজ করা।",
+      "answerEn": "No, we do not make false or unscientific sales guarantees. Actual ad results depend on product demand, pricing, offer appeal, website speed, creative quality, seasonality, and competition. Our role is to ensure accurate tracking, target high-intent buyers, test multiple creative angles, and systematically optimize campaigns to maximize your return on ad spend.",
+      "keywords": [
+        "guarantee",
+        "roas guarantee",
+        "গ্যারান্টি",
+        "সেলস গ্যারান্টি"
+      ],
+      "priority": 9,
+      "status": "published",
+      "createdAt": "2026-08-01",
+      "updatedAt": "2026-08-11"
+    },
+    {
+      "id": "kb-5",
+      "title": "How to contact Sonjoy or start a campaign?",
+      "category": "Contact",
+      "categoryEn": "Pricing & Process",
+      "categoryBn": "খরচ ও প্রক্রিয়া",
+      "question": "কীভাবে যোগাযোগ করবেন বা কাজ শুরু করবেন?",
+      "questionBn": "কীভাবে যোগাযোগ করবেন বা কাজ শুরু করবেন?",
+      "questionEn": "How do I contact Sonjoy or get started with a campaign audit?",
+      "answer": "আপনি ওয়েবসাইটের 'Lead Form পূরণ করুন' বাটনে ক্লিক করে আপনার ব্যবসার প্রাথমিক তথ্য ও বাজেট জমা দিতে পারেন। অথবা সরাসরি WhatsApp আইকনে ক্লিক করে মেসেজ পাঠাতে পারেন। আপনার তথ্যের ভিত্তিতে আমরা একটি ফ্রি স্ট্র্যাটেজি অডিট প্রস্তাব করব।",
+      "answerBn": "আপনি ওয়েবসাইটের 'Lead Form পূরণ করুন' বাটনে ক্লিক করে আপনার ব্যবসার প্রাথমিক তথ্য ও বাজেট জমা দিতে পারেন। অথবা সরাসরি WhatsApp আইকনে ক্লিক করে মেসেজ পাঠাতে পারেন। আপনার তথ্যের ভিত্তিতে আমরা একটি ফ্রি স্ট্র্যাটেজি অডিট প্রস্তাব করব।",
+      "answerEn": "You can click 'Book Free Strategy Audit' to submit your business details and budget, or message Sonjoy directly via WhatsApp. We will evaluate your current funnels and provide a tailored strategy audit within 24 hours.",
+      "keywords": [
+        "contact",
+        "start",
+        "whatsapp",
+        "যোগাযোগ",
+        "শুরু করবেন"
+      ],
+      "priority": 8,
+      "status": "published",
+      "createdAt": "2026-08-01",
+      "updatedAt": "2026-08-11"
+    },
+    {
+      "id": "kb-6",
+      "title": "What is the Ads Prediction Calculator?",
+      "category": "Calculator",
+      "categoryEn": "Tracking & Pixel",
+      "categoryBn": "ট্র্যাকিং ও পিক্সেল",
+      "question": "অ্যাড প্রেডিকশন ক্যালকুলেটর কী এবং এটি কীভাবে কাজ করে?",
+      "questionBn": "অ্যাড প্রেডিকশন ক্যালকুলেটর কী এবং এটি কীভাবে কাজ করে?",
+      "questionEn": "What is the Ads Prediction Calculator and how does it work?",
+      "answer": "Ads Prediction Calculator হলো একটি টুল যা আপনার প্রোডাক্টের ক্যাটাগরি, মূল্য, ক্রিয়েটিভ টাইপ, বাজেট ও লোকেশনের ওপর ভিত্তি করে টিকটক ও ফেসবুকে সম্ভাব্য রিচ, ইমপ্রেশন, ক্লিক, মেসেজ ও সেলস রেঞ্জ প্রজেকশন প্রদান করে। এটি ঐতিহাসিক বেঞ্চমার্ক ডেটা ভিত্তিক একটি আনুপাতিক ধারণা, কোনো গ্যারান্টিড ফলাফল নয়।",
+      "answerBn": "অ্যাড প্রেডিকশন ক্যালকুলেটর কী এবং এটি কীভাবে কাজ করে?",
+      "answerEn": "The Ads Prediction Calculator is a planning engine that projects estimated impressions, reach, clicks, conversions, and ROAS ranges based on your product category, average ticket price, creative format, budget, and target location in Bangladesh. It provides benchmark-calibrated projections rather than fixed guarantees.",
+      "keywords": [
+        "calculator",
+        "prediction",
+        "ক্যালকুলেটর",
+        "প্রেডিকশন"
+      ],
+      "priority": 7,
+      "status": "published",
+      "createdAt": "2026-08-01",
+      "updatedAt": "2026-08-11"
+    },
+    {
+      "id": "kb-7",
+      "title": "Why is Pixel and Conversions API (CAPI) tracking essential?",
+      "category": "TikTok Ads",
+      "categoryEn": "Tracking & Pixel",
+      "categoryBn": "ট্র্যাকিং ও পিক্সেল",
+      "question": "পিক্সেল ও কনভার্সন এপিআই (CAPI) ট্র্যাকিং কেন ক্যাম্পেইনের জন্য অপরিহার্য?",
+      "questionBn": "পিক্সেল ও কনভার্সন এপিআই (CAPI) ট্র্যাকিং কেন ক্যাম্পেইনের জন্য অপরিহার্য?",
+      "questionEn": "Why is Pixel and Conversions API (CAPI) tracking essential for ad campaigns?",
+      "answer": "সঠিক পিক্সেল ও সার্ভার-সাইড ইভেন্ট ট্র্যাকিং ছাড়া অ্যাড অ্যালগরিদম আসল ক্রেতাদের চিনতে পারে না। ViewContent, AddToCart, InitiateCheckout এবং Purchase ইভেন্ট ট্র্যাকিংয়ের মাধ্যমে অপ্রয়োজনীয় বাজেট খরচ রোধ করা ও রিটার্গেটিংয়ের মাধ্যমে আরওআই বাড়ানো সম্ভব।",
+      "answerBn": "সঠিক পিক্সেল ও সার্ভার-সাইড ইভেন্ট ট্র্যাকিং ছাড়া অ্যাড অ্যালগরিদম আসল ক্রেতাদের চিনতে পারে না। ViewContent, AddToCart, InitiateCheckout এবং Purchase ইভেন্ট ট্র্যাকিংয়ের মাধ্যমে অপ্রয়োজনীয় বাজেট খরচ রোধ করা ও রিটার্গেটিংয়ের মাধ্যমে আরওআই বাড়ানো সম্ভব।",
+      "answerEn": "Without browser pixel and server-side Conversions API (CAPI) tracking, ad algorithms cannot learn who your highest-converting buyers are. Tracking full-funnel events (ViewContent, AddToCart, InitiateCheckout, Purchase) prevents ad spend waste and enables high-ROAS retargeting.",
+      "keywords": [
+        "pixel",
+        "capi",
+        "tracking",
+        "পিক্সেল",
+        "ট্র্যাকিং"
+      ],
+      "priority": 8,
+      "status": "published",
+      "createdAt": "2026-08-01",
+      "updatedAt": "2026-08-11"
+    },
+    {
+      "id": "kb-8",
+      "title": "TikTok Ad Account Setup Rules and Requirements in Bangladesh",
+      "category": "TikTok Ads",
+      "categoryEn": "TikTok Ads",
+      "categoryBn": "টিকটক অ্যাডস",
+      "question": "বাংলাদেশে টিকটক অ্যাড অ্যাকাউন্ট সেটআপ করার নিয়ম ও কী কী প্রয়োজন?",
+      "questionBn": "বাংলাদেশে টিকটক অ্যাড অ্যাকাউন্ট সেটআপ করার নিয়ম ও কী কী প্রয়োজন?",
+      "questionEn": "What are the rules and requirements to set up a TikTok Ads account in Bangladesh?",
+      "answer": "বাংলাদেশে টিকটক অ্যাডস চালানোর জন্য প্রধানত প্রয়োজন: ১) একটি সচল টিকটক বিজনেস সেন্টার ও অ্যাড একাউন্ট (অথবা এজেন্সি অ্যাড অ্যাকাউন্ট যেখানে কোনো স্পেন্ডিং লিমিট থাকে না), ২) আন্তর্জাতিক পেমেন্ট সাপোর্টযুক্ত ডুয়াল কারেন্সি ক্রেডিট/ডেবিট কার্ড অথবা এজেন্সি ব্যালেন্স টপ-আপ, ৩) একটি ভেরিফায়েড ফেসবুক পেজ/টিকটক প্রোফাইল, এবং ৪) সঠিক পলিসি মেনে তৈরি ল্যান্ডিং পেজ বা ওয়েবসাইট (যেখানে রিটার্ন পলিসি, ডেলিভারি ও কন্টাক্ট ইনফো স্পষ্টভাবে উল্লেখ থাকতে হবে)। কোনো প্রকার নকল বা কপিরাইটযুক্ত প্রোডাক্ট টিকটকে বুস্ট করা নিষিদ্ধ।",
+      "answerBn": "বাংলাদেশে টিকটক অ্যাডস চালানোর জন্য প্রধানত প্রয়োজন: ১) একটি সচল টিকটক বিজনেস সেন্টার ও অ্যাড একাউন্ট (অথবা এজেন্সি অ্যাড অ্যাকাউন্ট যেখানে কোনো স্পেন্ডিং লিমিট থাকে না), ২) আন্তর্জাতিক পেমেন্ট সাপোর্টযুক্ত ডুয়াল কারেন্সি ক্রেডিট/ডেবিট কার্ড অথবা এজেন্সি ব্যালেন্স টপ-আপ, ৩) একটি ভেরিফায়েড ফেসবুক পেজ/টিকটক প্রোফাইল, এবং ৪) সঠিক পলিসি মেনে তৈরি ল্যান্ডিং পেজ বা ওয়েবসাইট (যেখানে রিটার্ন পলিসি, ডেলিভারি ও কন্টাক্ট ইনফো স্পষ্টভাবে উল্লেখ থাকতে হবে)। কোনো প্রকার নকল বা কপিরাইটযুক্ত প্রোডাক্ট টিকটকে বুস্ট করা নিষিদ্ধ।",
+      "answerEn": "To run TikTok Ads in Bangladesh, you need: 1) A TikTok Business Center and Ads Manager account (or an Agency Account with no spending caps and zero-tax billing support), 2) An international dual-currency card (USD enabled) or agency balance top-up, 3) An active TikTok profile or landing page, and 4) A policy-compliant website clearly stating return/delivery policies and contact details. Replicas and copyright-infringing items are strictly banned.",
+      "keywords": [
+        "tiktok account setup",
+        "requirements",
+        "নিয়ম",
+        "কী কী লাগে",
+        "অ্যাকাউন্ট সেটআপ",
+        "ডকুমেন্টস"
+      ],
+      "priority": 9,
+      "status": "published",
+      "createdAt": "2026-08-11",
+      "updatedAt": "2026-08-11"
+    },
+    {
+      "id": "kb-9",
+      "title": "Pixel Fixing & Conversions API (CAPI) Setup Process",
+      "category": "Process",
+      "categoryEn": "Tracking & Pixel",
+      "categoryBn": "ট্র্যাকিং ও পিক্সেল",
+      "question": "পিক্সেল ফিক্সিং ও সার্ভার সাইড ট্র্যাকিং (CAPI) সেটআপের প্রসেস কী?",
+      "questionBn": "পিক্সেল ফিক্সিং ও সার্ভার সাইড ট্র্যাকিং (CAPI) সেটআপের প্রসেস কী?",
+      "questionEn": "What is the process for fixing Pixel issues and setting up Conversions API (CAPI)?",
+      "answer": "পিক্সেল ফিক্সিং প্রক্রিয়াটি ৪টি ধাপে সম্পন্ন হয়: ১) Google Tag Manager (GTM)-এর মাধ্যমে ব্রাউজার পিক্সেল বেস কোড ইন্টিগ্রেশন, ২) Shopify / WooCommerce / Custom সাইটের ডেটালেয়ার (DataLayer) কনফিগারেশন, ৩) সার্ভার-সাইড Conversions API (CAPI) যুক্ত করে ইভেন্ট ডিডুপ্লিকেশন (PageView, ViewContent, AddToCart, InitiateCheckout, Purchase) সম্পন্ন করা, এবং ৪) Test Events টুল দিয়ে ১০০% সঠিক ইভেন্ট ম্যাচ কোয়ালিটি নিশ্চিত করা। এর ফলে iOS আপডেটের পরও ট্র্যাকিং ড্রপ রোধ হয় এবং আরওআই ২০-৩৫% বৃদ্ধি পায়।",
+      "answerBn": "পিক্সেল ফিক্সিং প্রক্রিয়াটি ৪টি ধাপে সম্পন্ন হয়: ১) Google Tag Manager (GTM)-এর মাধ্যমে ব্রাউজার পিক্সেল বেস কোড ইন্টিগ্রেশন, ২) Shopify / WooCommerce / Custom সাইটের ডেটালেয়ার (DataLayer) কনফিগারেশন, ৩) সার্ভার-সাইড Conversions API (CAPI) যুক্ত করে ইভেন্ট ডিডুপ্লিকেশন (PageView, ViewContent, AddToCart, InitiateCheckout, Purchase) সম্পন্ন করা, এবং ৪) Test Events টুল দিয়ে ১০০% সঠিক ইভেন্ট ম্যাচ কোয়ালিটি নিশ্চিত করা। এর ফলে iOS আপডেটের পরও ট্র্যাকিং ড্রপ রোধ হয় এবং আরওআই ২০-৩৫% বৃদ্ধি পায়।",
+      "answerEn": "Pixel fixing follows a 4-step framework: 1) Base Pixel integration via Google Tag Manager (GTM), 2) Custom DataLayer configuration on Shopify/WooCommerce, 3) Server-Side Conversions API (CAPI) with event deduplication for PageView, ViewContent, AddToCart, InitiateCheckout, and Purchase, and 4) Live validation with Test Event tools ensuring >8.5 Event Quality Score.",
+      "keywords": [
+        "pixel fixing",
+        "capi setup",
+        "পিক্সেল ফিক্স",
+        "কনভার্সন এপিআই",
+        "shopify pixel",
+        "woocommerce pixel"
+      ],
+      "priority": 9,
+      "status": "published",
+      "createdAt": "2026-08-11",
+      "updatedAt": "2026-08-11"
+    },
+    {
+      "id": "kb-10",
+      "title": "Service Pricing and Management Fee Structure",
+      "category": "Services",
+      "categoryEn": "Pricing & Process",
+      "categoryBn": "খরচ ও প্রক্রিয়া",
+      "question": "সার্ভিস চার্জ ও বিজ্ঞাপন ম্যানেজমেন্ট ফি কেমন এবং ন্যূনতম বাজেট কত লাগে?",
+      "questionBn": "সার্ভিস চার্জ ও বিজ্ঞাপন ম্যানেজমেন্ট ফি কেমন এবং ন্যূনতম বাজেট কত লাগে?",
+      "questionEn": "What are your service management charges and recommended minimum ad budgets?",
+      "answer": "আমাদের ক্যাম্পেইন ম্যানেজমেন্ট প্যাকেজ শুরু হয় মাসিক ৳১৫,০০০ - ৳২৫,০০০ থেকে (বিজ্ঞাপনের বাজেট ও কাজের পরিধির ওপর নির্ভর করে)। আর ওয়ান-টাইম ফুল পিক্সেল ও CAPI ফিক্সিং সেটআপ ফি ৳৫,০০০ - ৳৮,০০০। টিকটকে টেস্ট ক্যাম্পেইন শুরু করতে মাসে ন্যূনতম $১০০ - $৩০০ (প্রায় ৳১৫,০০০ - ৳৪৫,০০০) অ্যাড স্পেন্ড রাখার পরামর্শ দেওয়া হয়, যাতে অ্যালগরিদম পর্যাপ্ত কনভার্সন ডেটা নিয়ে দ্রুত অপটিমাইজ হতে পারে। কাস্টম কোটের জন্য সরাসরি ফ্রি অডিট ফর্ম পূরণ করুন।",
+      "answerBn": "আমাদের ক্যাম্পেইন ম্যানেজমেন্ট প্যাকেজ শুরু হয় মাসিক ৳১৫,০০০ - ৳২৫,০০০ থেকে (বিজ্ঞাপনের বাজেট ও কাজের পরিধির ওপর নির্ভর করে)। আর ওয়ান-টাইম ফুল পিক্সেল ও CAPI ফিক্সিং সেটআপ ফি ৳৫,০০০ - ৳৮,০০০। টিকটকে টেস্ট ক্যাম্পেইন শুরু করতে মাসে ন্যূনতম $১০০ - $৩০০ (প্রায় ৳১৫,০০০ - ৳৪৫,০০০) অ্যাড স্পেন্ড রাখার পরামর্শ দেওয়া হয়, যাতে অ্যালগরিদম পর্যাপ্ত কনভার্সন ডেটা নিয়ে দ্রুত অপটিমাইজ হতে পারে। কাস্টম কোটের জন্য সরাসরি ফ্রি অডিট ফর্ম পূরণ করুন।",
+      "answerEn": "Monthly ad management packages typically range from ৳15,000 to ৳25,000/month depending on ad spend scale and catalog size. One-time GTM/CAPI Pixel fixing is ৳5,000 - ৳8,000. For TikTok testing, we recommend an ad spend of at least $100–$300/month (৳15,000–৳45,000) so the algorithmic learning phase completes with optimal conversion velocity.",
+      "keywords": [
         "pricing",
-        "start"
-      ]
+        "cost",
+        "management fee",
+        "খরচ",
+        "প্রাইসিং",
+        "কত টাকা লাগবে",
+        "মিনিমাম বাজেট"
+      ],
+      "priority": 10,
+      "status": "published",
+      "createdAt": "2026-08-11",
+      "updatedAt": "2026-08-11"
+    },
+    {
+      "id": "kb-11",
+      "title": "Category Wise Budget Recommendations (Fashion, Cosmetics, Gadgets)",
+      "category": "Process",
+      "categoryEn": "Pricing & Process",
+      "categoryBn": "খরচ ও প্রক্রিয়া",
+      "question": "ফ্যাশন, কসমেটিক্স বা গ্যাজেটের জন্য টিকটকে কেমন বাজেট রাখা উচিত?",
+      "questionBn": "ফ্যাশন, কসমেটিক্স বা গ্যাজেটের জন্য টিকটকে কেমন বাজেট রাখা উচিত?",
+      "questionEn": "What is the recommended budget for Fashion, Cosmetics, and Tech/Gadgets in Bangladesh?",
+      "answer": "১) ফ্যাশন ও পোশাক (Fashion & Apparel): মাসিক $১৫০ - $৫০০ (৳২২,৫০০ - ৳৭৫,০০০)। রিয়েল মডেল বা ট্রাই-অন UGC ভিডিও দিলে ৩.৫x+ পর্যন্ত ROAS পাওয়া যায়।\n২) বিউটি ও স্কিনকেয়ার (Cosmetics & Beauty): মাসিক $২০০ - $৬০০ (৳৩০,০০০ - ৳৯০,০০০)। ডেমো ও ফলাফলভিত্তিক ভিডিও বেশি কনভার্ট করে।\n৩) গ্যাজেট ও ইলেকট্রনিক্স (Gadgets & Tech): মাসিক $১০০ - $৪০০ (৳১৫,০০০ - ৳৬০,০০০)। ফিচার ডেমোনস্ট্রেশন ও আনবক্সিং ভিডিওতে মেসেজ/অর্ডার দ্রুত আসে।\nআমাদের অ্যাড ক্যালকুলেটরে গিয়ে আপনার এক্সাক্ট প্রোডাক্ট প্রাইস দিয়ে তাৎক্ষণিক প্রজেকশন দেখতে পারেন।",
+      "answerBn": "১) ফ্যাশন ও পোশাক (Fashion & Apparel): মাসিক $১৫০ - $৫০০ (৳২২,৫০০ - ৳৭৫,০০০)। রিয়েল মডেল বা ট্রাই-অন UGC ভিডিও দিলে ৩.৫x+ পর্যন্ত ROAS পাওয়া যায়।\n২) বিউটি ও স্কিনকেয়ার (Cosmetics & Beauty): মাসিক $২০০ - $৬০০ (৳৩০,০০০ - ৳৯০,০০০)। ডেমো ও ফলাফলভিত্তিক ভিডিও বেশি কনভার্ট করে।\n৩) গ্যাজেট ও ইলেকট্রনিক্স (Gadgets & Tech): মাসিক $১০০ - $৪০০ (৳১৫,০০০ - ৳৬০,০০০)। ফিচার ডেমোনস্ট্রেশন ও আনবক্সিং ভিডিওতে মেসেজ/অর্ডার দ্রুত আসে।\nআমাদের অ্যাড ক্যালকুলেটরে গিয়ে আপনার এক্সাক্ট প্রোডাক্ট প্রাইস দিয়ে তাৎক্ষণিক প্রজেকশন দেখতে পারেন।",
+      "answerEn": "Recommended monthly ad spend:\n1) Fashion & Apparel: $150–$500 (৳22,500–৳75,000), yielding 3.2x–4.5x ROAS with try-on UGC hooks.\n2) Beauty & Cosmetics: $200–$600 (৳30,000–৳90,000), converting fast with before/after and texture demo videos.\n3) Gadgets & Electronics: $100–$400 (৳15,000–৳60,000) using unboxing and problem-solver feature walkthroughs.",
+      "keywords": [
+        "category budget",
+        "fashion budget",
+        "cosmetics budget",
+        "ফ্যাশন বাজেট",
+        "কসমেটিক্স বাজেট",
+        "গ্যাজেট"
+      ],
+      "priority": 9,
+      "status": "published",
+      "createdAt": "2026-08-11",
+      "updatedAt": "2026-08-11"
+    },
+    {
+      "id": "kb-12",
+      "title": "High Converting Creative Hooks and UGC Video Structure",
+      "category": "TikTok Ads",
+      "categoryEn": "TikTok Ads",
+      "categoryBn": "টিকটক অ্যাডস",
+      "question": "টিকটক বিজ্ঞাপনের জন্য কার্যকর UGC ভিডিও কীভাবে তৈরি করবেন?",
+      "questionBn": "টিকটক বিজ্ঞাপনের জন্য কার্যকর UGC ভিডিও কীভাবে তৈরি করবেন?",
+      "questionEn": "How to structure high-converting UGC and TikTok short video creatives?",
+      "answer": "একটি সফল টিকটক ভিডিও বিজ্ঞাপনের প্রধান কাঠামো:\n১) প্রথম ৩ সেকেন্ডে আকর্ষণীয় হুক (Visual/Audio Hook):\nযেমন: 'আপনি কি এখনও ভুল নিয়মে স্কিনকেয়ার করছেন?' অথবা 'মাত্র ৭ দিনে বাজেটেই এই ড্রেসটি পাচ্ছেন!'\n২) ৩-১২ সেকেন্ড: প্রোডাক্টের রিয়েল ডেমো বা সমস্যার সমাধান (Problem & Solution).\n৩) ১২-২০ সেকেন্ড: সোশ্যাল প্রুফ বা কাস্টমার রিভিউ ও ডিসকাউন্ট অফার।\n৪) ২০-২৫ সেকেন্ড: স্পষ্ট কল-টু-অ্যাকশন (CTA): 'এখনই ওয়েবসাইটে গিয়ে অর্ডার করুন' অথবা 'WhatsApp-এ ইনবক্স করুন'।\nভিডিও সবসময় ভার্টিক্যাল ৯:১৬ অনুপাতে এবং ক্লিয়ার অডিওতে শুট করতে হবে।",
+      "answerBn": "একটি সফল টিকটক ভিডিও বিজ্ঞাপনের প্রধান কাঠামো:\n১) প্রথম ৩ সেকেন্ডে আকর্ষণীয় হুক (Visual/Audio Hook):\nযেমন: 'আপনি কি এখনও ভুল নিয়মে স্কিনকেয়ার করছেন?' অথবা 'মাত্র ৭ দিনে বাজেটেই এই ড্রেসটি পাচ্ছেন!'\n২) ৩-১২ সেকেন্ড: প্রোডাক্টের রিয়েল ডেমো বা সমস্যার সমাধান (Problem & Solution).\n৩) ১২-২০ সেকেন্ড: সোশ্যাল প্রুফ বা কাস্টমার রিভিউ ও ডিসকাউন্ট অফার।\n৪) ২০-২৫ সেকেন্ড: স্পষ্ট কল-টু-অ্যাকশন (CTA): 'এখনই ওয়েবসাইটে গিয়ে অর্ডার করুন' অথবা 'WhatsApp-এ ইনবক্স করুন'।\nভিডিও সবসময় ভার্টিক্যাল ৯:১৬ অনুপাতে এবং ক্লিয়ার অডিওতে শুট করতে হবে।",
+      "answerEn": "Winning TikTok ad creative structure: 1) First 0-3s Hook (unexpected visual/problem callout), 2) 3-12s Demo (smartphone unboxing or authentic use), 3) 12-20s Social Proof & Urgency Offer, 4) 20-25s Direct CTA (Order on website / WhatsApp message). Always shoot 9:16 vertical with crisp audio.",
+      "keywords": [
+        "ugc",
+        "creative hook",
+        "video structure",
+        "ভিডিও বানাবো কীভাবে",
+        "হুক",
+        "ক্রিয়েটিভ"
+      ],
+      "priority": 8,
+      "status": "published",
+      "createdAt": "2026-08-11",
+      "updatedAt": "2026-08-11"
     }
   ],
   "knowledgeGaps": [],
   "aiConversations": [],
   "aiSettings": {
-    "systemPrompt": "You are the intelligent assistant for ST Web & Ads Studio, Bangladesh premier TikTok & Meta Ads agency.",
-    "welcomeMessageBn": "স্বাগতম! আমি এসটি ওয়েব অ্যান্ড অ্যাডস স্টুডিও-এর এআই অ্যাসিস্ট্যান্ট। আপনার বিজনেস গ্রোথ ও অ্যাড বাজেট সম্পর্কে যেকোনো প্রশ্ন করতে পারেন।",
-    "welcomeMessageEn": "Welcome! I am the AI assistant of ST Web & Ads Studio. Ask me anything about scaling your ads and budget in Bangladesh.",
-    "leadCaptureTriggerThreshold": 2,
-    "temperature": 0.7
+    "enabled": true,
+    "provider": "Gemini",
+    "primaryModel": "gemini-3.6-flash",
+    "backupModel": "gemini-3.6-flash",
+    "temperature": 0.2,
+    "maxOutputTokens": 800,
+    "systemInstruction": "You are the official AI assistant for Sonjoy Sarkar and ST Web & Ads Studio.\nYour sole purpose is to answer questions strictly grounded in the published Knowledge Base and approved Case Studies.\nDo NOT invent claims, client names, ROAS guarantees, or pricing.\nIf information is not present in the Knowledge Base, respond politely: \"এই বিষয়ে আমার কাছে পর্যাপ্ত তথ্য নেই। আপনার প্রশ্নটি আমাদের টিমের কাছে পাঠানো হয়েছে।\"\nAlways encourage the user with helpful next steps: Lead Form, Ads Prediction Calculator, or WhatsApp.",
+    "knowledgeRetrievalStrictness": "STRICT_KB_ONLY",
+    "ctaStrategy": "CONTEXTUAL"
   },
-  "analyticsEvents": [
-    {
-      "id": "ev-66ciimh",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T09:28:16.291Z"
-    },
-    {
-      "id": "ev-d6hejjn",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T09:28:16.268Z"
-    },
-    {
-      "id": "ev-0sjwfvt",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T09:15:59.678Z"
-    },
-    {
-      "id": "ev-rabf2y7",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T09:15:59.661Z"
-    },
-    {
-      "id": "ev-d9p70pw",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T09:15:58.870Z"
-    },
-    {
-      "id": "ev-5cms9sa",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T09:15:58.856Z"
-    },
-    {
-      "id": "ev-01y98ds",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T09:14:51.520Z"
-    },
-    {
-      "id": "ev-xa3fih3",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T09:14:51.507Z"
-    },
-    {
-      "id": "ev-0x59v7j",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T09:14:44.036Z"
-    },
-    {
-      "id": "ev-y7tl9hu",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T09:14:44.022Z"
-    },
-    {
-      "id": "ev-mzw74rm",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T09:14:18.840Z"
-    },
-    {
-      "id": "ev-xse0uv7",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T09:14:18.813Z"
-    },
-    {
-      "id": "ev-jk9ihd3",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "LEAD_FORM_OPENED",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "context": "direct"
-      },
-      "timestamp": "2026-08-12T09:12:24.633Z"
-    },
-    {
-      "id": "ev-xwh65h3",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T09:08:31.472Z"
-    },
-    {
-      "id": "ev-htx8nvx",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T09:08:31.457Z"
-    },
-    {
-      "id": "ev-odmn2s2",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:59:04.920Z"
-    },
-    {
-      "id": "ev-1a48cje",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:59:04.902Z"
-    },
-    {
-      "id": "ev-429wmrc",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:56:07.364Z"
-    },
-    {
-      "id": "ev-lnvs5ky",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:56:07.344Z"
-    },
-    {
-      "id": "ev-zw72d38",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:55:56.039Z"
-    },
-    {
-      "id": "ev-13qk863",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:55:56.021Z"
-    },
-    {
-      "id": "ev-ls6mp4q",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:55:53.412Z"
-    },
-    {
-      "id": "ev-orl2p29",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:55:53.390Z"
-    },
-    {
-      "id": "ev-jfznwim",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:55:41.937Z"
-    },
-    {
-      "id": "ev-sbyexwg",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:55:41.932Z"
-    },
-    {
-      "id": "ev-9rjw5wz",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:55:30.770Z"
-    },
-    {
-      "id": "ev-fv38or3",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:55:30.761Z"
-    },
-    {
-      "id": "ev-qonomfr",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:55:18.886Z"
-    },
-    {
-      "id": "ev-znuu43a",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:55:18.881Z"
-    },
-    {
-      "id": "ev-laqhlas",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:55:07.532Z"
-    },
-    {
-      "id": "ev-5y9zn3k",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:55:07.527Z"
-    },
-    {
-      "id": "ev-thzgd33",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:56.757Z"
-    },
-    {
-      "id": "ev-anjqu4i",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:56.731Z"
-    },
-    {
-      "id": "ev-4t0wmxo",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:44.495Z"
-    },
-    {
-      "id": "ev-vplp32t",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:44.469Z"
-    },
-    {
-      "id": "ev-dxk6nz0",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:41.131Z"
-    },
-    {
-      "id": "ev-tp88on8",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:41.120Z"
-    },
-    {
-      "id": "ev-ixbugap",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:37.736Z"
-    },
-    {
-      "id": "ev-01y75lf",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:37.726Z"
-    },
-    {
-      "id": "ev-eczyq3z",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:35.373Z"
-    },
-    {
-      "id": "ev-ah7cqxh",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:35.359Z"
-    },
-    {
-      "id": "ev-fs7bxq1",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:32.168Z"
-    },
-    {
-      "id": "ev-11g10fz",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:32.154Z"
-    },
-    {
-      "id": "ev-vxc1411",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:29.040Z"
-    },
-    {
-      "id": "ev-j14j7kv",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:29.024Z"
-    },
-    {
-      "id": "ev-ncuu661",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:25.918Z"
-    },
-    {
-      "id": "ev-vjqsjn3",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:25.907Z"
-    },
-    {
-      "id": "ev-adwwt52",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:22.654Z"
-    },
-    {
-      "id": "ev-82op0lt",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:22.638Z"
-    },
-    {
-      "id": "ev-yhjidwc",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:19.275Z"
-    },
-    {
-      "id": "ev-yrx3elh",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:19.260Z"
-    },
-    {
-      "id": "ev-2esdcyl",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:16.095Z"
-    },
-    {
-      "id": "ev-i0ap7k0",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:16.077Z"
-    },
-    {
-      "id": "ev-hvev1tm",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:08.339Z"
-    },
-    {
-      "id": "ev-v7zsfk6",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:08.320Z"
-    },
-    {
-      "id": "ev-3sdjil7",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:04.837Z"
-    },
-    {
-      "id": "ev-j2vmoad",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:04.819Z"
-    },
-    {
-      "id": "ev-bt6sbae",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:01.580Z"
-    },
-    {
-      "id": "ev-to77sy9",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:54:01.565Z"
-    },
-    {
-      "id": "ev-s3whf3o",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:53:58.468Z"
-    },
-    {
-      "id": "ev-fd8hh7v",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:53:58.452Z"
-    },
-    {
-      "id": "ev-h2pt31t",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:53:55.247Z"
-    },
-    {
-      "id": "ev-k67i7eq",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:53:55.228Z"
-    },
-    {
-      "id": "ev-7orti6w",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:53:51.916Z"
-    },
-    {
-      "id": "ev-edqvui1",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:53:51.902Z"
-    },
-    {
-      "id": "ev-1d3uvjg",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:53:48.707Z"
-    },
-    {
-      "id": "ev-ywxymqu",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:53:48.687Z"
-    },
-    {
-      "id": "ev-j9zedgn",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:53:42.709Z"
-    },
-    {
-      "id": "ev-0alls9b",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:53:42.687Z"
-    },
-    {
-      "id": "ev-kctn7rb",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:53:31.382Z"
-    },
-    {
-      "id": "ev-ml7fcmp",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:53:31.373Z"
-    },
-    {
-      "id": "ev-x68o1b7",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:53:20.538Z"
-    },
-    {
-      "id": "ev-d9tm7ej",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:53:20.533Z"
-    },
-    {
-      "id": "ev-qhnaff7",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:53:11.894Z"
-    },
-    {
-      "id": "ev-zxcudyq",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:53:11.888Z"
-    },
-    {
-      "id": "ev-04oxefp",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:53:03.134Z"
-    },
-    {
-      "id": "ev-4uz7wzv",
-      "visitorId": "v-atd116c-msombvne",
-      "eventName": "PAGE_VIEW",
-      "page": "/",
-      "properties": {
-        "path": "/",
-        "title": "ST Web & Ads Studio"
-      },
-      "timestamp": "2026-08-12T08:53:03.128Z"
-    }
-  ],
+  "analyticsEvents": [],
   "visitorJourneys": [],
   "media": [
     {
       "id": "med-1",
-      "title": "TikTok Ads Mastery Guide Banner",
+      "title": "Sonjoy Sarkar - Profile Photo",
+      "url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
       "type": "image",
-      "url": "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=1200&q=80",
-      "thumbnailUrl": "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=400&q=80",
-      "category": "TikTok Guide",
-      "uploadedAt": "2026-01-10T00:00:00.000Z"
+      "fileSize": "142 KB",
+      "dimensions": "600x600",
+      "altText": "Sonjoy Sarkar Performance Marketing Specialist",
+      "placement": "hero",
+      "isEnabled": true,
+      "uploadedAt": "2026-08-10",
+      "description": "Main official headshot of Sonjoy Sarkar used across hero and header profiles."
+    },
+    {
+      "id": "med-yt-1",
+      "title": "TikTok & Facebook Ads Strategy 2026 Masterclass",
+      "type": "youtube",
+      "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedCode": "<iframe width=\"100%\" height=\"100%\" src=\"https://www.youtube.com/embed/dQw4w9WgXcQ\" title=\"TikTok & Facebook Ads Strategy 2026\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>",
+      "thumbnailUrl": "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1000&q=80",
+      "altText": "YouTube Video - TikTok & Facebook Ads Strategy 2026",
+      "placement": "tiktok_education",
+      "isEnabled": true,
+      "uploadedAt": "2026-08-11",
+      "description": "In-depth breakdown of creative hook velocity and pixel tracking optimization."
+    },
+    {
+      "id": "med-tt-1",
+      "title": "TikTok Creative Hook Testing & Scaling Case Study",
+      "type": "tiktok",
+      "videoUrl": "https://www.tiktok.com/@tiktok/video/7106594312292453678",
+      "embedCode": "<blockquote class=\"tiktok-embed\" cite=\"https://www.tiktok.com/@tiktok/video/7106594312292453678\" data-video-id=\"7106594312292453678\"><section><a target=\"_blank\" title=\"@tiktok\" href=\"https://www.tiktok.com/@tiktok?refer=embed\">@tiktok</a> TikTok Ads Optimization Framework</section></blockquote>",
+      "thumbnailUrl": "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=1000&q=80",
+      "altText": "TikTok Short Video Case Study",
+      "placement": "case_studies",
+      "isEnabled": true,
+      "uploadedAt": "2026-08-11",
+      "description": "Real-time example of high-converting UGC structure in Bangladesh e-commerce."
+    },
+    {
+      "id": "med-2",
+      "title": "TikTok Ads Manager Report Proof",
+      "url": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1000&q=80",
+      "type": "image",
+      "fileSize": "280 KB",
+      "dimensions": "1000x600",
+      "altText": "TikTok Ads Manager Campaign Analytics",
+      "placement": "case_studies",
+      "isEnabled": true,
+      "uploadedAt": "2026-08-10",
+      "description": "Verified screenshot proof of 126 ad group consolidated campaigns."
+    },
+    {
+      "id": "med-3",
+      "title": "Skincare Brand Case Study Proof",
+      "url": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1000&q=80",
+      "type": "image",
+      "fileSize": "210 KB",
+      "dimensions": "1000x600",
+      "altText": "Skincare Beauty Campaign Proof",
+      "placement": "media_gallery",
+      "isEnabled": true,
+      "uploadedAt": "2026-08-05",
+      "description": "Campaign verification for cosmetics & skincare client."
     }
   ],
-  "users": [],
+  "users": [
+    {
+      "id": "usr-admin-1",
+      "name": "Sonjoy Sarkar",
+      "email": "giga.sonjoy@gmail.com",
+      "role": "admin",
+      "createdAt": "2026-08-01"
+    },
+    {
+      "id": "usr-editor-1",
+      "name": "Content Editor",
+      "email": "editor@stwebads.com",
+      "role": "editor",
+      "createdAt": "2026-08-05"
+    }
+  ],
   "adminUsers": [
     {
-      "id": "usr-admin-root",
-      "name": "Super Admin",
+      "id": "usr-admin-1",
+      "name": "Sonjoy Sarkar",
       "email": "giga.sonjoy@gmail.com",
       "mobile": "01723516793",
-      "passwordHash": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
-      "role": "SUPER_ADMIN",
-      "isActive": true,
-      "createdAt": "2026-01-01T00:00:00.000Z"
+      "role": "ADMIN",
+      "status": "ACTIVE",
+      "passwordHash": "e949980d22081fdb7020d5bc5043bf7e55fae2fbbe2d7b4db13045610d4812a4",
+      "passcode": "stweb2025",
+      "createdAt": "2026-08-01",
+      "lastLogin": "2026-08-11 14:30"
+    },
+    {
+      "id": "usr-editor-1",
+      "name": "Content Editor (Operations)",
+      "email": "editor@stwebads.com",
+      "mobile": "01700000000",
+      "role": "EDITOR",
+      "status": "ACTIVE",
+      "passwordHash": "e949980d22081fdb7020d5bc5043bf7e55fae2fbbe2d7b4db13045610d4812a4",
+      "passcode": "stweb2025",
+      "createdAt": "2026-08-05",
+      "lastLogin": "2026-08-10 09:15"
     }
   ],
   "robotsSettings": {
-    "rawContent": "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\n\nSitemap: https://stwebads.com/sitemap.xml",
+    "content": "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\n\nSitemap: https://stwebads.com/sitemap.xml",
     "allowAll": true,
     "disallowAdmin": true,
-    "includeSitemap": true,
     "sitemapUrl": "https://stwebads.com/sitemap.xml",
-    "crawlDelay": 0,
-    "customRules": ""
+    "customRules": "",
+    "lastUpdated": "2026-08-12"
   },
   "sitemapSettings": {
     "baseUrl": "https://stwebads.com",
@@ -1333,11 +1395,11 @@
   "auditLogs": [
     {
       "id": "log-1",
-      "timestamp": "2026-08-12T09:28:17.800Z",
+      "timestamp": "2026-08-12T10:12:44.196Z",
       "action": "ONLINE_DATABASE_INITIALIZED",
       "details": "Initial cloud database schema and collection seeds bootstrapped.",
       "userId": "system"
     }
   ],
-  "_lastUpdated": "2026-08-12T09:40:16.125Z"
+  "_lastUpdated": "2026-08-12T10:12:44.196Z"
 }

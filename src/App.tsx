@@ -122,10 +122,8 @@ export default function App() {
         const slug = window.location.pathname.replace('/page/', '').trim();
         setActivePageSlug(slug || null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (!hash.includes('admin')) {
-        if (!hash.startsWith('#')) {
-          setActivePageSlug(null);
-        }
+      } else {
+        setActivePageSlug(null);
       }
     };
 
