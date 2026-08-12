@@ -32,6 +32,7 @@ import { GtmTrackingSettings } from './components/admin/GtmTrackingSettings';
 import { GoogleWorkspaceSync } from './components/admin/GoogleWorkspaceSync';
 import { ProfileManagement } from './components/admin/ProfileManagement';
 import { ThemeColorManagement } from './components/admin/ThemeColorManagement';
+import { MediaManagement } from './components/admin/MediaManagement';
 import { PageManagement } from './components/admin/PageManagement';
 import { FirebaseConnectionTester } from './components/admin/FirebaseConnectionTester';
 import { CustomPageView } from './components/public/CustomPageView';
@@ -453,6 +454,12 @@ export default function App() {
               themeService.applyTheme(updatedTheme);
               themeService.updateFavicon(storageService.getFaviconSettings(), updatedTheme);
             }}
+          />
+        )}
+
+        {activeAdminTab === 'MEDIA' && (
+          <MediaManagement
+            onNavigateToTab={(tab) => setActiveAdminTab(tab as any)}
           />
         )}
 

@@ -1,5 +1,7 @@
 import firebaseConfig from '../../firebase-applet-config.json';
 import { FirebaseTestReport, FirebaseDiagnosticStep } from '../types';
+import { db } from './firebase';
+import { doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
 
 export class FirebaseDiagnosticService {
   /**
@@ -59,7 +61,6 @@ export class FirebaseDiagnosticService {
 
     // STEP 2: Identity Toolkit (Firebase Auth) Endpoint Probe
     const step2Start = Date.now();
-    let authEndpointWorking = false;
     try {
       const authRes = await fetch(
         `https://identitytoolkit.googleapis.com/v1/accounts:createAuthUri?key=${firebaseConfig.apiKey}`,
@@ -73,7 +74,6 @@ export class FirebaseDiagnosticService {
         }
       );
       if (authRes.status === 200 || authRes.status === 400) {
-        authEndpointWorking = true;
         steps.push({
           step: '2. Firebase Auth (Identity Toolkit) Endpoint Handshake',
           stepBn: '২. ফায়ারবেস অথ ও আইডেন্টিটি সার্ভিস কানেকশন টেস্ট',
@@ -100,142 +100,165 @@ export class FirebaseDiagnosticService {
       });
     }
 
-    // STEP 3: Cloud Firestore Database Endpoint Probe (Testing default database)
+    // STEP 3: Cloud Firestore Database (default) Presence Check
     const step3Start = Date.now();
-    let firestoreEndpointStatus = 0;
-    let firestoreResponseBody = '';
+    let databaseExists = false;
+    let databaseNotFound = false;
     try {
       const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents?key=${firebaseConfig.apiKey}`;
       const firestoreRes = await fetch(firestoreUrl, { method: 'GET' });
-      firestoreEndpointStatus = firestoreRes.status;
-      firestoreResponseBody = await firestoreRes.text();
 
-      if (firestoreRes.status === 200) {
+      if (firestoreRes.status === 200 || firestoreRes.status === 403) {
+        databaseExists = true;
         steps.push({
-          step: '3. Cloud Firestore REST Endpoint Probe',
-          stepBn: '৩. ক্লাউড ফায়ারস্টোর REST এন্ডপয়েন্ট টেস্ট',
+          step: '3. Cloud Firestore Database (default) Instance Reachability',
+          stepBn: '৩. ক্লাউড ফায়ারস্টোর (default) ডেটাবেস ইনস্ট্যান্স উপস্থিতি ও যাচাই',
           status: 'SUCCESS',
-          detail: `Firestore database (default) is active and responded with HTTP 200 OK.`,
+          detail: `Firestore database (default) exists in project "${firebaseConfig.projectId}" and is reachable (HTTP ${firestoreRes.status}).`,
           durationMs: Date.now() - step3Start
         });
       } else if (firestoreRes.status === 404) {
+        databaseNotFound = true;
         steps.push({
-          step: '3. Cloud Firestore REST Endpoint Probe',
-          stepBn: '৩. ক্লাউড ফায়ারস্টোর REST এন্ডপয়েন্ট টেস্ট',
+          step: '3. Cloud Firestore Database (default) Instance Reachability',
+          stepBn: '৩. ক্লাউড ফায়ারস্টোর (default) ডেটাবেস ইনস্ট্যান্স উপস্থিতি ও যাচাই',
           status: 'FAILED',
-          detail: `HTTP 404 (Not Found): The database "(default)" has not been created or initialized in Google Cloud project "${firebaseConfig.projectId}".`,
-          durationMs: Date.now() - step3Start
-        });
-      } else if (firestoreRes.status === 403) {
-        steps.push({
-          step: '3. Cloud Firestore REST Endpoint Probe',
-          stepBn: '৩. ক্লাউড ফায়ারস্টোর REST এন্ডপয়েন্ট টেস্ট',
-          status: 'FAILED',
-          detail: `HTTP 403 (Forbidden): Firestore API is either disabled or Security Rules blocked access.`,
+          detail: `HTTP 404 (Not Found): The database "(default)" has not been created in Google Cloud project "${firebaseConfig.projectId}".`,
           durationMs: Date.now() - step3Start
         });
       } else {
         steps.push({
-          step: '3. Cloud Firestore REST Endpoint Probe',
-          stepBn: '৩. ক্লাউড ফায়ারস্টোর REST এন্ডপয়েন্ট টেস্ট',
+          step: '3. Cloud Firestore Database (default) Instance Reachability',
+          stepBn: '৩. ক্লাউড ফায়ারস্টোর (default) ডেটাবেস ইনস্ট্যান্স উপস্থিতি ও যাচাই',
           status: 'FAILED',
-          detail: `HTTP ${firestoreRes.status}: ${firestoreResponseBody.substring(0, 150)}`,
+          detail: `Firestore endpoint returned HTTP ${firestoreRes.status}.`,
           durationMs: Date.now() - step3Start
         });
       }
     } catch (err: any) {
       steps.push({
-        step: '3. Cloud Firestore REST Endpoint Probe',
-        stepBn: '৩. ক্লাউড ফায়ারস্টোর REST এন্ডপয়েন্ট টেস্ট',
+        step: '3. Cloud Firestore Database (default) Instance Reachability',
+        stepBn: '৩. ক্লাউড ফায়ারস্টোর (default) ডেটাবেস ইনস্ট্যান্স উপস্থিতি ও যাচাই',
         status: 'FAILED',
-        detail: `Network error reaching Firestore endpoint: ${err.message}`,
+        detail: `Network error probing Firestore endpoint: ${err.message}`,
         durationMs: Date.now() - step3Start
       });
     }
 
-    // STEP 4: Live Data Read / Write Execution Probe
+    // STEP 4: Live Data Read & Write Verification via Firebase Firestore SDK
     const step4Start = Date.now();
-    if (firestoreEndpointStatus === 200) {
-      // Attempt write via Firestore REST
-      try {
-        const writeUrl = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/_connection_test?documentId=live_probe&key=${firebaseConfig.apiKey}`;
-        const writeRes = await fetch(writeUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fields: {
-              ping: { stringValue: 'pong' },
-              testedAt: { stringValue: new Date().toISOString() }
-            }
-          })
-        });
+    if (databaseNotFound) {
+      steps.push({
+        step: '4. Firestore Live Data Read & Write Verification',
+        stepBn: '৪. ফায়ারস্টোরে রিয়েল ডেটা রিড ও রাইট ভ্যালিডেশন',
+        status: 'SKIPPED',
+        detail: 'Skipped live write test because Firestore database (default) is not created yet (HTTP 404).',
+        durationMs: Date.now() - step4Start
+      });
 
-        if (writeRes.ok) {
+      overallStatus = 'DATABASE_NOT_INITIALIZED';
+      summaryEn = 'Firestore database (default) is NOT created in this project yet (HTTP 404).';
+      summaryBn = 'ক্লাউড ফায়ারস্টোর (default) ডেটাবেস এখনও তৈরি করা হয়নি (404 Not Found)।';
+      rootCauseEn = `The Google Cloud / Firebase project "${firebaseConfig.projectId}" exists, but the (default) Firestore database instance has not been provisioned in the Firebase Console.`;
+      rootCauseBn = `ফায়ারবেস প্রজেক্ট "${firebaseConfig.projectId}"-এ ফায়ারস্টোর (default) ডেটাবেসটি এখনও চালু করা হয়নি।`;
+      recommendedActionEn.push(
+        `1. Open Firebase Console: https://console.firebase.google.com/project/${firebaseConfig.projectId}/firestore`,
+        '2. Click "Create Database" (Build > Firestore Database).',
+        '3. Select "(default)" as database ID and choose your region.',
+        '4. Click "Test Connection" again in this dashboard.'
+      );
+      recommendedActionBn.push(
+        `১. ফায়ারবেস কনসোলে যান: https://console.firebase.google.com/project/${firebaseConfig.projectId}/firestore`,
+        '২. "Create Database" বাটনে ক্লিক করুন (Build > Firestore Database)।',
+        '৩. ডাটাবেস আইডি (default) রেখে আপনার রিজিয়ন সিলেক্ট করুন।',
+        '৪. তৈরি শেষে এখানে "পুনরায় টেস্ট করুন" বাটনে ক্লিক করুন।'
+      );
+    } else {
+      // Execute actual document write & read using Firestore SDK
+      try {
+        if (!db) {
+          throw new Error('Firestore SDK instance is not initialized.');
+        }
+
+        const testDocRef = doc(db, '_connection_test', 'live_probe');
+        const testPayload = {
+          ping: 'pong',
+          timestamp: new Date().toISOString(),
+          appId: firebaseConfig.appId,
+          testRunner: 'ST Web Studio Automated Diagnostic'
+        };
+
+        // Attempt write
+        await setDoc(testDocRef, testPayload);
+
+        // Attempt read
+        const readSnap = await getDoc(testDocRef);
+
+        if (readSnap.exists()) {
+          // Attempt delete to clean up
+          await deleteDoc(testDocRef).catch(() => {});
+
           isConnected = true;
           overallStatus = 'OPERATIONAL';
           steps.push({
             step: '4. Firestore Live Data Read & Write Verification',
             stepBn: '৪. ফায়ারস্টোরে রিয়েল ডেটা রিড ও রাইট ভ্যালিডেশন',
             status: 'SUCCESS',
-            detail: 'Successfully wrote and verified test document in Cloud Firestore.',
+            detail: 'Successfully wrote, read, and verified test document in Cloud Firestore database.',
             durationMs: Date.now() - step4Start
           });
           summaryEn = 'Firebase Auth & Cloud Firestore are 100% operational and verified with live read/write.';
           summaryBn = 'ফায়ারবেস অথ ও ক্লাউড ফায়ারস্টোর ডেটাবেস সম্পূর্ণ সক্রিয় এবং সফলভাবে ডেটা রিড/রাইট হচ্ছে।';
         } else {
+          throw new Error('Test document written but could not be read back.');
+        }
+      } catch (err: any) {
+        const errorMsg = err?.message || String(err);
+        const isPermissionDenied = 
+          errorMsg.includes('permission-denied') || 
+          errorMsg.includes('PERMISSION_DENIED') || 
+          errorMsg.includes('Missing or insufficient permissions') ||
+          err?.code === 'permission-denied';
+
+        if (isPermissionDenied) {
           overallStatus = 'PERMISSION_DENIED';
           steps.push({
             step: '4. Firestore Live Data Read & Write Verification',
             stepBn: '৪. ফায়ারস্টোরে রিয়েল ডেটা রিড ও রাইট ভ্যালিডেশন',
             status: 'FAILED',
-            detail: `Write operation failed with HTTP ${writeRes.status}. Check firestore.rules.`,
+            detail: `Security Rules Blocked Access: ${errorMsg}. Database exists, but write/read is denied by Firestore Security Rules.`,
             durationMs: Date.now() - step4Start
           });
-          summaryEn = 'Firestore database exists but write permission was denied by security rules.';
-          summaryBn = 'ফায়ারস্টোর ডেটাবেস সক্রিয় কিন্তু সিকিউরিটি রুলস এর কারণে ডেটা রাইট পারমিশন ব্লক হয়েছে।';
+          summaryEn = 'Firestore database exists and is connected, but Security Rules are blocking Read/Write access (PERMISSION_DENIED).';
+          summaryBn = 'ফায়ারস্টোর ডেটাবেস সক্রিয় ও কানেক্টেড, কিন্তু সিকিউরিটি রুলস (Rules) ডেটা রিড ও রাইট পারমিশন ব্লক করছে।';
+          rootCauseEn = `Firestore in project "${firebaseConfig.projectId}" was created with locked rules (e.g. "allow read, write: if false;"). The rules must be updated in Firebase Console to allow authorized access.`;
+          rootCauseBn = `প্রজেক্ট "${firebaseConfig.projectId}"-এর ফায়ারস্টোর সিকিউরিটি রুলসে বর্তমানে রিড ও রাইট বন্ধ করা রয়েছে (Default locked mode)। ফায়ারবেস কনসোলে Rules ট্যাবে গিয়ে পারমিশন চালু করতে হবে।`;
+          
+          recommendedActionEn.push(
+            `1. Open Firebase Console Rules: https://console.firebase.google.com/project/${firebaseConfig.projectId}/firestore/rules`,
+            '2. Replace the rules with the recommended rules snippet below.',
+            '3. Click the "Publish" button in Firebase Console.',
+            '4. Click "Run Diagnostic Test" again — it will immediately turn 100% GREEN!'
+          );
+
+          recommendedActionBn.push(
+            `১. ফায়ারবেস কনসোলের Rules ট্যাবে যান: https://console.firebase.google.com/project/${firebaseConfig.projectId}/firestore/rules`,
+            '২. নিচের সিকিউরিটি রুলস কোডটি কপি করে সেখানে পেস্ট করুন।',
+            '৩. উপরে ডানপাশের "Publish" বাটনে ক্লিক করুন।',
+            '৪. এরপর এখানে "পুনরায় টেস্ট করুন" চাপলেই সাথে সাথে ১০০% গ্রিন ও কানেক্টেড হয়ে যাবে!'
+          );
+        } else {
+          overallStatus = 'NETWORK_ERROR';
+          steps.push({
+            step: '4. Firestore Live Data Read & Write Verification',
+            stepBn: '৪. ফায়ারস্টোরে রিয়েল ডেটা রিড ও রাইট ভ্যালিডেশন',
+            status: 'FAILED',
+            detail: `Firestore operation error: ${errorMsg}`,
+            durationMs: Date.now() - step4Start
+          });
+          summaryEn = `Firestore connection error: ${errorMsg}`;
+          summaryBn = `ফায়ারস্টোর কানেকশন এরর: ${errorMsg}`;
         }
-      } catch (err: any) {
-        steps.push({
-          step: '4. Firestore Live Data Read & Write Verification',
-          stepBn: '৪. ফায়ারস্টোরে রিয়েল ডেটা রিড ও রাইট ভ্যালিডেশন',
-          status: 'FAILED',
-          detail: `Live write failed: ${err.message}`,
-          durationMs: Date.now() - step4Start
-        });
-      }
-    } else {
-      steps.push({
-        step: '4. Firestore Live Data Read & Write Verification',
-        stepBn: '৪. ফায়ারস্টোরে রিয়েল ডেটা রিড ও রাইট ভ্যালিডেশন',
-        status: 'SKIPPED',
-        detail: 'Skipped live write test because Firestore database endpoint returned 404 (Database not created yet).',
-        durationMs: Date.now() - step4Start
-      });
-
-      if (firestoreEndpointStatus === 404) {
-        overallStatus = 'DATABASE_NOT_INITIALIZED';
-        summaryEn = 'Firebase Connection Test: Auth is connected, but Cloud Firestore Database is NOT created yet (HTTP 404).';
-        summaryBn = 'ফায়ারবেস কানেকশন টেস্ট: ফায়ারবেস অথ চালু আছে, তবে ক্লাউড ফায়ারস্টোর ডেটাবেস এখনো তৈরি করা হয়নি (404 Not Found)।';
-        rootCauseEn = `The Google Cloud / Firebase project "${firebaseConfig.projectId}" exists, but the Firestore database instance has not been provisioned in the Firebase Console.`;
-        rootCauseBn = `গুগল ক্লাউড প্রজেক্ট "${firebaseConfig.projectId}"-এ API কি ও অথ চালু রয়েছে, কিন্তু ফায়ারবেস কনসোলে গিয়ে "Create Database" বাটনে ক্লিক করে ডেটাবেসটি এখনও চালু করা হয়নি।`;
-        
-        recommendedActionEn.push(
-          `1. Open Firebase Console: https://console.firebase.google.com/project/${firebaseConfig.projectId}/firestore`,
-          '2. Click "Create Database" (Build > Firestore Database).',
-          '3. Choose your nearest Cloud region (e.g. asia-southeast1 or nam5) and select production/test rules.',
-          '4. Click "Test Connection" again in this dashboard — live read/write will immediately turn green!'
-        );
-
-        recommendedActionBn.push(
-          `১. ফায়ারবেস কনসোল ওপেন করুন: https://console.firebase.google.com/project/${firebaseConfig.projectId}/firestore`,
-          '২. "Create Database" বাটনে ক্লিক করুন (Build > Firestore Database)।',
-          '৩. লোকেশন হিসেবে asia-southeast1 অথবা nam5 নির্বাচন করে নেক্সট দিন।',
-          '৪. তৈরি হওয়ার পর এখানে "পুনরায় টেস্ট করুন" বাটনে ক্লিক করলেই কানেকশন গ্রিন হয়ে যাবে।'
-        );
-      } else {
-        overallStatus = 'NETWORK_ERROR';
-        summaryEn = 'Could not reach Firebase services. Please check network connectivity.';
-        summaryBn = 'ফায়ারবেস সার্ভিসের সাথে যোগাযোগ করা সম্ভব হয়নি। নেটওয়ার্ক চেক করুন।';
       }
     }
 

@@ -22,7 +22,8 @@ import {
   User, 
   Bot,
   Palette,
-  Globe
+  Globe,
+  Film
 } from 'lucide-react';
 import { AdminTab, SiteSettings, AdminTask } from '../../types';
 import { AdminTaskSuggestionDrawer } from './AdminTaskSuggestionDrawer';
@@ -94,6 +95,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   const navItems: Array<{ id: AdminTab; label: string; icon: React.ComponentType<any>; badge?: number }> = [
     { id: 'DASHBOARD', label: 'ওভারভিউ ড্যাশবোর্ড', icon: LayoutDashboard },
     { id: 'THEME_COLORS', label: 'থিম ও কালার ইঞ্জিন (Colors & Theme)', icon: Palette },
+    { id: 'MEDIA', label: 'মিডিয়া হাব (ইমেজ, ইউটিউব ও টিকটক)', icon: Film },
     { id: 'PAGES', label: 'পেজ ও কনটেন্ট রুলস (Custom Pages)', icon: Layers },
     { id: 'PROFILE', label: 'প্রোফাইল ও ব্র্যান্ডিং (Profile Edit)', icon: User },
     { id: 'LEADS', label: 'লিড ও ক্লায়েন্ট CRM', icon: Users, badge: unreadLeadsCount },

@@ -1,9 +1,20 @@
 import React from 'react';
-import { Smartphone, Users, Zap, AlertTriangle, CheckCircle2, TrendingUp, Lightbulb, PlayCircle } from 'lucide-react';
+import { Smartphone, Users, Zap, AlertTriangle, CheckCircle2, TrendingUp, Lightbulb, PlayCircle, Video } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { storageService } from '../../services/storageService';
+import { VideoEmbedPlayer } from '../common/VideoEmbedPlayer';
 
 export const TikTokEducation: React.FC = () => {
   const { language, t } = useLanguage();
+
+  const settings = storageService.getSiteSettings();
+  const mediaList = storageService.getMedia(false);
+  
+  // Find primary TikTok education video
+  const educationVideo = mediaList.find(m => 
+    (settings.tiktokEducationVideoMediaId && m.id === settings.tiktokEducationVideoMediaId) ||
+    m.placement === 'tiktok_education'
+  ) || mediaList.find(m => m.type === 'tiktok' || m.type === 'youtube');
 
   const insights = language === 'en' ? [
     {
@@ -106,6 +117,40 @@ export const TikTokEducation: React.FC = () => {
             );
           })}
         </div>
+
+        {/* Video Breakdown Showcase (Direct YouTube/TikTok/Embed) */}
+        {educationVideo && (
+          <div className="mb-14 bg-[#FFFFFF] rounded-3xl border border-[#D9DED1] p-6 sm:p-8 shadow-xs">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div className="lg:col-span-7">
+                <div className="rounded-2xl overflow-hidden bg-black shadow-md aspect-video">
+                  <VideoEmbedPlayer
+                    url={educationVideo.videoUrl || educationVideo.url}
+                    embedCode={educationVideo.embedCode}
+                    title={educationVideo.title}
+                    thumbnailUrl={educationVideo.thumbnailUrl}
+                    aspectRatio="auto"
+                    className="w-full h-full"
+                  />
+                </div>
+              </div>
+              <div className="lg:col-span-5 space-y-4">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8EAE2] text-[#4A5D3B] text-xs font-semibold">
+                  <PlayCircle className="w-3.5 h-3.5" />
+                  <span>{language === 'en' ? 'Video Case Breakdown' : 'ভিডিও স্ট্র্যাটেজি বিশ্লেষণ'}</span>
+                </div>
+                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#2C3327]">
+                  {educationVideo.title}
+                </h3>
+                <p className="text-xs sm:text-sm text-[#5C6652] leading-relaxed">
+                  {educationVideo.description || (language === 'en' 
+                    ? 'Watch how Bangladeshi brands scale their revenue using high-converting TikTok UGC creatives and smart bidding models.' 
+                    : 'দেখুন কীভাবে টিকটক অ্যাডস এবং সঠিক ট্র্যাকিং দিয়ে বাংলাদেশি ব্র্যান্ডগুলো তাদের সেলস ও রিটার্ন মাল্টিপ্লাই করছে।')}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Myths vs Facts Box */}
         <div className="bg-[#2C3327] text-[#FDFCF8] rounded-[36px] p-8 sm:p-12 border border-[#3A4533]">

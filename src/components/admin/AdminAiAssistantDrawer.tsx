@@ -22,7 +22,9 @@ import {
   Sliders,
   Maximize2,
   Minimize2,
-  Trash2
+  Trash2,
+  Mic,
+  MicOff
 } from 'lucide-react';
 import { 
   AdminTab, 
@@ -87,7 +89,112 @@ export const AdminAiAssistantDrawer: React.FC<AdminAiAssistantDrawerProps> = ({
   const [inputQuery, setInputQuery] = useState<string>('');
   const [isThinking, setIsThinking] = useState<boolean>(false);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const [isListening, setIsListening] = useState<boolean>(false);
+  const [voiceNotice, setVoiceNotice] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
+  const voiceTimeoutRef = useRef<any>(null);
+
+  const showVoiceNotice = (msg: string) => {
+    setVoiceNotice(msg);
+    if (voiceTimeoutRef.current) clearTimeout(voiceTimeoutRef.current);
+    voiceTimeoutRef.current = setTimeout(() => {
+      setVoiceNotice(null);
+    }, 4000);
+  };
+
+  // Initialize Speech Recognition for Admin Assistant (zero API key - browser native)
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      try {
+        const rec = new SpeechRecognition();
+        rec.continuous = false;
+        rec.interimResults = true;
+        rec.lang = 'bn-BD'; // Supports Bangla/English recognition
+
+        rec.onstart = () => {
+          setIsListening(true);
+          setVoiceNotice('🎙️ অ্যাডমিন সহকারী শুনছে... মুখে বলুন (বাংলা বা English)');
+        };
+
+        rec.onend = () => {
+          setIsListening(false);
+          setTimeout(() => setVoiceNotice(null), 1200);
+        };
+
+        rec.onerror = (event: any) => {
+          setIsListening(false);
+          if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+            showVoiceNotice('⚠️ মাইক্রোফোন পারমিশন অন করুন (Browser Settings -> Permissions)');
+          } else if (event.error === 'no-speech') {
+            showVoiceNotice('ℹ️ কোনো শব্দ শোনা যায়নি। পুনরায় মাইক আইকনে ক্লিক করুন।');
+          } else {
+            showVoiceNotice('ভয়েস রিকগনিশনে সাময়িক সমস্যা হয়েছে।');
+          }
+        };
+
+        rec.onresult = (event: any) => {
+          let transcript = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            transcript += event.results[i][0].transcript;
+          }
+          if (transcript.trim()) {
+            setInputQuery(transcript);
+          }
+        };
+
+        recognitionRef.current = rec;
+      } catch (e) {
+        console.warn('Admin voice init warning:', e);
+      }
+    }
+
+    return () => {
+      if (voiceTimeoutRef.current) clearTimeout(voiceTimeoutRef.current);
+      if (recognitionRef.current) {
+        try { recognitionRef.current.abort(); } catch (e) {}
+      }
+    };
+  }, []);
+
+  const toggleVoiceInput = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      showVoiceNotice('ভয়েস ইনপুট Chrome, Edge বা আধুনিক ব্রাউজারে সমর্থিত।');
+      return;
+    }
+
+    if (isListening) {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch (e) {}
+      }
+      setIsListening(false);
+    } else {
+      try {
+        if (!recognitionRef.current) {
+          const rec = new SpeechRecognition();
+          rec.continuous = false;
+          rec.interimResults = true;
+          rec.lang = 'bn-BD';
+          rec.onstart = () => setIsListening(true);
+          rec.onend = () => setIsListening(false);
+          rec.onerror = () => setIsListening(false);
+          rec.onresult = (ev: any) => {
+            let t = '';
+            for (let i = ev.resultIndex; i < ev.results.length; ++i) {
+              t += ev.results[i][0].transcript;
+            }
+            if (t.trim()) setInputQuery(t);
+          };
+          recognitionRef.current = rec;
+        }
+        recognitionRef.current.start();
+      } catch (err) {
+        showVoiceNotice('মাইক্রোফোন চালু করা যায়নি। পারমিশন চেক করুন।');
+      }
+    }
+  };
 
   useEffect(() => {
     try {
@@ -763,15 +870,51 @@ ${matchedKb.slice(0, 2).map((item, idx) => `**${idx + 1}. ${item.question}**\n${
             </button>
           </div>
 
+          {/* Voice status or error notice */}
+          {voiceNotice && (
+            <div className="mb-2 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 flex items-center justify-between gap-2 shrink-0 animate-fadeIn">
+              <span className="truncate">{voiceNotice}</span>
+              <button 
+                onClick={() => setVoiceNotice(null)}
+                className="text-amber-700 hover:text-amber-900 font-bold text-xs"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={inputQuery}
-              onChange={(e) => setInputQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="যেকোনো সেটিংস, ফিচার বা প্রশ্নের জন্য এখানে লিখুন (বাংলা / English)..."
-              className="flex-1 bg-[#FDFCF8] border border-[#D9DED1] focus:border-[#4A5D3B] px-4 py-2.5 rounded-xl text-xs text-[#2C3327] outline-none transition-colors"
-            />
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={inputQuery}
+                onChange={(e) => setInputQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={
+                  isListening
+                    ? "শুনছি... মুখে বলুন (বাংলা / English)..."
+                    : "যেকোনো সেটিংস, ফিচার বা প্রশ্নের জন্য এখানে লিখুন (বাংলা / English)..."
+                }
+                className={`w-full bg-[#FDFCF8] border rounded-xl pl-3.5 pr-10 py-2.5 text-xs text-[#2C3327] outline-none transition-all ${
+                  isListening
+                    ? 'border-[#E2725B] ring-2 ring-[#E2725B]/20 bg-rose-50/30'
+                    : 'border-[#D9DED1] focus:border-[#4A5D3B]'
+                }`}
+              />
+              <button
+                type="button"
+                onClick={toggleVoiceInput}
+                className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-colors ${
+                  isListening
+                    ? 'bg-[#E2725B] text-white animate-pulse'
+                    : 'text-[#8A957F] hover:text-[#4A5D3B] hover:bg-[#E8EAE2]'
+                }`}
+                title="ভয়েস ইনপুট (বাংলা / English)"
+              >
+                {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+
             <button
               onClick={() => processAdminQuery(inputQuery)}
               disabled={!inputQuery.trim() || isThinking}

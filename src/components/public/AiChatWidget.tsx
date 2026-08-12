@@ -49,6 +49,7 @@ export const AiChatWidget: React.FC<AiChatWidgetProps> = ({
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [isListening, setIsListening] = useState<boolean>(false);
   const [speechSupported, setSpeechSupported] = useState<boolean>(false);
+  const [voiceNotice, setVoiceNotice] = useState<string | null>(null);
   
   // In-chat lead capture form state
   const [leadName, setLeadName] = useState<string>('');
@@ -59,6 +60,15 @@ export const AiChatWidget: React.FC<AiChatWidgetProps> = ({
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+  const voiceTimeoutRef = useRef<any>(null);
+
+  const showVoiceNotice = (msg: string) => {
+    setVoiceNotice(msg);
+    if (voiceTimeoutRef.current) clearTimeout(voiceTimeoutRef.current);
+    voiceTimeoutRef.current = setTimeout(() => {
+      setVoiceNotice(null);
+    }, 4000);
+  };
 
   const quickPrompts = language === 'en' 
     ? [
@@ -78,48 +88,111 @@ export const AiChatWidget: React.FC<AiChatWidgetProps> = ({
         "সার্ভিস চার্জ ও ম্যানেজমেন্ট ফি কত?"
       ];
 
-  // Initialize Speech Recognition
+  // Initialize Speech Recognition (Client-side native Web Speech API)
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
       setSpeechSupported(true);
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = true;
-      recognition.lang = language === 'en' ? 'en-US' : 'bn-BD';
+      try {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = language === 'en' ? 'en-US' : 'bn-BD';
 
-      recognition.onstart = () => setIsListening(true);
-      recognition.onend = () => setIsListening(false);
-      recognition.onerror = () => setIsListening(false);
+        recognition.onstart = () => {
+          setIsListening(true);
+          setVoiceNotice(language === 'en' ? '🎙️ Listening... Speak now.' : '🎙️ শুনছি... স্পষ্ট করে কথা বলুন।');
+        };
 
-      recognition.onresult = (event: any) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          transcript += event.results[i][0].transcript;
-        }
-        if (transcript.trim()) {
-          setInputMessage(transcript);
-        }
-      };
+        recognition.onend = () => {
+          setIsListening(false);
+          setTimeout(() => setVoiceNotice(null), 1200);
+        };
 
-      recognitionRef.current = recognition;
+        recognition.onerror = (event: any) => {
+          setIsListening(false);
+          if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+            showVoiceNotice(
+              language === 'en'
+                ? '⚠️ Microphone permission denied. Please allow microphone access in browser settings.'
+                : '⚠️ মাইক্রোফোন পারমিশন বন্ধ আছে। অনুগ্রহ করে ব্রাউজারে মাইক্রোফোন অন করুন।'
+            );
+          } else if (event.error === 'no-speech') {
+            showVoiceNotice(
+              language === 'en'
+                ? 'ℹ️ No speech detected. Please try tapping the mic again.'
+                : 'ℹ️ কোনো শব্দ শোনা যায়নি। পুনরায় মাইক চেপে কথা বলুন।'
+            );
+          }
+        };
+
+        recognition.onresult = (event: any) => {
+          let transcript = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            transcript += event.results[i][0].transcript;
+          }
+          if (transcript.trim()) {
+            setInputMessage(transcript);
+          }
+        };
+
+        recognitionRef.current = recognition;
+      } catch (err) {
+        console.warn('Speech recognition init warning:', err);
+      }
+    } else {
+      setSpeechSupported(false);
     }
+
+    return () => {
+      if (voiceTimeoutRef.current) clearTimeout(voiceTimeoutRef.current);
+    };
   }, [language]);
 
   const toggleVoiceInput = () => {
-    if (!speechSupported || !recognitionRef.current) {
-      alert(language === 'en' ? 'Voice input is supported on Chrome, Edge, and Android browsers.' : 'ভয়েস ইনপুট শুধুমাত্র Chrome, Edge অথবা Android ব্রাউজারে সমর্থিত।');
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      showVoiceNotice(
+        language === 'en'
+          ? 'Voice recognition is supported in Google Chrome, Microsoft Edge, and modern mobile browsers.'
+          : 'ভয়েস ইনপুট Google Chrome, Microsoft Edge বা মোবাইল ব্রাউজারে ব্যবহার করুন।'
+      );
       return;
     }
 
     if (isListening) {
-      recognitionRef.current.stop();
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch (e) {}
+      }
+      setIsListening(false);
     } else {
       try {
+        if (!recognitionRef.current) {
+          const rec = new SpeechRecognition();
+          rec.continuous = false;
+          rec.interimResults = true;
+          rec.lang = language === 'en' ? 'en-US' : 'bn-BD';
+          rec.onstart = () => setIsListening(true);
+          rec.onend = () => setIsListening(false);
+          rec.onerror = () => setIsListening(false);
+          rec.onresult = (ev: any) => {
+            let t = '';
+            for (let i = ev.resultIndex; i < ev.results.length; ++i) {
+              t += ev.results[i][0].transcript;
+            }
+            if (t.trim()) setInputMessage(t);
+          };
+          recognitionRef.current = rec;
+        }
         recognitionRef.current.lang = language === 'en' ? 'en-US' : 'bn-BD';
         recognitionRef.current.start();
       } catch (err) {
-        console.warn('Speech recognition start failed:', err);
+        console.warn('Speech recognition start fallback:', err);
+        showVoiceNotice(
+          language === 'en' 
+            ? 'Please grant microphone permission to use voice input.' 
+            : 'ভয়েস ইনপুটের জন্য মাইক্রোফোন অ্যাক্সেসের অনুমতি দিন।'
+        );
       }
     }
   };
@@ -517,6 +590,19 @@ export const AiChatWidget: React.FC<AiChatWidgetProps> = ({
               </button>
             ))}
           </div>
+
+          {/* Voice status or error notice */}
+          {voiceNotice && (
+            <div className="px-3 py-1.5 bg-amber-50 border-t border-amber-200 text-[11px] text-amber-900 flex items-center justify-between gap-2 shrink-0 animate-fadeIn">
+              <span className="truncate">{voiceNotice}</span>
+              <button 
+                onClick={() => setVoiceNotice(null)}
+                className="text-amber-700 hover:text-amber-900 font-bold text-xs"
+              >
+                ✕
+              </button>
+            </div>
+          )}
 
           {/* Chat Input Bar with Bengali/English Voice Input */}
           <form

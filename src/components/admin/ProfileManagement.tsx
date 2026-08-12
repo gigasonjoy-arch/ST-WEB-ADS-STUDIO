@@ -19,10 +19,12 @@ import {
   ExternalLink,
   MessageCircle,
   Briefcase,
-  Layers
+  Layers,
+  Image as ImageIcon
 } from 'lucide-react';
 import { SiteSettings } from '../../types';
 import { storageService } from '../../services/storageService';
+import { MediaSelectorModal } from './MediaSelectorModal';
 
 interface ProfileManagementProps {
   settings: SiteSettings;
@@ -39,6 +41,7 @@ export const ProfileManagement: React.FC<ProfileManagementProps> = ({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [activePreviewMode, setActivePreviewMode] = useState<'CARD' | 'HERO'>('CARD');
+  const [mediaModalOpen, setMediaModalOpen] = useState(false);
 
   const adminDirectUrl = `${window.location.origin}${window.location.pathname}#admin`;
 
@@ -197,9 +200,19 @@ export const ProfileManagement: React.FC<ProfileManagementProps> = ({
               </div>
 
               <div className="w-full space-y-2 text-left">
-                <label className="block text-[11px] font-bold text-[#5C6652]">
-                  ফাইল আপলোড করুন (ছবি):
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="block text-[11px] font-bold text-[#5C6652]">
+                    ফাইল আপলোড করুন (ছবি):
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setMediaModalOpen(true)}
+                    className="text-[11px] bg-[#E8EAE2] text-[#4A5D3B] hover:bg-[#D9DED1] px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-colors"
+                  >
+                    <ImageIcon className="w-3 h-3" />
+                    <span>মিডিয়া হাব থেকে বাছুন</span>
+                  </button>
+                </div>
                 <input
                   type="file"
                   accept="image/*"
@@ -478,6 +491,23 @@ export const ProfileManagement: React.FC<ProfileManagementProps> = ({
         </div>
 
       </form>
+
+      {/* Media Selector Modal for Profile Photo */}
+      <MediaSelectorModal
+        isOpen={mediaModalOpen}
+        onClose={() => setMediaModalOpen(false)}
+        allowedTypes={['image']}
+        title="প্রোফাইল ছবি নির্বাচন করুন"
+        onSelect={(selected) => {
+          if (selected.url) {
+            setFormData(prev => ({
+              ...prev,
+              sonjoyImage: selected.url!
+            }));
+            showToast('প্রোফাইল ছবি নির্বাচন করা হয়েছে!');
+          }
+        }}
+      />
     </div>
   );
 };

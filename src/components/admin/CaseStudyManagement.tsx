@@ -18,6 +18,7 @@ import {
 import { CaseStudy } from '../../types';
 import { storageService } from '../../services/storageService';
 import { VideoEmbedPlayer } from '../common/VideoEmbedPlayer';
+import { MediaSelectorModal } from './MediaSelectorModal';
 
 interface CaseStudyManagementProps {
   caseStudies?: CaseStudy[];
@@ -42,6 +43,8 @@ export const CaseStudyManagement: React.FC<CaseStudyManagementProps> = ({
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [currentStudy, setCurrentStudy] = useState<Partial<CaseStudy>>({});
   const [imageUploadLoading, setImageUploadLoading] = useState<boolean>(false);
+  const [mediaSelectorOpen, setMediaSelectorOpen] = useState<boolean>(false);
+  const [mediaSelectorTarget, setMediaSelectorTarget] = useState<'IMAGE' | 'VIDEO'>('IMAGE');
 
   const caseStudies = propCaseStudies || internalStudies;
 
@@ -387,15 +390,28 @@ export const CaseStudyManagement: React.FC<CaseStudyManagementProps> = ({
                     <ImageIcon className="w-4 h-4 text-[#4A5D3B]" />
                     <span>কেস স্টাডি প্রুফ স্ক্রিনশট / ইমেজ আপলোড (Proof Image)</span>
                   </label>
-                  {currentStudy.proofImage && (
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => setCurrentStudy(prev => ({ ...prev, proofImage: '' }))}
-                      className="text-[11px] text-red-600 hover:underline font-bold"
+                      onClick={() => {
+                        setMediaSelectorTarget('IMAGE');
+                        setMediaSelectorOpen(true);
+                      }}
+                      className="text-[11px] bg-[#E8EAE2] text-[#4A5D3B] hover:bg-[#D9DED1] px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-colors"
                     >
-                      ইমেজ সরান
+                      <ImageIcon className="w-3 h-3" />
+                      <span>মিডিয়া হাব থেকে বাছুন</span>
                     </button>
-                  )}
+                    {currentStudy.proofImage && (
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStudy(prev => ({ ...prev, proofImage: '' }))}
+                        className="text-[11px] text-red-600 hover:underline font-bold"
+                      >
+                        ইমেজ সরান
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
@@ -414,13 +430,13 @@ export const CaseStudyManagement: React.FC<CaseStudyManagementProps> = ({
 
                   <div>
                     <label className="block text-[11px] font-semibold text-[#5C6652] mb-1">
-                      অথবা ইমেজ ওয়েব URL লিখুন:
+                      অথবা ইমেজ লিঙ্ক (Web URL):
                     </label>
                     <input
                       type="text"
                       value={currentStudy.proofImage || ''}
                       onChange={(e) => setCurrentStudy({ ...currentStudy, proofImage: e.target.value })}
-                      placeholder="https://images.unsplash.com/..."
+                      placeholder="https://images.unsplash.com/... or CDN link"
                       className="w-full bg-white border border-[#D9DED1] rounded-xl px-3 py-1.5 text-xs text-[#2C3327]"
                     />
                   </div>
@@ -440,10 +456,23 @@ export const CaseStudyManagement: React.FC<CaseStudyManagementProps> = ({
 
               {/* YOUTUBE & TIKTOK VIDEO EMBED SYSTEM */}
               <div className="bg-[#FDFCF8] p-4 rounded-2xl border border-[#D9DED1] space-y-3">
-                <label className="text-xs font-bold text-[#2C3327] flex items-center gap-1.5">
-                  <Video className="w-4 h-4 text-[#E2725B]" />
-                  <span>ইউটিউব ও টিকটক ভিডিও এম্বেড সিস্টেম (YouTube & TikTok Embed)</span>
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-[#2C3327] flex items-center gap-1.5">
+                    <Video className="w-4 h-4 text-[#E2725B]" />
+                    <span>ইউটিউব ও টিকটক ভিডিও লিঙ্ক/এম্বেড সিস্টেম (YouTube & TikTok Embed)</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMediaSelectorTarget('VIDEO');
+                      setMediaSelectorOpen(true);
+                    }}
+                    className="text-[11px] bg-[#E8EAE2] text-[#4A5D3B] hover:bg-[#D9DED1] px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-colors"
+                  >
+                    <Video className="w-3 h-3" />
+                    <span>ভিডিও লাইব্রেরি থেকে বাছুন</span>
+                  </button>
+                </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
@@ -630,6 +659,28 @@ export const CaseStudyManagement: React.FC<CaseStudyManagementProps> = ({
           </div>
         </div>
       )}
+
+      {/* Media Selector Modal */}
+      <MediaSelectorModal
+        isOpen={mediaSelectorOpen}
+        onClose={() => setMediaSelectorOpen(false)}
+        allowedTypes={mediaSelectorTarget === 'IMAGE' ? ['image'] : ['youtube', 'tiktok', 'video_embed']}
+        title={mediaSelectorTarget === 'IMAGE' ? 'কেস স্টাডি প্রুফ ইমেজ নির্বাচন করুন' : 'কেস স্টাডি ভিডিও নির্বাচন বা এমবেড করুন'}
+        onSelect={(selected) => {
+          if (mediaSelectorTarget === 'IMAGE') {
+            setCurrentStudy(prev => ({
+              ...prev,
+              proofImage: selected.url
+            }));
+          } else {
+            setCurrentStudy(prev => ({
+              ...prev,
+              videoUrl: selected.videoUrl || selected.url,
+              tiktokEmbed: selected.embedCode || (selected.type === 'tiktok' ? selected.videoUrl : prev.tiktokEmbed)
+            }));
+          }
+        }}
+      />
 
     </div>
   );
