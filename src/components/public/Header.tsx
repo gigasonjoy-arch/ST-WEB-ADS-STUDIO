@@ -34,12 +34,13 @@ const DEFAULT_HEADER_SETTINGS: HeaderSettings = {
   ctaAction: 'LEAD_FORM',
   ctaCustomUrl: '',
   navLinks: [
-    { id: 'nav-services', labelEn: 'Services', labelBn: 'সেবাসমূহ', sectionId: 'services', enabled: true, sortOrder: 1 },
-    { id: 'nav-results', labelEn: 'Results & ROI', labelBn: 'ফলাফল ও ROI', sectionId: 'results', enabled: true, sortOrder: 2 },
-    { id: 'nav-calculator', labelEn: 'Ads Calculator', labelBn: 'অ্যাড ক্যালকুলেটর', sectionId: 'calculator', enabled: true, sortOrder: 3 },
-    { id: 'nav-case-studies', labelEn: 'Case Studies', labelBn: 'কেস স্টাডিজ', sectionId: 'case-studies', enabled: true, sortOrder: 4 },
-    { id: 'nav-tiktok-guide', labelEn: 'TikTok Playbook', labelBn: 'টিকটক গাইড', sectionId: 'tiktok-education', enabled: true, sortOrder: 5 },
-    { id: 'nav-faq', labelEn: 'FAQ', labelBn: 'সাধারণ জিজ্ঞাসা', sectionId: 'faq', enabled: true, sortOrder: 6 }
+    { id: 'nav-services', labelEn: 'Services', labelBn: 'সেবাসমূহ', route: '/services', sectionId: 'services', enabled: true, sortOrder: 1 },
+    { id: 'nav-case-studies', labelEn: 'Case Studies', labelBn: 'কেস স্টাডিজ', route: '/case-studies', sectionId: 'case-studies', enabled: true, sortOrder: 2 },
+    { id: 'nav-media-gallery', labelEn: 'Media Gallery', labelBn: 'মিডিয়া গ্যালারি', route: '/media-gallery', sectionId: 'media-gallery', enabled: true, sortOrder: 3 },
+    { id: 'nav-tiktok-guide', labelEn: 'TikTok Playbook', labelBn: 'টিকটক গাইড', route: '/tiktok-ads', sectionId: 'tiktok-education', enabled: true, sortOrder: 4 },
+    { id: 'nav-facebook-ads', labelEn: 'Facebook Ads', labelBn: 'ফেসবুক অ্যাডস', route: '/facebook-ads', sectionId: 'facebook-ads', enabled: true, sortOrder: 5 },
+    { id: 'nav-calculator', labelEn: 'Ads Calculator', labelBn: 'অ্যাড ক্যালকুলেটর', route: '/#calculator', sectionId: 'calculator', enabled: true, sortOrder: 6 },
+    { id: 'nav-contact', labelEn: 'Contact', labelBn: 'যোগাযোগ', route: '/contact', sectionId: 'contact', enabled: true, sortOrder: 7 }
   ]
 };
 
@@ -62,13 +63,40 @@ export const Header: React.FC<HeaderProps> = ({
   const whatsappDefaultMsg = settings?.whatsapp?.defaultMessage || 'Hello Sonjoy, I would like to schedule a strategy session for TikTok & Facebook Ads campaigns.';
   const whatsappUrl = `https://wa.me/${whatsappClean}?text=${encodeURIComponent(whatsappDefaultMsg)}`;
 
-  // Filter & sort nav links
-  const dynamicNavLinks = (header.navLinks && header.navLinks.length > 0)
-    ? header.navLinks.filter(l => l.enabled !== false).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
-    : DEFAULT_HEADER_SETTINGS.navLinks || [];
+  // Filter & sort nav links, ensuring Media Gallery is always included
+  const dynamicNavLinks: HeaderNavLink[] = (() => {
+    const rawLinks = (header.navLinks && header.navLinks.length > 0)
+      ? header.navLinks.filter(l => l.enabled !== false)
+      : [...(DEFAULT_HEADER_SETTINGS.navLinks || [])];
 
-  const handleNavClick = (id: string) => {
-    onNavigateSection(id);
+    const hasMediaGallery = rawLinks.some(l => 
+      l.id === 'nav-media-gallery' || 
+      l.sectionId === 'media-gallery' || 
+      l.route === '/media-gallery' ||
+      l.labelEn?.toLowerCase().includes('media gallery')
+    );
+
+    let finalLinks = [...rawLinks];
+    if (!hasMediaGallery) {
+      const mediaGalleryLink: HeaderNavLink = {
+        id: 'nav-media-gallery',
+        labelEn: 'Media Gallery',
+        labelBn: 'মিডিয়া গ্যালারি',
+        route: '/media-gallery',
+        sectionId: 'media-gallery',
+        enabled: true,
+        sortOrder: 3
+      };
+      const insertIndex = Math.min(2, finalLinks.length);
+      finalLinks.splice(insertIndex, 0, mediaGalleryLink);
+    }
+
+    return finalLinks.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  })();
+
+  const handleNavClick = (link: HeaderNavLink) => {
+    const target = link.route || link.sectionId || 'hero';
+    onNavigateSection(target);
     setMobileMenuOpen(false);
   };
 
@@ -76,7 +104,7 @@ export const Header: React.FC<HeaderProps> = ({
     if (header.ctaAction === 'WHATSAPP') {
       window.open(whatsappUrl, '_blank');
     } else if (header.ctaAction === 'CALCULATOR') {
-      handleNavClick('calculator');
+      onNavigateSection('calculator');
     } else if (header.ctaAction === 'CUSTOM_URL' && header.ctaCustomUrl) {
       window.open(header.ctaCustomUrl, '_blank');
     } else {
@@ -84,59 +112,71 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
+  const hasBengali = (text?: string) => Boolean(text && /[\u0980-\u09FF]/.test(text));
+
   const ctaLabel = language === 'en'
     ? (header.ctaTextEn || 'Book Free Audit')
-    : (header.ctaTextBn || settings.primaryCtaText || 'ফ্রি অডিট বুক করুন');
+    : (header.ctaTextBn || settings.primaryCtaTextBn || (hasBengali(settings.primaryCtaText) ? settings.primaryCtaText : 'ফ্রি স্ট্র্যাটেজি অডিট বুক করুন'));
+
+  const personalName = language === 'bn'
+    ? (settings.personalNameBn || settings.personalName || 'সঞ্জয় সরকার')
+    : (settings.personalName || 'Sonjoy Sarkar');
+
+  const brandName = language === 'bn'
+    ? (settings.brandNameBn || settings.brandName || 'ST Web & Ads Studio')
+    : (settings.brandName || 'ST Web & Ads Studio');
 
   const tagline = language === 'en'
-    ? (header.customTaglineEn || `${settings.personalName} • Performance Marketing`)
-    : (header.customTaglineBn || `${settings.personalName} • পারফরম্যান্স মার্কেটিং`);
+    ? (header.customTaglineEn || `${personalName} • Performance Marketing`)
+    : (header.customTaglineBn || `${personalName} • পারফরম্যান্স মার্কেটিং`);
 
   // Render Logo Component
-  const renderLogoBadge = () => {
+  const renderLogoBadge = (isMobile = false) => {
+    const sizeClasses = isMobile ? "w-8 h-8 rounded-xl text-sm" : "w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl text-base sm:text-lg";
+    
     if (header.logoType === 'IMAGE_URL' && header.logoImageUrl) {
       return (
         <img
           src={header.logoImageUrl}
           alt={settings.brandName || 'Brand Logo'}
-          className="object-contain rounded-xl shadow-xs transition-transform group-hover:scale-105"
-          style={{ width: header.logoWidth || 40, height: header.logoHeight || 40 }}
+          className={`object-contain shadow-xs transition-transform group-hover:scale-105 shrink-0 ${isMobile ? 'w-8 h-8 rounded-xl' : 'w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl'}`}
+          style={!isMobile && header.logoWidth ? { width: header.logoWidth, height: header.logoHeight || header.logoWidth } : undefined}
         />
       );
     }
     return (
-      <div className="w-10 h-10 rounded-2xl bg-[#4A5D3B] text-[#FDFCF8] flex items-center justify-center font-serif text-lg font-bold shadow-xs transition-transform group-hover:scale-105">
+      <div className={`${sizeClasses} bg-[#4A5D3B] text-[#FDFCF8] flex items-center justify-center font-serif font-bold shadow-xs transition-transform group-hover:scale-105 shrink-0 select-none`}>
         {header.logoText || 'ST'}
       </div>
     );
   };
 
   return (
-    <header className={`${header.sticky !== false ? 'sticky top-0' : 'relative'} z-40 bg-[#FDFCF8]/95 backdrop-blur-md border-b border-[#D9DED1] transition-all`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+    <header className={`${header.sticky !== false ? 'sticky top-0' : 'relative'} z-40 bg-[#FDFCF8]/95 backdrop-blur-md border-b border-[#D9DED1]/80 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] transition-all`}>
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 lg:gap-4">
         
         {/* Brand & Personal Signature */}
         <div 
-          onClick={() => handleNavClick('hero')} 
-          className="cursor-pointer flex items-center gap-3 group"
+          onClick={() => onNavigateSection('hero')} 
+          className="cursor-pointer flex items-center gap-2.5 sm:gap-3 group shrink-0 min-w-0"
           id="header-brand-logo"
         >
           {/* Desktop Logo Rendering */}
-          <div className="hidden sm:flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-2.5 sm:gap-3 shrink-0">
             {header.showLogo && (header.logoDisplayMode === 'BOTH' || header.logoDisplayMode === 'LOGO_ONLY') && (
-              renderLogoBadge()
+              renderLogoBadge(false)
             )}
 
             {(header.logoDisplayMode === 'BOTH' || header.logoDisplayMode === 'NAME_ONLY') && (
-              <div>
+              <div className="flex flex-col justify-center min-w-0">
                 {header.showBrandName && (
-                  <div className="font-serif text-xl font-bold tracking-tight text-[#2C3327] group-hover:text-[#4A5D3B] transition-colors flex items-center gap-1.5">
-                    <span>{settings.brandName}</span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#E2725B]"></span>
+                  <div className="font-serif text-base md:text-lg lg:text-xl font-bold tracking-tight text-[#2C3327] group-hover:text-[#4A5D3B] transition-colors flex items-center gap-1.5 whitespace-nowrap leading-tight">
+                    <span>{brandName}</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#E2725B] shrink-0"></span>
                   </div>
                 )}
                 {header.showTagline && (
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-[#8A957F] font-semibold">
+                  <div className="text-[10px] md:text-[11px] uppercase tracking-[0.14em] text-[#8A957F] font-semibold whitespace-nowrap leading-none mt-1">
                     {tagline}
                   </div>
                 )}
@@ -145,20 +185,20 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Mobile Logo Rendering */}
-          <div className="flex sm:hidden items-center gap-2.5">
+          <div className="flex sm:hidden items-center gap-2 shrink-0 min-w-0">
             {header.showLogo && (header.mobileLogoDisplayMode === 'BOTH' || header.mobileLogoDisplayMode === 'LOGO_ONLY') && (
-              renderLogoBadge()
+              renderLogoBadge(true)
             )}
 
             {(header.mobileLogoDisplayMode === 'BOTH' || header.mobileLogoDisplayMode === 'NAME_ONLY') && (
-              <div>
-                <div className="font-serif text-lg font-bold tracking-tight text-[#2C3327] group-hover:text-[#4A5D3B] transition-colors flex items-center gap-1">
-                  <span>{settings.brandName}</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#E2725B]"></span>
+              <div className="flex flex-col justify-center min-w-0">
+                <div className="font-serif text-sm font-bold tracking-tight text-[#2C3327] group-hover:text-[#4A5D3B] transition-colors flex items-center gap-1 whitespace-nowrap leading-tight">
+                  <span className="truncate max-w-[170px] xs:max-w-[210px]">{brandName}</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#E2725B] shrink-0"></span>
                 </div>
                 {header.showTagline && (
-                  <div className="text-[9px] uppercase tracking-wider text-[#8A957F] font-medium">
-                    {settings.personalName}
+                  <div className="text-[9px] uppercase tracking-wider text-[#8A957F] font-medium whitespace-nowrap leading-none mt-0.5 truncate max-w-[170px] xs:max-w-[210px]">
+                    {personalName}
                   </div>
                 )}
               </div>
@@ -167,12 +207,12 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-sm font-medium text-[#5C6652]" id="desktop-nav">
+        <nav className="hidden lg:flex items-center gap-1.5 xl:gap-2.5 2xl:gap-4 text-sm font-medium text-[#5C6652]" id="desktop-nav">
           {dynamicNavLinks.map((item) => (
             <button
               key={item.id}
-              onClick={() => handleNavClick(item.sectionId)}
-              className="hover:text-[#2C3327] transition-colors relative py-1 focus:outline-none whitespace-nowrap text-xs font-semibold tracking-wide"
+              onClick={() => handleNavClick(item)}
+              className="px-2.5 py-1.5 rounded-lg text-xs 2xl:text-[13px] font-semibold tracking-wide text-[#5C6652] hover:text-[#2C3327] hover:bg-[#F5F1EB]/90 transition-all whitespace-nowrap focus:outline-none"
             >
               {language === 'en' ? item.labelEn : item.labelBn}
             </button>
@@ -180,15 +220,15 @@ export const Header: React.FC<HeaderProps> = ({
         </nav>
 
         {/* Header Actions */}
-        <div className="hidden sm:flex items-center gap-2.5">
+        <div className="hidden sm:flex items-center gap-1.5 lg:gap-2 shrink-0">
           {/* Language Switcher */}
           {header.showLanguageSwitcher !== false && (
-            <div className="flex items-center bg-[#F5F1EB] p-1 rounded-full border border-[#D9DED1] text-xs font-semibold" id="language-switcher-desktop">
+            <div className="flex items-center bg-[#F5F1EB] p-0.5 rounded-full border border-[#D9DED1] text-xs font-semibold shrink-0" id="language-switcher-desktop">
               <button
                 onClick={() => setLanguage('en')}
-                className={`px-2.5 py-1 rounded-full transition-all flex items-center gap-1 ${
+                className={`px-2.5 py-1 rounded-full transition-all flex items-center gap-1 text-[11px] font-bold ${
                   language === 'en'
-                    ? 'bg-[#4A5D3B] text-[#FDFCF8] shadow-xs font-bold'
+                    ? 'bg-[#4A5D3B] text-[#FDFCF8] shadow-xs'
                     : 'text-[#5C6652] hover:text-[#2C3327]'
                 }`}
                 title="Switch to English"
@@ -198,9 +238,9 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
               <button
                 onClick={() => setLanguage('bn')}
-                className={`px-2.5 py-1 rounded-full transition-all ${
+                className={`px-2.5 py-1 rounded-full transition-all text-[11px] font-bold ${
                   language === 'bn'
-                    ? 'bg-[#4A5D3B] text-[#FDFCF8] shadow-xs font-bold'
+                    ? 'bg-[#4A5D3B] text-[#FDFCF8] shadow-xs'
                     : 'text-[#5C6652] hover:text-[#2C3327]'
                 }`}
                 title="বাংলায় পরিবর্তন করুন"
@@ -214,8 +254,8 @@ export const Header: React.FC<HeaderProps> = ({
           {header.showAdminButton !== false && (
             <button
               onClick={onOpenAdmin}
-              className="p-2.5 rounded-full border border-[#D9DED1] text-[#5C6652] hover:text-[#2C3327] hover:bg-[#E8EAE2] transition-colors"
-              title={language === 'en' ? 'Admin Portal' : 'অ্যাডমিন পোর্টাল'}
+              className="p-2 rounded-full border border-[#D9DED1] bg-[#FDFCF8] text-[#5C6652] hover:text-[#2C3327] hover:bg-[#E8EAE2] transition-colors shrink-0"
+              title={language === 'en' ? 'Admin Studio' : 'অ্যাডমিন স্টুডিও'}
               id="header-admin-btn"
             >
               <Lock className="w-4 h-4" />
@@ -228,7 +268,7 @@ export const Header: React.FC<HeaderProps> = ({
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2.5 rounded-full border border-[#D9DED1] text-[#4A5D3B] hover:bg-[#E8EAE2] transition-colors"
+              className="p-2 rounded-full border border-[#D9DED1] bg-[#FDFCF8] text-[#4A5D3B] hover:bg-[#E8EAE2] transition-colors shrink-0"
               title={language === 'en' ? 'Chat on WhatsApp' : 'WhatsApp এ মেসেজ দিন'}
               id="header-whatsapp-btn"
             >
@@ -240,22 +280,22 @@ export const Header: React.FC<HeaderProps> = ({
           {header.ctaEnabled !== false && (
             <button
               onClick={handleCtaClick}
-              className="bg-[#4A5D3B] hover:bg-[#3A4533] text-[#FDFCF8] px-4 py-2.5 rounded-full text-xs font-semibold tracking-wide shadow-xs transition-all flex items-center gap-2 whitespace-nowrap"
+              className="bg-[#4A5D3B] hover:bg-[#3A4533] text-[#FDFCF8] px-3.5 lg:px-4 py-2 rounded-full text-xs font-bold tracking-wide shadow-xs hover:shadow transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 group"
               id="header-primary-cta"
             >
               <span>{ctaLabel}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </button>
           )}
         </div>
 
         {/* Mobile Controls (Lang + Menu) */}
-        <div className="flex sm:hidden items-center gap-2">
+        <div className="flex sm:hidden items-center gap-1.5 shrink-0">
           {/* Mobile Language Switcher */}
           {header.showLanguageSwitcher !== false && (
             <button
               onClick={toggleLanguage}
-              className="px-2.5 py-1.5 rounded-xl border border-[#D9DED1] bg-[#F5F1EB] text-xs font-bold text-[#4A5D3B] flex items-center gap-1"
+              className="px-2.5 py-1.5 rounded-xl border border-[#D9DED1] bg-[#F5F1EB] text-xs font-bold text-[#4A5D3B] flex items-center gap-1 shrink-0"
               title="Switch Language"
             >
               <Globe className="w-3.5 h-3.5" />
@@ -265,7 +305,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2.5 rounded-xl border border-[#D9DED1] text-[#2C3327] hover:bg-[#F5F1EB]"
+            className="p-2 rounded-xl border border-[#D9DED1] text-[#2C3327] hover:bg-[#F5F1EB] shrink-0"
             id="mobile-menu-toggle"
             aria-label="Toggle menu"
           >
@@ -276,26 +316,26 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="sm:hidden bg-[#FDFCF8] border-b border-[#D9DED1] px-6 py-6 space-y-4 shadow-lg animate-fadeIn">
+        <div className="sm:hidden bg-[#FDFCF8] border-b border-[#D9DED1] px-5 py-5 space-y-4 shadow-xl animate-fadeIn">
           {/* Language Selector Inside Mobile Menu */}
           {header.showLanguageSwitcher !== false && (
-            <div className="flex items-center justify-between pb-3 border-b border-[#D9DED1]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#D9DED1]/70">
               <span className="text-xs font-semibold text-[#5C6652]">
-                {language === 'en' ? 'Language / ভাষা' : 'ভাষা / Language'}:
+                {language === 'en' ? 'Language' : 'ভাষা'}:
               </span>
-              <div className="flex items-center bg-[#F5F1EB] p-1 rounded-full border border-[#D9DED1] text-xs">
+              <div className="flex items-center bg-[#F5F1EB] p-0.5 rounded-full border border-[#D9DED1] text-xs">
                 <button
                   onClick={() => setLanguage('en')}
-                  className={`px-3 py-1 rounded-full font-bold ${
-                    language === 'en' ? 'bg-[#4A5D3B] text-white' : 'text-[#5C6652]'
+                  className={`px-3 py-1 rounded-full font-bold transition-all ${
+                    language === 'en' ? 'bg-[#4A5D3B] text-white shadow-xs' : 'text-[#5C6652]'
                   }`}
                 >
                   English
                 </button>
                 <button
                   onClick={() => setLanguage('bn')}
-                  className={`px-3 py-1 rounded-full font-bold ${
-                    language === 'bn' ? 'bg-[#4A5D3B] text-white' : 'text-[#5C6652]'
+                  className={`px-3 py-1 rounded-full font-bold transition-all ${
+                    language === 'bn' ? 'bg-[#4A5D3B] text-white shadow-xs' : 'text-[#5C6652]'
                   }`}
                 >
                   বাংলা
@@ -304,12 +344,12 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           )}
 
-          <nav className="flex flex-col space-y-2">
+          <nav className="flex flex-col space-y-1">
             {dynamicNavLinks.map((item) => (
               <button
                 key={item.id}
-                onClick={() => handleNavClick(item.sectionId)}
-                className="text-left py-2.5 text-sm font-medium text-[#2C3327] border-b border-[#D9DED1]/40"
+                onClick={() => handleNavClick(item)}
+                className="text-left px-3 py-2.5 text-sm font-semibold text-[#2C3327] hover:bg-[#F5F1EB] rounded-xl transition-colors"
               >
                 {language === 'en' ? item.labelEn : item.labelBn}
               </button>
@@ -320,7 +360,7 @@ export const Header: React.FC<HeaderProps> = ({
                   onOpenAdmin();
                   setMobileMenuOpen(false);
                 }}
-                className="text-left py-2.5 text-sm font-semibold text-[#4A5D3B] flex items-center gap-2 border-b border-[#D9DED1]/40"
+                className="text-left px-3 py-2.5 text-sm font-semibold text-[#4A5D3B] hover:bg-[#F5F1EB] rounded-xl flex items-center gap-2 transition-colors"
               >
                 <Lock className="w-4 h-4" />
                 <span>{language === 'en' ? 'Admin Studio' : 'অ্যাডমিন স্টুডিও'}</span>
@@ -328,14 +368,14 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </nav>
 
-          <div className="pt-2 flex flex-col gap-3">
+          <div className="pt-2 flex flex-col gap-2.5">
             {header.ctaEnabled !== false && (
               <button
                 onClick={() => {
                   handleCtaClick();
                   setMobileMenuOpen(false);
                 }}
-                className="w-full bg-[#4A5D3B] text-[#FDFCF8] py-3 rounded-full text-sm font-semibold flex items-center justify-center gap-2 shadow-xs"
+                className="w-full bg-[#4A5D3B] hover:bg-[#3A4533] text-[#FDFCF8] py-3 rounded-full text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all"
               >
                 <span>{ctaLabel}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -347,7 +387,7 @@ export const Header: React.FC<HeaderProps> = ({
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full border border-[#D9DED1] text-[#4A5D3B] py-2.5 rounded-full text-xs font-semibold flex items-center justify-center gap-2"
+                className="w-full border border-[#D9DED1] bg-[#FDFCF8] hover:bg-[#F5F1EB] text-[#4A5D3B] py-2.5 rounded-full text-xs font-bold flex items-center justify-center gap-2 transition-all"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span>{language === 'en' ? 'Chat Directly on WhatsApp' : 'WhatsApp-এ সরাসরি কথা বলুন'}</span>

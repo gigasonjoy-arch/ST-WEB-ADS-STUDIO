@@ -23,6 +23,7 @@ import {
   X
 } from 'lucide-react';
 import { VideoEmbedPlayer } from '../common/VideoEmbedPlayer';
+import { MediaGalleryPage } from './MediaGalleryPage';
 
 interface CustomPageViewProps {
   page: CustomPage;
@@ -81,6 +82,16 @@ export const CustomPageView: React.FC<CustomPageViewProps> = ({
   const availableIndustries = ['ALL', ...Array.from(new Set(allCaseStudies.map(c => c.industry).filter(Boolean)))];
 
   const isDraftOrDisabled = page.status !== 'PUBLISHED';
+
+  if (page.pageType === 'MEDIA_GALLERY') {
+    return (
+      <MediaGalleryPage
+        onBackToHome={onBackToHome}
+        onOpenLeadForm={handleOpenLead}
+        onNavigateToPage={onNavigateToPage}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[var(--theme-bg,#FDFCF8)] text-[var(--theme-text,#2C3327)] py-8 sm:py-12 animate-fadeIn">

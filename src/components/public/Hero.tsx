@@ -9,6 +9,8 @@ interface HeroProps {
   onScrollToCalculator: () => void;
 }
 
+const hasBengali = (text?: string) => Boolean(text && /[\u0980-\u09FF]/.test(text));
+
 export const Hero: React.FC<HeroProps> = ({
   settings,
   onOpenLeadForm,
@@ -16,9 +18,81 @@ export const Hero: React.FC<HeroProps> = ({
 }) => {
   const { language, t } = useLanguage();
 
+  const isBn = language === 'bn';
+
+  const headline = isBn
+    ? (settings.heroHeadlineBn || (hasBengali(settings.heroHeadline) ? settings.heroHeadline : t('hero.headline')))
+    : (settings.heroHeadlineEn || (!hasBengali(settings.heroHeadline) ? settings.heroHeadline : t('hero.headline')));
+
+  const subheadline = isBn
+    ? (settings.heroSubheadlineBn || (hasBengali(settings.heroSubheadline) ? settings.heroSubheadline : t('hero.subheadline')))
+    : (settings.heroSubheadlineEn || (!hasBengali(settings.heroSubheadline) ? settings.heroSubheadline : t('hero.subheadline')));
+
+  const titleBadge = isBn
+    ? (settings.titleBadgeBn || (hasBengali(settings.titleBadge) ? settings.titleBadge : t('hero.badge')))
+    : (settings.titleBadgeEn || (!hasBengali(settings.titleBadge) ? settings.titleBadge : t('hero.badge')));
+
+  const primaryCta = isBn
+    ? (settings.primaryCtaTextBn || (hasBengali(settings.primaryCtaText) ? settings.primaryCtaText : t('hero.cta.primary')))
+    : (settings.primaryCtaTextEn || (!hasBengali(settings.primaryCtaText) ? settings.primaryCtaText : t('hero.cta.primary')));
+
+  const secondaryCta = isBn
+    ? (settings.secondaryCtaTextBn || (hasBengali(settings.secondaryCtaText) ? settings.secondaryCtaText : t('hero.cta.secondary')))
+    : (settings.secondaryCtaTextEn || (!hasBengali(settings.secondaryCtaText) ? settings.secondaryCtaText : t('hero.cta.secondary')));
+
+  const heroBadge = isBn
+    ? (settings.heroBadgeTextBn || (hasBengali(settings.heroBadgeText) ? settings.heroBadgeText : t('hero.verifiedPractitioner')))
+    : (settings.heroBadgeTextEn || (!hasBengali(settings.heroBadgeText) ? settings.heroBadgeText : t('hero.verifiedPractitioner')));
+
+  const personalName = isBn
+    ? (settings.personalNameBn || settings.personalName || 'সঞ্জয় সরকার')
+    : (settings.personalName || 'Sonjoy Sarkar');
+
+  const sonjoyRole = isBn
+    ? (settings.sonjoyRoleBn || (hasBengali(settings.sonjoyRole) ? settings.sonjoyRole : 'পারফরম্যান্স অ্যাডস স্পেশালিস্ট'))
+    : (settings.sonjoyRoleEn || (!hasBengali(settings.sonjoyRole) ? settings.sonjoyRole : 'Performance Ads & Growth Specialist'));
+
+  const specialistFocusTitle = isBn
+    ? (settings.heroSpecialistFocusTitleBn || t('hero.profile.focus'))
+    : (settings.heroSpecialistFocusTitleEn || (!hasBengali(settings.heroSpecialistFocusTitle) ? settings.heroSpecialistFocusTitle : 'SPECIALIST FOCUS:'));
+
+  const sonjoyBio = isBn
+    ? (settings.sonjoyBioBn || (hasBengali(settings.sonjoyBio) ? settings.sonjoyBio : t('hero.profile.bio')))
+    : (settings.sonjoyBioEn || (!hasBengali(settings.sonjoyBio) ? settings.sonjoyBio : t('hero.profile.bio')));
+
+  const statGroups = isBn
+    ? (settings.heroStatAdGroupsBn || (hasBengali(settings.heroStatAdGroups) ? settings.heroStatAdGroups : '১২৬টি অ্যাড গ্রুপ'))
+    : (settings.heroStatAdGroups || '126 Groups');
+
+  const statImpressions = isBn
+    ? (settings.heroStatImpressionsBn || (hasBengali(settings.heroStatImpressions) ? settings.heroStatImpressions : '৩.৬৬ মিলিয়ন+'))
+    : (settings.heroStatImpressions || '3.66M+');
+
+  const statConversations = isBn
+    ? (settings.heroStatConversationsBn || (hasBengali(settings.heroStatConversations) ? settings.heroStatConversations : '১৮,৬৯৮টি'))
+    : (settings.heroStatConversations || '18,698');
+
+  const statLeads = isBn
+    ? (settings.heroStatLeadsBn || (hasBengali(settings.heroStatLeads) ? settings.heroStatLeads : '১,৩১৬টি'))
+    : (settings.heroStatLeads || '1,316');
+
+  const primaryPlatform = isBn
+    ? (settings.heroPrimaryPlatformBn || settings.heroPrimaryPlatform || 'TikTok Ads')
+    : (settings.heroPrimaryPlatform || 'TikTok Ads');
+
+  const secondaryPlatform = isBn
+    ? (settings.heroSecondaryPlatformBn || settings.heroSecondaryPlatform || 'Facebook Ads')
+    : (settings.heroSecondaryPlatform || 'Facebook Ads');
+
+  const targetRegion = isBn
+    ? (settings.heroTargetRegionBn || 'মার্কেট: বাংলাদেশ')
+    : (settings.heroTargetRegion || 'Bangladesh');
+
   const whatsappRaw = settings?.whatsapp?.number || (settings as any)?.whatsappNumber || '+8801815124970';
   const whatsappClean = whatsappRaw ? whatsappRaw.replace(/\D/g, '') : '8801815124970';
-  const whatsappDefaultMsg = settings?.whatsapp?.defaultMessage || 'Hello Sonjoy, I would like to schedule a strategy session for TikTok & Facebook Ads campaigns.';
+  const whatsappDefaultMsg = isBn
+    ? 'হ্যালো সঞ্জয়, আমি টিকটক ও ফেসবুক অ্যাডস ক্যাম্পেইনের জন্য একটি স্ট্র্যাটেজি সেশন বুক করতে চাই।'
+    : (settings?.whatsapp?.defaultMessage || 'Hello Sonjoy, I would like to schedule a strategy session for TikTok & Facebook Ads campaigns.');
   const whatsappUrl = `https://wa.me/${whatsappClean}?text=${encodeURIComponent(whatsappDefaultMsg)}`;
 
   return (
@@ -36,19 +110,19 @@ export const Hero: React.FC<HeroProps> = ({
             {/* Trust Pill / Verification Badge */}
             <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#F5F1EB] border border-[#D9DED1] text-xs text-[#4A5D3B] font-medium shadow-xs">
               <span className="w-2 h-2 rounded-full bg-[#E2725B] animate-pulse"></span>
-              <span className="font-semibold">{settings.personalName}</span>
+              <span className="font-semibold">{personalName}</span>
               <span className="text-[#8A957F]">•</span>
-              <span className="text-[#5C6652]">{language === 'en' ? 'Performance Marketing Specialist (TikTok & Meta Ads)' : settings.titleBadge}</span>
+              <span className="text-[#5C6652]">{titleBadge}</span>
             </div>
 
             {/* Main Headline */}
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-[#2C3327] font-normal leading-[1.25] tracking-tight">
-              {language === 'en' ? t('hero.headline') : settings.heroHeadline}
+              {headline}
             </h1>
 
             {/* Subheadline & Honest Positioning */}
             <p className="text-base sm:text-lg text-[#5C6652] leading-relaxed max-w-2xl">
-              {language === 'en' ? t('hero.subheadline') : settings.heroSubheadline}
+              {subheadline}
             </p>
 
             {/* Core Methodology Pillars */}
@@ -82,20 +156,20 @@ export const Hero: React.FC<HeroProps> = ({
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-4">
               <button
                 onClick={onOpenLeadForm}
-                className="bg-[#4A5D3B] hover:bg-[#3A4533] text-[#FDFCF8] px-7 py-4 rounded-full text-sm font-semibold tracking-wide shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-3 group"
+                className="bg-[#4A5D3B] hover:bg-[#3A4533] text-[#FDFCF8] px-7 py-4 rounded-full text-sm font-semibold tracking-wide shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-3 group cursor-pointer"
                 id="hero-primary-cta"
               >
-                <span>{language === 'en' ? 'Book Free Strategy Audit' : settings.primaryCtaText}</span>
+                <span>{primaryCta}</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </button>
 
               <button
                 onClick={onScrollToCalculator}
-                className="bg-[#FFFFFF] hover:bg-[#F5F1EB] text-[#2C3327] border border-[#D9DED1] px-6 py-4 rounded-full text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+                className="bg-[#FFFFFF] hover:bg-[#F5F1EB] text-[#2C3327] border border-[#D9DED1] px-6 py-4 rounded-full text-sm font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 id="hero-calculator-cta"
               >
                 <Calculator className="w-4 h-4 text-[#4A5D3B]" />
-                <span>{language === 'en' ? 'Predict Ads ROI' : settings.secondaryCtaText}</span>
+                <span>{secondaryCta}</span>
               </button>
 
               <a
@@ -106,7 +180,7 @@ export const Hero: React.FC<HeroProps> = ({
                 id="hero-whatsapp-link"
               >
                 <MessageCircle className="w-4 h-4 text-[#4A5D3B]" />
-                <span>{language === 'en' ? 'Talk on WhatsApp' : 'WhatsApp এ কথা বলুন'}</span>
+                <span>{isBn ? 'WhatsApp এ কথা বলুন' : 'Talk on WhatsApp'}</span>
               </a>
             </div>
 
@@ -121,26 +195,26 @@ export const Hero: React.FC<HeroProps> = ({
                 <div className="w-20 h-20 rounded-2xl bg-[#E8EAE2] overflow-hidden border-2 border-[#8A957F]/40 shrink-0 shadow-inner">
                   <img
                     src={settings.sonjoyImage}
-                    alt={settings.personalName}
+                    alt={personalName}
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div>
                   <div className="inline-block px-2.5 py-0.5 bg-[#4A5D3B] rounded-full text-[10px] uppercase tracking-widest text-[#FDFCF8] font-bold mb-1.5 shadow-2xs">
-                    {settings.heroBadgeText || t('hero.verifiedPractitioner')}
+                    {heroBadge}
                   </div>
-                  <h2 className="text-xl font-serif text-[#FDFCF8] font-bold">{settings.personalName}</h2>
-                  <p className="text-xs text-[#8A957F]">{settings.sonjoyRole || (language === 'en' ? 'Performance Ads & Growth Specialist' : 'পারফরম্যান্স অ্যাডস স্পেশালিস্ট')}</p>
+                  <h2 className="text-xl font-serif text-[#FDFCF8] font-bold">{personalName}</h2>
+                  <p className="text-xs text-[#8A957F]">{sonjoyRole}</p>
                 </div>
               </div>
 
               {/* Bio Summary */}
               <div className="py-6">
                 <div className="text-[11px] uppercase tracking-wider font-bold text-[#8A957F] mb-2">
-                  {settings.heroSpecialistFocusTitle || t('hero.profile.focus')}
+                  {specialistFocusTitle}
                 </div>
                 <p className="text-xs leading-relaxed text-[#D9DED1]">
-                  {language === 'en' ? t('hero.profile.bio') : settings.sonjoyBio}
+                  {sonjoyBio}
                 </p>
               </div>
 
@@ -154,19 +228,19 @@ export const Hero: React.FC<HeroProps> = ({
                 <div className="grid grid-cols-2 gap-4 pt-1">
                   <div>
                     <div className="text-[10px] text-[#8A957F] uppercase font-bold">{t('hero.stats.groups')}</div>
-                    <div className="text-xl font-serif font-bold text-[#FDFCF8]">{settings.heroStatAdGroups || '126 Groups'}</div>
+                    <div className="text-xl font-serif font-bold text-[#FDFCF8]">{statGroups}</div>
                   </div>
                   <div>
                     <div className="text-[10px] text-[#8A957F] uppercase font-bold">{t('hero.stats.impressions')}</div>
-                    <div className="text-xl font-serif font-bold text-[#FDFCF8]">{settings.heroStatImpressions || '3.66M+'}</div>
+                    <div className="text-xl font-serif font-bold text-[#FDFCF8]">{statImpressions}</div>
                   </div>
                   <div>
                     <div className="text-[10px] text-[#8A957F] uppercase font-bold">{t('hero.stats.conversations')}</div>
-                    <div className="text-xl font-serif font-bold text-[#FDFCF8]">{settings.heroStatConversations || '18,698'}</div>
+                    <div className="text-xl font-serif font-bold text-[#FDFCF8]">{statConversations}</div>
                   </div>
                   <div>
                     <div className="text-[10px] text-[#8A957F] uppercase font-bold">{t('hero.stats.leads')}</div>
-                    <div className="text-xl font-serif font-bold text-[#FDFCF8]">{settings.heroStatLeads || '1,316'}</div>
+                    <div className="text-xl font-serif font-bold text-[#FDFCF8]">{statLeads}</div>
                   </div>
                 </div>
 
@@ -177,11 +251,11 @@ export const Hero: React.FC<HeroProps> = ({
 
               {/* Target Platforms */}
               <div className="pt-6 flex items-center justify-between text-xs text-[#8A957F]">
-                <span>{t('hero.platforms.primary')}: <strong className="text-[#FDFCF8]">{settings.heroPrimaryPlatform || 'TikTok Ads'}</strong></span>
+                <span>{t('hero.platforms.primary')}: <strong className="text-[#FDFCF8]">{primaryPlatform}</strong></span>
                 <span>•</span>
-                <span>{t('hero.platforms.secondary')}: <strong className="text-[#FDFCF8]">{settings.heroSecondaryPlatform || 'Facebook Ads'}</strong></span>
+                <span>{t('hero.platforms.secondary')}: <strong className="text-[#FDFCF8]">{secondaryPlatform}</strong></span>
                 <span>•</span>
-                <span><strong className="text-[#FDFCF8]">{settings.heroTargetRegion || 'Bangladesh'}</strong></span>
+                <span><strong className="text-[#FDFCF8]">{targetRegion}</strong></span>
               </div>
 
             </div>

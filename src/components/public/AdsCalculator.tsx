@@ -264,7 +264,7 @@ I would like to consult on launching high-ROAS campaigns.`;
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-[#2C3327] flex items-center gap-1.5">
                   <DollarSign className="w-3.5 h-3.5 text-[#4A5D3B]" />
-                  <span>Monthly Advertising Budget:</span>
+                  <span>{language === 'en' ? 'Monthly Advertising Budget:' : 'মাসিক বিজ্ঞাপনী বাজেট:'}</span>
                 </label>
                 <div className="text-right">
                   <span className="text-base font-serif font-bold text-[#4A5D3B]">
@@ -345,10 +345,12 @@ I would like to consult on launching high-ROAS campaigns.`;
                 <div>
                   <label className="text-xs font-bold text-[#2C3327] flex items-center gap-1.5">
                     <Tag className="w-3.5 h-3.5 text-[#E2725B]" />
-                    <span>Average Product Price / Ticket Size:</span>
+                    <span>{language === 'en' ? 'Average Product Price / Ticket Size:' : 'গড় প্রোডাক্ট মূল্য / অর্ডার ভ্যালু:'}</span>
                   </label>
                   <div className="text-[11px] text-[#5C6652]">
-                    Price tier dynamically influences buyer conversion velocity & ticket ROAS.
+                    {language === 'en' 
+                      ? 'Price tier dynamically influences buyer conversion velocity & ticket ROAS.' 
+                      : 'প্রোডাক্টের প্রাইস টায়ার কনভার্সন রেট ও সম্ভাব্য আরওআই-তে প্রভাব ফেলে।'}
                   </div>
                 </div>
                 <div className="text-right">
@@ -361,11 +363,11 @@ I would like to consult on launching high-ROAS campaigns.`;
               {/* Quick Price Preset Chips */}
               <div className="flex flex-wrap gap-1.5">
                 {[
-                  { label: '৳350 (Low Ticket)', val: 350 },
-                  { label: '৳850 (Affordable)', val: 850 },
-                  { label: '৳1,500 (Mid-Standard)', val: 1500 },
-                  { label: '৳2,800 (Premium)', val: 2800 },
-                  { label: '৳5,500 (Luxury)', val: 5500 }
+                  { label: language === 'en' ? '৳350 (Low Ticket)' : '৳৩৫০ (কম মূল্য)', val: 350 },
+                  { label: language === 'en' ? '৳850 (Affordable)' : '৳৮৫০ (সাশ্রয়ী)', val: 850 },
+                  { label: language === 'en' ? '৳1,500 (Mid-Standard)' : '৳১,৫০০ (স্ট্যান্ডার্ড)', val: 1500 },
+                  { label: language === 'en' ? '৳2,800 (Premium)' : '৳২,৮০০ (প্রিমিয়াম)', val: 2800 },
+                  { label: language === 'en' ? '৳5,500 (Luxury)' : '৳৫,৫০০ (লাক্সারি)', val: 5500 }
                 ].map((tier) => (
                   <button
                     key={tier.val}
@@ -398,7 +400,7 @@ I would like to consult on launching high-ROAS campaigns.`;
                 <div className="flex items-center justify-between text-[11px] pt-1 text-[#5C6652]">
                   <span className="font-semibold text-[#4A5D3B] flex items-center gap-1">
                     <Zap className="w-3 h-3" />
-                    Tier: {activePriceTier.labelEn} ({activePriceTier.labelBn})
+                    Tier: {language === 'en' ? activePriceTier.labelEn : (activePriceTier.labelBn || activePriceTier.labelEn)}
                   </span>
                   <span className="text-[10px] bg-[#E8EAE2] px-2 py-0.5 rounded-full font-medium">
                     CVR Multiplier: {activePriceTier.cvrMultiplier}x
@@ -410,15 +412,23 @@ I would like to consult on launching high-ROAS campaigns.`;
             {/* 3. Platform & Objective Selection */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#2C3327]">Target Platform:</label>
+                <label className="text-xs font-bold text-[#2C3327]">
+                  {language === 'en' ? 'Target Platform:' : 'বিজ্ঞাপন প্ল্যাটফর্ম নির্বাচন:'}
+                </label>
                 <select
                   value={selectedPlatform}
                   onChange={(e) => setSelectedPlatform(e.target.value as any)}
                   className="w-full bg-[#FDFCF8] border border-[#D9DED1] rounded-2xl px-3.5 py-2.5 text-xs text-[#2C3327] font-medium focus:outline-none focus:border-[#4A5D3B]"
                 >
-                  <option value="Compare TikTok vs Facebook">Compare TikTok vs Facebook</option>
-                  <option value="TikTok">TikTok Ads Only</option>
-                  <option value="Facebook">Facebook Ads Only</option>
+                  <option value="Compare TikTok vs Facebook">
+                    {language === 'en' ? 'Compare TikTok vs Facebook' : 'TikTok ও Facebook তুলনা'}
+                  </option>
+                  <option value="TikTok">
+                    {language === 'en' ? 'TikTok Ads Only' : 'শুধুমাত্র TikTok Ads'}
+                  </option>
+                  <option value="Facebook">
+                    {language === 'en' ? 'Facebook Ads Only' : 'শুধুমাত্র Facebook Ads'}
+                  </option>
                 </select>
               </div>
 
@@ -451,7 +461,9 @@ I would like to consult on launching high-ROAS campaigns.`;
             {/* 4. Product Category & Location */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#2C3327]">Product Category:</label>
+                <label className="text-xs font-bold text-[#2C3327]">
+                  {language === 'en' ? 'Product Category:' : 'প্রোডাক্ট ক্যাটাগরি:'}
+                </label>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
@@ -464,7 +476,9 @@ I would like to consult on launching high-ROAS campaigns.`;
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#2C3327]">Target Geography:</label>
+                <label className="text-xs font-bold text-[#2C3327]">
+                  {language === 'en' ? 'Target Geography:' : 'টার্গেট লোকেশন:'}
+                </label>
                 <select
                   value={selectedLocation}
                   onChange={(e) => setSelectedLocation(e.target.value)}
@@ -479,12 +493,14 @@ I would like to consult on launching high-ROAS campaigns.`;
 
             {/* 5. Creative Type Selector */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#2C3327]">Creative Asset Format:</label>
+              <label className="text-xs font-bold text-[#2C3327]">
+                {language === 'en' ? 'Creative Asset Format:' : 'ক্রিয়েটিভ ফরম্যাট নির্বাচন:'}
+              </label>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { id: 'UGC', label: 'UGC / Creator Video (+25% ROAS)', icon: Smartphone },
-                  { id: 'Product Video', label: 'Product Video (+15% ROAS)', icon: Zap },
-                  { id: 'Image', label: 'Static Image Banner', icon: FileText }
+                  { id: 'UGC', label: language === 'en' ? 'UGC / Video (+25% ROAS)' : 'UGC / ভিডিও (+২৫% ROAS)', icon: Smartphone },
+                  { id: 'Product Video', label: language === 'en' ? 'Product Video (+15% ROAS)' : 'ডেমো ভিডিও (+১৫% ROAS)', icon: Zap },
+                  { id: 'Image', label: language === 'en' ? 'Static Image Banner' : 'ইমেজ ব্যানার', icon: FileText }
                 ].map((cr) => {
                   const Icon = cr.icon;
                   return (
@@ -519,14 +535,16 @@ I would like to consult on launching high-ROAS campaigns.`;
                 <div>
                   <div className="text-[10px] uppercase font-bold text-[#E2725B] tracking-widest flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>Real-Time Forecast Engine</span>
+                    <span>{language === 'en' ? 'Real-Time Forecast Engine' : 'রিয়েল-টাইম ফোরকাস্ট ইঞ্জিন'}</span>
                   </div>
                   <h3 className="text-xl font-serif font-bold text-[#FDFCF8] mt-0.5">
-                    Estimated Campaign Outcomes
+                    {language === 'en' ? 'Estimated Campaign Outcomes' : 'সম্ভাব্য ক্যাম্পেইন ফলাফল'}
                   </h3>
                 </div>
                 <div className="text-right">
-                  <div className="text-[10px] uppercase font-bold text-[#8A957F]">Daily Budget</div>
+                  <div className="text-[10px] uppercase font-bold text-[#8A957F]">
+                    {language === 'en' ? 'Daily Budget' : 'দৈনিক বাজেট'}
+                  </div>
                   <div className="text-sm font-bold text-[#D9DED1]">
                     ৳{Math.round(currentBudgetBDT / 30).toLocaleString('en-IN')}/day (${(adBudgetUSD / 30).toFixed(1)}/day)
                   </div>
@@ -543,20 +561,24 @@ I would like to consult on launching high-ROAS campaigns.`;
                         <span className="font-bold text-sm text-[#FDFCF8]">TikTok Ads Projection</span>
                       </div>
                       <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-[#4A5D3B] text-[#FDFCF8]">
-                        Confidence: {predictionOutput.tiktok.confidence}
+                        {language === 'en' ? 'Confidence: ' : 'নির্ভুলতা: '}{predictionOutput.tiktok.confidence}
                       </span>
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
                       <div className="bg-[#2C3327]/60 p-2.5 rounded-xl border border-[#4A5D3B]/20">
-                        <div className="text-[9px] uppercase font-bold text-[#8A957F]">Estimated Reach</div>
+                        <div className="text-[9px] uppercase font-bold text-[#8A957F]">
+                          {language === 'en' ? 'Estimated Reach' : 'সম্ভাব্য রিচ'}
+                        </div>
                         <div className="text-xs font-bold text-[#FDFCF8] mt-0.5">
                           {predictionOutput.tiktok.estimatedReach.formatted}
                         </div>
                       </div>
 
                       <div className="bg-[#2C3327]/60 p-2.5 rounded-xl border border-[#4A5D3B]/20">
-                        <div className="text-[9px] uppercase font-bold text-[#8A957F]">Web Clicks</div>
+                        <div className="text-[9px] uppercase font-bold text-[#8A957F]">
+                          {language === 'en' ? 'Web Clicks' : 'সম্ভাব্য ক্লিক'}
+                        </div>
                         <div className="text-xs font-bold text-[#FDFCF8] mt-0.5">
                           {predictionOutput.tiktok.estimatedClicks.formatted}
                         </div>
@@ -570,7 +592,9 @@ I would like to consult on launching high-ROAS campaigns.`;
                       </div>
 
                       <div className="bg-[#2C3327]/60 p-2.5 rounded-xl border border-[#4A5D3B]/20">
-                        <div className="text-[9px] uppercase font-bold text-[#8A957F]">Est. ROAS</div>
+                        <div className="text-[9px] uppercase font-bold text-[#8A957F]">
+                          {language === 'en' ? 'Est. ROAS' : 'সম্ভাব্য ROAS'}
+                        </div>
                         <div className="text-xs font-bold text-[#E2725B] mt-0.5">
                           {predictionOutput.tiktok.estimatedRoas.formatted}
                         </div>
@@ -578,8 +602,8 @@ I would like to consult on launching high-ROAS campaigns.`;
                     </div>
 
                     <div className="flex items-center justify-between text-xs pt-2 border-t border-[#4A5D3B]/30 text-[#D9DED1]">
-                      <span>Est. Cost Per Result: <strong>{predictionOutput.tiktok.estimatedCostPerResult.formatted}</strong></span>
-                      <span>Gross Sales: <strong className="text-[#00F2FE]">{predictionOutput.tiktok.estimatedSalesValueBDT.formatted}</strong></span>
+                      <span>{language === 'en' ? 'Est. Cost Per Result: ' : 'প্রতি রেজাল্ট খরচ: '}<strong>{predictionOutput.tiktok.estimatedCostPerResult.formatted}</strong></span>
+                      <span>{language === 'en' ? 'Gross Sales: ' : 'মোট বিক্রয়: '}<strong className="text-[#00F2FE]">{predictionOutput.tiktok.estimatedSalesValueBDT.formatted}</strong></span>
                     </div>
                   </div>
                 )}
@@ -592,20 +616,24 @@ I would like to consult on launching high-ROAS campaigns.`;
                         <span className="font-bold text-sm text-[#FDFCF8]">Facebook Ads Projection</span>
                       </div>
                       <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-[#4A5D3B] text-[#FDFCF8]">
-                        Confidence: {predictionOutput.facebook.confidence}
+                        {language === 'en' ? 'Confidence: ' : 'নির্ভুলতা: '}{predictionOutput.facebook.confidence}
                       </span>
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
                       <div className="bg-[#2C3327]/60 p-2.5 rounded-xl border border-[#4A5D3B]/20">
-                        <div className="text-[9px] uppercase font-bold text-[#8A957F]">Estimated Reach</div>
+                        <div className="text-[9px] uppercase font-bold text-[#8A957F]">
+                          {language === 'en' ? 'Estimated Reach' : 'সম্ভাব্য রিচ'}
+                        </div>
                         <div className="text-xs font-bold text-[#FDFCF8] mt-0.5">
                           {predictionOutput.facebook.estimatedReach.formatted}
                         </div>
                       </div>
 
                       <div className="bg-[#2C3327]/60 p-2.5 rounded-xl border border-[#4A5D3B]/20">
-                        <div className="text-[9px] uppercase font-bold text-[#8A957F]">Web Clicks</div>
+                        <div className="text-[9px] uppercase font-bold text-[#8A957F]">
+                          {language === 'en' ? 'Web Clicks' : 'সম্ভাব্য ক্লিক'}
+                        </div>
                         <div className="text-xs font-bold text-[#FDFCF8] mt-0.5">
                           {predictionOutput.facebook.estimatedClicks.formatted}
                         </div>
@@ -619,7 +647,9 @@ I would like to consult on launching high-ROAS campaigns.`;
                       </div>
 
                       <div className="bg-[#2C3327]/60 p-2.5 rounded-xl border border-[#4A5D3B]/20">
-                        <div className="text-[9px] uppercase font-bold text-[#8A957F]">Est. ROAS</div>
+                        <div className="text-[9px] uppercase font-bold text-[#8A957F]">
+                          {language === 'en' ? 'Est. ROAS' : 'সম্ভাব্য ROAS'}
+                        </div>
                         <div className="text-xs font-bold text-[#E2725B] mt-0.5">
                           {predictionOutput.facebook.estimatedRoas.formatted}
                         </div>
@@ -627,8 +657,8 @@ I would like to consult on launching high-ROAS campaigns.`;
                     </div>
 
                     <div className="flex items-center justify-between text-xs pt-2 border-t border-[#4A5D3B]/30 text-[#D9DED1]">
-                      <span>Est. Cost Per Result: <strong>{predictionOutput.facebook.estimatedCostPerResult.formatted}</strong></span>
-                      <span>Gross Sales: <strong className="text-[#1877F2]">{predictionOutput.facebook.estimatedSalesValueBDT.formatted}</strong></span>
+                      <span>{language === 'en' ? 'Est. Cost Per Result: ' : 'প্রতি রেজাল্ট খরচ: '}<strong>{predictionOutput.facebook.estimatedCostPerResult.formatted}</strong></span>
+                      <span>{language === 'en' ? 'Gross Sales: ' : 'মোট বিক্রয়: '}<strong className="text-[#1877F2]">{predictionOutput.facebook.estimatedSalesValueBDT.formatted}</strong></span>
                     </div>
                   </div>
                 )}
@@ -639,7 +669,7 @@ I would like to consult on launching high-ROAS campaigns.`;
                 <div className="p-4 rounded-2xl bg-[#3A4533]/90 border border-[#4A5D3B]/40 text-xs leading-relaxed space-y-1.5">
                   <div className="flex items-center gap-1.5 text-[#E2725B] font-bold">
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>Strategic Optimization Analysis</span>
+                    <span>{language === 'en' ? 'Strategic Optimization Analysis' : 'স্ট্র্যাটেজিক অপ্টিমাইজেশন অ্যানালাইসিস'}</span>
                   </div>
                   <p className="text-[#D9DED1] text-[11px]">
                     {predictionOutput.comparisonVerdict}
@@ -658,10 +688,12 @@ I would like to consult on launching high-ROAS campaigns.`;
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-[#2C3327]">
-                      Unlock Full Performance Audit & Growth Roadmap
+                      {language === 'en' ? 'Unlock Full Performance Audit & Growth Roadmap' : 'সম্পূর্ণ পারফরম্যান্স অডিট ও রোডম্যাপ আনলক করুন'}
                     </h4>
                     <p className="text-[11px] text-[#5C6652]">
-                      Enter your details to save this calculation snapshot and receive a complimentary strategy review from Sonjoy Sarkar.
+                      {language === 'en' 
+                        ? 'Enter your details to save this calculation snapshot and receive a complimentary strategy review from Sonjoy Sarkar.' 
+                        : 'আপনার তথ্য দিয়ে এই ক্যালকুলেশন রিপোর্টটি সেভ করুন এবং সঞ্জয় সরকারের সাথে ফ্রি স্ট্র্যাটেজি রিভিউ গ্রহণ করুন।'}
                     </p>
                   </div>
                 </div>
@@ -673,7 +705,7 @@ I would like to consult on launching high-ROAS campaigns.`;
                       required
                       value={leadName}
                       onChange={(e) => setLeadName(e.target.value)}
-                      placeholder="Your Full Name *"
+                      placeholder={language === 'en' ? 'Your Full Name *' : 'আপনার নাম *'}
                       className="w-full bg-[#FDFCF8] border border-[#D9DED1] rounded-xl px-3.5 py-2.5 text-xs text-[#2C3327] focus:outline-none focus:border-[#4A5D3B]"
                     />
                     <input
@@ -681,7 +713,7 @@ I would like to consult on launching high-ROAS campaigns.`;
                       required
                       value={leadPhone}
                       onChange={(e) => setLeadPhone(e.target.value)}
-                      placeholder="WhatsApp Number (e.g. 01712xxxxxx) *"
+                      placeholder={language === 'en' ? 'WhatsApp Number (e.g. 01712xxxxxx) *' : 'WhatsApp নম্বর (যেমন 01712xxxxxx) *'}
                       className="w-full bg-[#FDFCF8] border border-[#D9DED1] rounded-xl px-3.5 py-2.5 text-xs text-[#2C3327] focus:outline-none focus:border-[#4A5D3B]"
                     />
                   </div>
@@ -690,7 +722,7 @@ I would like to consult on launching high-ROAS campaigns.`;
                     type="email"
                     value={leadEmail}
                     onChange={(e) => setLeadEmail(e.target.value)}
-                    placeholder="Email Address (Optional)"
+                    placeholder={language === 'en' ? 'Email Address (Optional)' : 'ইমেইল এড্রেস (ঐচ্ছিক)'}
                     className="w-full bg-[#FDFCF8] border border-[#D9DED1] rounded-xl px-3.5 py-2.5 text-xs text-[#2C3327] focus:outline-none focus:border-[#4A5D3B]"
                   />
 
@@ -700,7 +732,7 @@ I would like to consult on launching high-ROAS campaigns.`;
                     className="w-full bg-[#4A5D3B] hover:bg-[#3A4533] text-[#FDFCF8] py-3 rounded-xl text-xs font-bold tracking-wide transition-all shadow-xs flex items-center justify-center gap-2"
                   >
                     <Unlock className="w-3.5 h-3.5" />
-                    <span>{isSubmittingLead ? 'Saving Snapshot...' : 'Unlock Audit & Save Calculation'}</span>
+                    <span>{isSubmittingLead ? (language === 'en' ? 'Saving Snapshot...' : 'সেভ হচ্ছে...') : (language === 'en' ? 'Unlock Audit & Save Calculation' : 'রিপোর্ট আনলক ও সেভ করুন')}</span>
                   </button>
                 </form>
               </div>
@@ -711,9 +743,13 @@ I would like to consult on launching high-ROAS campaigns.`;
                     <CheckCircle2 className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-[#2C3327]">Performance Forecast Saved</div>
+                    <div className="text-xs font-bold text-[#2C3327]">
+                      {language === 'en' ? 'Performance Forecast Saved' : 'পারফরম্যান্স প্রজেকশন সেভ হয়েছে'}
+                    </div>
                     <div className="text-[11px] text-[#5C6652]">
-                      Discuss your ৳{productPriceBDT} product strategy directly with Sonjoy Sarkar on WhatsApp.
+                      {language === 'en'
+                        ? `Discuss your ৳${productPriceBDT} product strategy directly with Sonjoy Sarkar on WhatsApp.`
+                        : `আপনার ৳${productPriceBDT} টাকার প্রোডাক্টের স্ট্র্যাটেজি নিয়ে সরাসরি WhatsApp-এ কথা বলুন।`}
                     </div>
                   </div>
                 </div>
@@ -724,7 +760,7 @@ I would like to consult on launching high-ROAS campaigns.`;
                   rel="noopener noreferrer"
                   className="w-full sm:w-auto px-5 py-2.5 bg-[#4A5D3B] hover:bg-[#3A4533] text-[#FDFCF8] rounded-xl text-xs font-bold shrink-0 text-center transition-colors shadow-xs"
                 >
-                  Chat on WhatsApp
+                  {language === 'en' ? 'Chat on WhatsApp' : 'WhatsApp এ মেসেজ দিন'}
                 </a>
               </div>
             )}
@@ -733,7 +769,9 @@ I would like to consult on launching high-ROAS campaigns.`;
             <div className="p-4 rounded-2xl bg-[#FFFFFF] border border-[#D9DED1] text-[11px] text-[#8A957F] leading-relaxed flex items-start gap-2">
               <Info className="w-4 h-4 text-[#8A957F] shrink-0 mt-0.5" />
               <span>
-                <strong>Model Note:</strong> Projections represent statistical medians from past Bangladesh campaign data. Actual return is subject to product market-fit, offer compellingness, video hook velocity, and checkout frictionless experience. Minimum testing budget starts at $1 (৳150).
+                <strong>{language === 'en' ? 'Model Note:' : 'মডেল নোট:'}</strong> {language === 'en'
+                  ? 'Projections represent statistical medians from past Bangladesh campaign data. Actual return is subject to product market-fit, offer compellingness, video hook velocity, and checkout frictionless experience. Minimum testing budget starts at $1 (৳150).'
+                  : 'এই প্রজেকশনটি বাংলাদেশে পূর্ববর্তী ক্যাম্পেইনের তথ্যের ওপর ভিত্তি করে তৈরি। বাস্তব ফলাফল প্রোডাক্টের গুণমান, ভিডিও হুক এবং ল্যান্ডিং পেজের সুবিধার ওপর নির্ভর করে। সর্বনিম্ন টেস্ট বাজেট শুরু $১ (৳১৫০) থেকে।'}
               </span>
             </div>
 

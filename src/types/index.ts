@@ -429,6 +429,8 @@ export interface HeaderNavLink {
   labelEn: string;
   labelBn: string;
   sectionId: string;
+  route?: string;
+  pageSlug?: string;
   enabled: boolean;
   sortOrder: number;
 }
@@ -558,6 +560,7 @@ export type PageType =
   | 'SERVICES_ARCHIVE' 
   | 'TIKTOK_PLAYBOOK' 
   | 'FACEBOOK_ADS' 
+  | 'MEDIA_GALLERY'
   | 'CALCULATOR_STANDALONE' 
   | 'CONTACT_STANDALONE'
   | 'ABOUT_SONJOY';
@@ -602,36 +605,130 @@ export interface HomePageSettings {
   showServicesViewAll?: boolean;
 }
 
+export interface SocialLinkItem {
+  id: string;
+  platform: 'facebook' | 'tiktok' | 'youtube' | 'linkedin' | 'whatsapp' | 'instagram' | 'x' | 'telegram' | 'github' | 'custom';
+  label: string;
+  url: string;
+  enabled: boolean;
+  username?: string;
+  sortOrder: number;
+}
+
+export interface SocialLinksSettings {
+  facebook?: string;
+  tiktok?: string;
+  youtube?: string;
+  linkedin?: string;
+  whatsapp?: string;
+  instagram?: string;
+  xTwitter?: string;
+  telegram?: string;
+  github?: string;
+  customLinks?: SocialLinkItem[];
+  showInHeader?: boolean;
+  showInFooter?: boolean;
+  showInContactPage?: boolean;
+}
+
+export interface SchemaAddress {
+  streetAddress?: string;
+  addressLocality?: string;
+  addressRegion?: string;
+  postalCode?: string;
+  addressCountry?: string;
+}
+
+export interface SchemaGeo {
+  latitude?: string;
+  longitude?: string;
+}
+
+export interface SchemaMarkupSettings {
+  enabled: boolean;
+  schemaType: 'ProfessionalService' | 'LocalBusiness' | 'Organization' | 'Person';
+  name: string;
+  alternateName?: string;
+  description: string;
+  url: string;
+  logoUrl?: string;
+  imageUrl?: string;
+  telephone?: string;
+  email?: string;
+  address?: SchemaAddress;
+  geo?: SchemaGeo;
+  priceRange?: string;
+  openingHours?: string;
+  sameAs: string[];
+  founderName?: string;
+  founderJobTitle?: string;
+  serviceOffered?: string[];
+  customJsonLd?: string;
+  includeFaqSchema?: boolean;
+  includeBreadcrumbSchema?: boolean;
+  lastUpdated?: string;
+}
+
 export interface SiteSettings {
   brandName: string;
+  brandNameBn?: string;
   personalName: string;
+  personalNameBn?: string;
   titleBadge: string;
+  titleBadgeEn?: string;
+  titleBadgeBn?: string;
   designation?: string;
+  designationBn?: string;
   heroHeadline: string;
+  heroHeadlineEn?: string;
+  heroHeadlineBn?: string;
   heroSubheadline: string;
+  heroSubheadlineEn?: string;
+  heroSubheadlineBn?: string;
   primaryCtaText: string;
+  primaryCtaTextEn?: string;
+  primaryCtaTextBn?: string;
   secondaryCtaText: string;
+  secondaryCtaTextEn?: string;
+  secondaryCtaTextBn?: string;
   exchangeRateUsdToBdt: number;
   minAdBudgetUSD?: number;
   minAdBudgetBDT?: number;
   minMonthlyBudgetUSD?: number;
   minMonthlyBudgetBDT?: number;
   sonjoyBio: string;
+  sonjoyBioEn?: string;
+  sonjoyBioBn?: string;
   sonjoyRole: string;
+  sonjoyRoleEn?: string;
+  sonjoyRoleBn?: string;
   sonjoyImage: string;
   sonjoyDetailedBio?: string;
+  sonjoyDetailedBioEn?: string;
+  sonjoyDetailedBioBn?: string;
   sonjoyExperienceYears?: number;
   sonjoyTotalAdSpendManaged?: string;
   sonjoyCampaignsCount?: string;
   heroBadgeText?: string;
+  heroBadgeTextEn?: string;
+  heroBadgeTextBn?: string;
   heroStatAdGroups?: string;
+  heroStatAdGroupsBn?: string;
   heroStatImpressions?: string;
+  heroStatImpressionsBn?: string;
   heroStatConversations?: string;
+  heroStatConversationsBn?: string;
   heroStatLeads?: string;
+  heroStatLeadsBn?: string;
   heroPrimaryPlatform?: string;
+  heroPrimaryPlatformBn?: string;
   heroSecondaryPlatform?: string;
+  heroSecondaryPlatformBn?: string;
   heroTargetRegion?: string;
+  heroTargetRegionBn?: string;
   heroSpecialistFocusTitle?: string;
+  heroSpecialistFocusTitleEn?: string;
+  heroSpecialistFocusTitleBn?: string;
   googleSheetsWebhookUrl?: string;
   email?: string;
   phone?: string;
@@ -649,6 +746,8 @@ export interface SiteSettings {
   tiktokEducationVideoMediaId?: string;
   robots?: RobotsSettings;
   sitemap?: SitemapSettings;
+  socialLinks?: SocialLinksSettings;
+  schemaMarkup?: SchemaMarkupSettings;
 }
 
 export interface RobotsSettings {
@@ -708,12 +807,14 @@ export type AdminTab =
   | 'CALCULATOR_BENCHMARKS'
   | 'WORKSPACE_SYNC'
   | 'PROFILE'
+  | 'SOCIAL_MEDIA'
   | 'MEDIA'
   | 'KNOWLEDGE_BASE'
   | 'KNOWLEDGE_GAPS'
   | 'AI_CONVERSATIONS'
   | 'ANALYTICS'
   | 'GTM_TRACKING'
+  | 'SCHEMA_MARKUP'
   | 'FIREBASE_STATUS'
   | 'ROBOTS_TXT'
   | 'SITEMAP'

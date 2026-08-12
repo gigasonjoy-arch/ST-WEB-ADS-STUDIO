@@ -848,16 +848,26 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                           className="bg-[#FDFCF8] border border-[#D9DED1] px-2.5 py-1.5 rounded-lg text-xs font-medium text-[#2C3327]"
                         />
                         <select
-                          value={link.sectionId}
-                          onChange={(e) => handleUpdateNavLink(link.id, { sectionId: e.target.value })}
+                          value={link.route || link.sectionId}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val.startsWith('/')) {
+                              handleUpdateNavLink(link.id, { route: val, sectionId: val.replace(/^\//, '') });
+                            } else {
+                              handleUpdateNavLink(link.id, { sectionId: val, route: `/${val}` });
+                            }
+                          }}
                           className="bg-[#FDFCF8] border border-[#D9DED1] px-2.5 py-1.5 rounded-lg text-xs font-medium text-[#2C3327]"
                         >
                           <option value="hero">Hero (হোম)</option>
-                          <option value="services">Services (সেবাসমূহ)</option>
+                          <option value="/services">Services (সেবাসমূহ)</option>
+                          <option value="/case-studies">Case Studies (কেস স্টাডিজ)</option>
+                          <option value="/media-gallery">Media Gallery (মিডিয়া গ্যালারি)</option>
+                          <option value="/tiktok-ads">TikTok Guide (টিকটক গাইড)</option>
+                          <option value="/facebook-ads">Facebook Ads (ফেসবুক অ্যাডস)</option>
                           <option value="results">Results & ROI (ফলাফল)</option>
                           <option value="calculator">Calculator (ক্যালকুলেটর)</option>
-                          <option value="case-studies">Case Studies (কেস স্টাডিজ)</option>
-                          <option value="tiktok-education">TikTok Guide (টিকটক গাইড)</option>
+                          <option value="/contact">Contact (যোগাযোগ)</option>
                           <option value="faq">FAQ (সাধারণ জিজ্ঞাসা)</option>
                         </select>
                       </div>

@@ -194,7 +194,9 @@ export const CaseStudiesSection: React.FC<CaseStudiesSectionProps> = ({
 
                     {cs.conversations !== undefined && (
                       <div>
-                        <div className="text-[10px] uppercase font-bold text-[#8A957F]">Conversations</div>
+                        <div className="text-[10px] uppercase font-bold text-[#8A957F]">
+                          {language === 'en' ? 'Conversations' : 'কনভার্সেশন'}
+                        </div>
                         <div className="text-sm font-serif font-bold text-[#4A5D3B]">
                           {cs.conversations.toLocaleString('en-IN')}
                         </div>
@@ -212,7 +214,9 @@ export const CaseStudiesSection: React.FC<CaseStudiesSectionProps> = ({
 
                     {cs.purchases !== undefined && (
                       <div>
-                        <div className="text-[10px] uppercase font-bold text-[#8A957F]">Purchases</div>
+                        <div className="text-[10px] uppercase font-bold text-[#8A957F]">
+                          {language === 'en' ? 'Purchases' : 'পারচেজ'}
+                        </div>
                         <div className="text-sm font-serif font-bold text-[#4A5D3B]">
                           {cs.purchases.toLocaleString('en-IN')}
                         </div>
@@ -230,7 +234,9 @@ export const CaseStudiesSection: React.FC<CaseStudiesSectionProps> = ({
 
                     {cs.cpa !== undefined && (
                       <div>
-                        <div className="text-[10px] uppercase font-bold text-[#8A957F]">CPA / Cost</div>
+                        <div className="text-[10px] uppercase font-bold text-[#8A957F]">
+                          {language === 'en' ? 'CPA / Cost' : 'প্রতি রেজাল্ট খরচ'}
+                        </div>
                         <div className="text-sm font-serif font-bold text-[#2C3327]">
                           ৳{cs.cpa}
                         </div>
@@ -239,7 +245,9 @@ export const CaseStudiesSection: React.FC<CaseStudiesSectionProps> = ({
 
                     {cs.ctr !== undefined && (
                       <div>
-                        <div className="text-[10px] uppercase font-bold text-[#8A957F]">CTR</div>
+                        <div className="text-[10px] uppercase font-bold text-[#8A957F]">
+                          {language === 'en' ? 'CTR' : 'ক্লিক রেট (CTR)'}
+                        </div>
                         <div className="text-sm font-serif font-bold text-[#2C3327]">
                           {cs.ctr}%
                         </div>

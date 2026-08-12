@@ -8,6 +8,7 @@ import { Header } from './components/public/Header';
 import { Hero } from './components/public/Hero';
 import { ServicesSection } from './components/public/ServicesSection';
 import { CaseStudiesSection } from './components/public/CaseStudiesSection';
+import { FeaturedMediaPreview } from './components/public/FeaturedMediaPreview';
 import { TikTokEducation } from './components/public/TikTokEducation';
 import { AdsCalculator } from './components/public/AdsCalculator';
 import { AudienceAndProcess } from './components/public/AudienceAndProcess';
@@ -39,8 +40,15 @@ import { OnlineDatabaseManagement } from './components/admin/OnlineDatabaseManag
 import { UserManagement } from './components/admin/UserManagement';
 import { RobotsManagement } from './components/admin/RobotsManagement';
 import { SitemapManagement } from './components/admin/SitemapManagement';
+import { SchemaMarkupManagement } from './components/admin/SchemaMarkupManagement';
+import { SocialMediaManagement } from './components/admin/SocialMediaManagement';
 import { CustomPageView } from './components/public/CustomPageView';
+import { MediaGalleryPage } from './components/public/MediaGalleryPage';
+import { RobotsTxtView } from './components/public/RobotsTxtView';
+import { SitemapXmlView } from './components/public/SitemapXmlView';
+import { initialCustomPages } from './data/initialData';
 import { themeService } from './services/themeService';
+import { schemaService } from './services/schemaService';
 import { CustomPage, AdminUser } from './types';
 
 import { Lock, ShieldCheck, ArrowLeft, KeyRound, CheckCircle2, Eye, EyeOff, Mail, Smartphone, Users, Bot, Network, Sparkles } from 'lucide-react';
@@ -61,13 +69,20 @@ export default function App() {
 
   const [activePageSlug, setActivePageSlug] = useState<string | null>(() => {
     try {
+      const path = window.location.pathname.replace(/^\/+/, '').replace(/\/+$/, '');
       const hash = window.location.hash;
+      
+      if (path.startsWith('page/')) {
+        return path.replace(/^page\//, '');
+      }
+      if (path && path !== 'index.html' && path !== 'admin') {
+        return path;
+      }
       if (hash.startsWith('#page/')) {
         return hash.replace('#page/', '');
       }
-      const path = window.location.pathname;
-      if (path.startsWith('/page/')) {
-        return path.replace('/page/', '');
+      if (hash.startsWith('#/') && !hash.startsWith('#/admin')) {
+        return hash.replace('#/', '');
       }
     } catch {}
     return null;
@@ -108,22 +123,43 @@ export default function App() {
       const isHashAdmin = window.location.hash.toLowerCase().includes('admin');
       const isSearchAdmin = window.location.search.toLowerCase().includes('admin');
       const isPathAdmin = window.location.pathname.toLowerCase().endsWith('/admin');
+      
       if (isHashAdmin || isSearchAdmin || isPathAdmin) {
         setIsAdminMode(true);
+        setActivePageSlug(null);
+        return;
       }
 
-      // Check for page routes
+      // Check path and hash for page slugs
+      const path = window.location.pathname.replace(/^\/+/, '').replace(/\/+$/, '');
       const hash = window.location.hash;
-      if (hash.startsWith('#page/')) {
+
+      if (path.startsWith('page/')) {
+        const slug = path.replace(/^page\//, '').trim();
+        setActivePageSlug(slug || null);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (path && path !== 'index.html' && path !== 'admin') {
+        setActivePageSlug(path);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (hash.startsWith('#page/')) {
         const slug = hash.replace('#page/', '').trim();
         setActivePageSlug(slug || null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (window.location.pathname.startsWith('/page/')) {
-        const slug = window.location.pathname.replace('/page/', '').trim();
+      } else if (hash.startsWith('#/') && !hash.startsWith('#/admin')) {
+        const slug = hash.replace('#/', '').trim();
         setActivePageSlug(slug || null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         setActivePageSlug(null);
+        if (hash && hash !== '#') {
+          const sectionId = hash.replace(/^#/, '');
+          setTimeout(() => {
+            const el = document.getElementById(sectionId);
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth' });
+            }
+          }, 100);
+        }
       }
     };
 
@@ -131,6 +167,11 @@ export default function App() {
     const currentTheme = storageService.getThemeSettings();
     themeService.applyTheme(currentTheme);
     themeService.updateFavicon(storageService.getFaviconSettings(), currentTheme);
+
+    // Apply active schema markup immediately on load
+    const liveSettings = storageService.getSiteSettings();
+    const liveFaqs = storageService.getFAQs(true);
+    schemaService.injectSchemaToHead(liveSettings.schemaMarkup, liveSettings, liveFaqs);
 
     handleUrlChange();
     window.addEventListener('hashchange', handleUrlChange);
@@ -142,14 +183,37 @@ export default function App() {
   }, []);
 
   const navigateToPage = (slug: string) => {
-    setActivePageSlug(slug);
-    window.location.hash = `#page/${slug}`;
+    const cleanSlug = slug.replace(/^\/+/, '').replace(/^page\//, '').replace(/^#page\//, '');
+    setActivePageSlug(cleanSlug);
+    setIsAdminMode(false);
+    
+    // Update browser URL nicely
+    try {
+      window.history.pushState(null, '', `/${cleanSlug}`);
+    } catch {
+      window.location.hash = `#page/${cleanSlug}`;
+    }
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    storageService.recordEvent('PAGE_VIEW', {
+      path: `/${cleanSlug}`,
+      title: cleanSlug
+    });
+    trackingService.pushEvent('page_view', {
+      page_path: `/${cleanSlug}`,
+      page_title: cleanSlug
+    });
   };
 
   const navigateBackToHome = () => {
     setActivePageSlug(null);
-    window.location.hash = '';
+    setIsAdminMode(false);
+    try {
+      window.history.pushState(null, '', '/');
+    } catch {
+      window.location.hash = '';
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -202,18 +266,53 @@ export default function App() {
     setConversations(storageService.getAIConversations());
   };
 
-  // Scroll to anchor sections smoothly
-  const scrollToSection = (sectionId: string) => {
-    if (isAdminMode) {
-      setIsAdminMode(false);
+  // Scroll to anchor sections or navigate smoothly to standalone pages
+  const scrollToSection = (target: string) => {
+    if (!target) return;
+
+    // If target is an admin toggle
+    if (target === 'admin' || target === '/admin' || target === '#admin') {
+      setIsAdminMode(true);
+      return;
+    }
+
+    const cleanTarget = target.trim();
+    const cleanSlug = cleanTarget
+      .replace(/^\/+/, '')
+      .replace(/^#\/?/, '')
+      .replace(/^page\//, '')
+      .replace(/^nav-/, '');
+
+    // Check if target is a custom page or a known standalone route
+    const customPageMatch = storageService.getCustomPageBySlug(cleanSlug, true);
+    const isKnownStandalone = [
+      'media-gallery',
+      'case-studies',
+      'services',
+      'tiktok-ads',
+      'facebook-ads',
+      'contact',
+      'about'
+    ].includes(cleanSlug.toLowerCase());
+
+    if (customPageMatch || isKnownStandalone || cleanTarget.startsWith('/page/') || (cleanTarget.startsWith('/') && !cleanTarget.startsWith('/#') && !cleanTarget.startsWith('#'))) {
+      navigateToPage(cleanSlug);
+      return;
+    }
+
+    // Otherwise, treat as an in-page section anchor (e.g. calculator, results, hero, faq)
+    const cleanSectionId = cleanSlug;
+
+    if (isAdminMode || activePageSlug) {
+      navigateBackToHome();
       setTimeout(() => {
-        const el = document.getElementById(sectionId);
+        const el = document.getElementById(cleanSectionId);
         if (el) {
           el.scrollIntoView({ behavior: 'smooth' });
         }
-      }, 100);
+      }, 150);
     } else {
-      const el = document.getElementById(sectionId);
+      const el = document.getElementById(cleanSectionId);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth' });
       }
@@ -545,6 +644,14 @@ export default function App() {
           />
         )}
 
+        {activeAdminTab === 'SOCIAL_MEDIA' && (
+          <SocialMediaManagement />
+        )}
+
+        {activeAdminTab === 'SCHEMA_MARKUP' && (
+          <SchemaMarkupManagement />
+        )}
+
         {activeAdminTab === 'ROBOTS_TXT' && (
           <RobotsManagement />
         )}
@@ -568,29 +675,47 @@ export default function App() {
 
   // ================= CUSTOM PAGE / ARCHIVE VIEW =================
   if (activePageSlug) {
-    const customPage = storageService.getCustomPageBySlug(activePageSlug);
+    const cleanActiveSlug = activePageSlug.toLowerCase().replace(/^\/+/, '').replace(/^page\//, '').replace(/^#page\//, '');
+    
+    // Dedicated SEO endpoints in SPA mode
+    if (cleanActiveSlug === 'robots.txt') {
+      return <RobotsTxtView onBackToHome={navigateBackToHome} />;
+    }
+    if (cleanActiveSlug === 'sitemap.xml') {
+      return <SitemapXmlView onBackToHome={navigateBackToHome} />;
+    }
+
+    let customPage = storageService.getCustomPageBySlug(cleanActiveSlug, true);
+    if (!customPage) {
+      customPage = initialCustomPages.find(p => p.slug.toLowerCase() === cleanActiveSlug) || null;
+    }
+
+    const isMediaGallery = cleanActiveSlug === 'media-gallery' || customPage?.pageType === 'MEDIA_GALLERY' || customPage?.slug === 'media-gallery';
+
     return (
       <div className="min-h-screen bg-[#FDFCF8] text-[#2C3327] selection:bg-[#4A5D3B] selection:text-white flex flex-col font-sans">
         <Header
           settings={siteSettings}
           onOpenLeadForm={() => handleOpenLeadForm()}
-          onNavigateSection={(id) => {
-            navigateBackToHome();
-            setTimeout(() => scrollToSection(id), 100);
-          }}
+          onNavigateSection={scrollToSection}
           onOpenAdmin={() => setIsAdminMode(true)}
         />
 
         <main className="flex-grow">
-          {customPage ? (
+          {isMediaGallery ? (
+            <MediaGalleryPage
+              onBackToHome={navigateBackToHome}
+              onOpenLeadForm={(context) => handleOpenLeadForm({ interestedService: 'BOTH', notes: context ? `Media inquiry: ${context}` : 'Media Gallery Inquiry' })}
+              onNavigateToPage={navigateToPage}
+            />
+          ) : customPage ? (
             <CustomPageView
               page={customPage}
               onBackToHome={navigateBackToHome}
               onOpenLeadForm={() => handleOpenLeadForm()}
-              onOpenCalculator={() => {
-                navigateBackToHome();
-                setTimeout(() => scrollToSection('calculator'), 100);
-              }}
+              onOpenLeadFormWithContext={handleOpenLeadForm}
+              onNavigateToPage={navigateToPage}
+              onOpenCalculator={() => scrollToSection('calculator')}
             />
           ) : (
             <div className="max-w-4xl mx-auto px-4 py-20 text-center">
@@ -617,10 +742,7 @@ export default function App() {
         <Footer
           settings={siteSettings}
           onOpenLeadForm={() => handleOpenLeadForm()}
-          onNavigateSection={(id) => {
-            navigateBackToHome();
-            setTimeout(() => scrollToSection(id), 100);
-          }}
+          onNavigateSection={scrollToSection}
           onOpenAdmin={() => setIsAdminMode(true)}
         />
 
@@ -690,6 +812,11 @@ export default function App() {
             onNavigateToPage={navigateToPage}
           />
         )}
+
+        {/* 3.1 Featured Media & Video Vault Showcase Preview */}
+        <FeaturedMediaPreview
+          onNavigateToGallery={() => navigateToPage('media-gallery')}
+        />
 
         {/* 4. TikTok Strategy & Education Guide */}
         {(siteSettings.sectionVisibility.tiktokEducation || siteSettings.sectionVisibility.tiktokGuide) && (

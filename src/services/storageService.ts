@@ -18,6 +18,8 @@ import {
   VisitorJourney, 
   SiteSettings, 
   SocialLink, 
+  SocialLinksSettings,
+  SchemaMarkupSettings,
   UserProfile, 
   AuditLogEntry, 
   MediaItem,
@@ -30,13 +32,16 @@ import {
   HomePageSettings,
   ServicePackage,
   RobotsSettings,
-  SitemapSettings
+  SitemapSettings,
+  HeaderNavLink
 } from '../types';
 import { hashPassword, normalizeMobileNumber, isValidEmail, DEFAULT_ADMIN_PASSWORD_HASH } from '../utils/security';
 
 import {
   initialSiteSettings,
   initialSocialLinks,
+  initialSocialLinksSettings,
+  initialSchemaMarkupSettings,
   initialCaseStudies,
   initialDistricts,
   initialBenchmarks,
@@ -51,6 +56,7 @@ import {
 } from '../data/initialData';
 
 import { themeService, DEFAULT_THEME_SETTINGS, DEFAULT_FAVICON_SETTINGS } from './themeService';
+import { schemaService } from './schemaService';
 import { 
   db, 
   doc, 
@@ -378,10 +384,26 @@ class StorageService {
       this.setRawItem(key, str);
       this.notify();
 
-      // Automatically queue batch sync with Online Cloud Database
+      // Automatically sync directly with Online Cloud Database & Firestore
       if (!this.isBatchInitializing && !this.isApplyingRemoteUpdate && typeof window !== 'undefined') {
         const collectionName = KEY_TO_COLLECTION_MAP[key];
         if (collectionName) {
+          // 1. Direct real-time write to Google Cloud Firestore
+          if (db) {
+            try {
+              const docRef = doc(db, 'system_collections', collectionName);
+              setDoc(docRef, {
+                data: value,
+                name: collectionName,
+                count: Array.isArray(value) ? value.length : (value ? 1 : 0),
+                updatedAt: new Date().toISOString()
+              }).catch((err) => console.debug('Firestore direct item sync notice:', err));
+            } catch (err) {
+              console.debug('Firestore direct item sync error:', err);
+            }
+          }
+
+          // 2. Queue and notify online database client
           onlineDbClient.queueCollectionSync(collectionName, value);
         }
       }
@@ -553,7 +575,34 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
       header: {
         ...initialSiteSettings.header,
         ...(saved?.header || {}),
-        navLinks: saved?.header?.navLinks || initialSiteSettings.header?.navLinks || []
+        navLinks: (() => {
+          const links = saved?.header?.navLinks || initialSiteSettings.header?.navLinks || [];
+          const hasMediaGallery = links.some((l: HeaderNavLink) => l.id === 'nav-media-gallery' || l.sectionId === 'media-gallery' || l.route === '/media-gallery');
+          if (!hasMediaGallery) {
+            const mediaGalleryLink: HeaderNavLink = {
+              id: 'nav-media-gallery',
+              labelEn: 'Media Gallery',
+              labelBn: 'মিডিয়া গ্যালারি',
+              route: '/media-gallery',
+              sectionId: 'media-gallery',
+              enabled: true,
+              sortOrder: 3
+            };
+            const insertIndex = Math.min(2, links.length);
+            const copy = [...links];
+            copy.splice(insertIndex, 0, mediaGalleryLink);
+            return copy;
+          }
+          return links;
+        })()
+      },
+      socialLinks: {
+        ...initialSocialLinksSettings,
+        ...(saved?.socialLinks || {})
+      },
+      schemaMarkup: {
+        ...initialSchemaMarkupSettings,
+        ...(saved?.schemaMarkup || {})
       }
     };
   }
@@ -562,7 +611,49 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
     const current = this.getSiteSettings();
     const updated = { ...current, ...settings };
     this.setItem(STORAGE_KEYS.SITE_SETTINGS, updated);
+    
+    // Auto-inject updated schema if modified
+    if (updated.schemaMarkup) {
+      schemaService.injectSchemaToHead(updated.schemaMarkup, updated, this.getFAQs(true));
+    }
+    
     this.logAudit('EDIT_SETTINGS', 'SiteSettings', 'Updated global site settings');
+  }
+
+  // --- Social Links Configuration ---
+  public getSocialLinksSettings(): SocialLinksSettings {
+    const siteSettings = this.getSiteSettings();
+    return siteSettings.socialLinks || initialSocialLinksSettings;
+  }
+
+  public saveSocialLinksSettings(socialLinks: Partial<SocialLinksSettings>): void {
+    const current = this.getSiteSettings();
+    const updatedSocial = {
+      ...initialSocialLinksSettings,
+      ...(current.socialLinks || {}),
+      ...socialLinks
+    };
+    this.updateSiteSettings({ socialLinks: updatedSocial });
+    this.logAudit('SAVE_SOCIAL_LINKS', 'SocialLinks', 'Updated social media channels & links');
+  }
+
+  // --- Schema Markup Settings ---
+  public getSchemaMarkupSettings(): SchemaMarkupSettings {
+    const siteSettings = this.getSiteSettings();
+    return siteSettings.schemaMarkup || initialSchemaMarkupSettings;
+  }
+
+  public saveSchemaMarkupSettings(schemaMarkup: Partial<SchemaMarkupSettings>): void {
+    const current = this.getSiteSettings();
+    const updatedSchema: SchemaMarkupSettings = {
+      ...initialSchemaMarkupSettings,
+      ...(current.schemaMarkup || {}),
+      ...schemaMarkup,
+      lastUpdated: new Date().toISOString().split('T')[0]
+    };
+    this.updateSiteSettings({ schemaMarkup: updatedSchema });
+    schemaService.injectSchemaToHead(updatedSchema, current, this.getFAQs(true));
+    this.logAudit('SAVE_SCHEMA_MARKUP', 'SchemaMarkup', 'Updated structured JSON-LD schema markup');
   }
 
   // --- Theme & Color Management ---
@@ -606,15 +697,38 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
   // --- WordPress-like Custom Page Management ---
   public getCustomPages(includeDrafts: boolean = false): CustomPage[] {
     const all = this.getItem<CustomPage[]>(STORAGE_KEYS.CUSTOM_PAGES, initialCustomPages);
-    const sorted = [...all].sort((a, b) => a.sortOrder - b.sortOrder);
+    
+    // Auto-hydrate any missing default/system pages from initialCustomPages
+    let hasMergedNew = false;
+    const mergedList = [...all];
+    initialCustomPages.forEach(initialPg => {
+      const exists = mergedList.some(p => p.id === initialPg.id || p.slug.toLowerCase() === initialPg.slug.toLowerCase());
+      if (!exists) {
+        mergedList.push(initialPg);
+        hasMergedNew = true;
+      }
+    });
+
+    if (hasMergedNew) {
+      this.setItem(STORAGE_KEYS.CUSTOM_PAGES, mergedList);
+    }
+
+    const sorted = [...mergedList].sort((a, b) => a.sortOrder - b.sortOrder);
     if (includeDrafts) return sorted;
     return sorted.filter(p => p.status === 'PUBLISHED');
   }
 
   public getCustomPageBySlug(slug: string, includeDrafts: boolean = false): CustomPage | null {
+    const cleanSlug = slug.toLowerCase().replace(/^#\/?/, '').replace(/^\/page\//, '').replace(/^\//, '');
     const all = this.getCustomPages(includeDrafts);
-    const cleanSlug = slug.toLowerCase().replace(/^\/page\//, '').replace(/^\//, '');
-    return all.find(p => p.slug.toLowerCase() === cleanSlug) || null;
+    const found = all.find(p => p.slug.toLowerCase() === cleanSlug);
+    if (found) return found;
+    // Fallback directly to initialCustomPages
+    const initialMatch = initialCustomPages.find(p => p.slug.toLowerCase() === cleanSlug);
+    if (initialMatch && (includeDrafts || initialMatch.status === 'PUBLISHED')) {
+      return initialMatch;
+    }
+    return null;
   }
 
   public saveCustomPage(page: CustomPage): void {

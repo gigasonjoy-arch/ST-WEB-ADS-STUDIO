@@ -1,5 +1,18 @@
 import React from 'react';
-import { Lock, MessageCircle, ArrowUp, Mail, Phone, MapPin, ShieldCheck, Heart } from 'lucide-react';
+import { 
+  Lock, 
+  MessageCircle, 
+  ArrowUp, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  ShieldCheck, 
+  Heart,
+  Share2,
+  ExternalLink,
+  Globe,
+  Video
+} from 'lucide-react';
 import { SiteSettings } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -53,12 +66,12 @@ export const Footer: React.FC<FooterProps> = ({
             <div className="flex items-center gap-4 text-xs text-[#8A957F] pt-2">
               <span className="flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-[#E2725B]" />
-                <span>Dhaka, Bangladesh</span>
+                <span>{language === 'en' ? 'Dhaka, Bangladesh' : 'ঢাকা, বাংলাদেশ'}</span>
               </span>
               <span>•</span>
               <span className="flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-[#4A5D3B]" />
-                <span>Verified Ads Specialist</span>
+                <span>{language === 'en' ? 'Verified Ads Specialist' : 'ভেরিফাইড অ্যাডস স্পেশালিস্ট'}</span>
               </span>
             </div>
           </div>
@@ -66,32 +79,42 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Nav Links */}
           <div className="md:col-span-3 space-y-3">
             <div className="text-xs font-bold uppercase tracking-wider text-[#8A957F]">
-              {language === 'en' ? 'Navigation' : 'ক্যাম্পেইন নেভিগেশন'}
+              {language === 'en' ? 'Quick Pages & Resources' : 'পেজ ও রিসোর্স সমূহ'}
             </div>
             <ul className="space-y-2 text-xs text-[#D9DED1]">
               <li>
-                <button onClick={() => onNavigateSection('services')} className="hover:text-[#FDFCF8] transition-colors">
-                  {t('nav.services')}
+                <button onClick={() => onNavigateSection('/services')} className="hover:text-[#FDFCF8] transition-colors text-left">
+                  {language === 'en' ? 'Performance Services' : 'অ্যাড সার্ভিসেস'}
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigateSection('results')} className="hover:text-[#FDFCF8] transition-colors">
-                  {t('nav.caseStudies')}
+                <button onClick={() => onNavigateSection('/case-studies')} className="hover:text-[#FDFCF8] transition-colors text-left">
+                  {language === 'en' ? 'Case Studies Archive' : 'কেস স্টাডিজ আর্কাইভ'}
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigateSection('calculator')} className="hover:text-[#FDFCF8] transition-colors">
-                  {t('nav.calculator')}
+                <button onClick={() => onNavigateSection('/media-gallery')} className="hover:text-[#FDFCF8] transition-colors text-left font-medium text-emerald-400">
+                  {language === 'en' ? 'Media Gallery (3 Columns)' : 'মিডিয়া গ্যালারি (ভিডিও ও ইমেজ)'}
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigateSection('tiktok-guide')} className="hover:text-[#FDFCF8] transition-colors">
-                  {t('nav.tiktok')}
+                <button onClick={() => onNavigateSection('/tiktok-ads')} className="hover:text-[#FDFCF8] transition-colors text-left">
+                  {language === 'en' ? 'TikTok Ads Playbook' : 'টিকটক অ্যাডস প্লেবুক'}
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigateSection('faq')} className="hover:text-[#FDFCF8] transition-colors">
-                  {t('nav.faq')}
+                <button onClick={() => onNavigateSection('/facebook-ads')} className="hover:text-[#FDFCF8] transition-colors text-left">
+                  {language === 'en' ? 'Facebook Ads Architecture' : 'ফেসবুক অ্যাডস স্ট্র্যাটেজি'}
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onNavigateSection('/#calculator')} className="hover:text-[#FDFCF8] transition-colors text-left">
+                  {language === 'en' ? 'Ads Feasibility Calculator' : 'অ্যাড ক্যালকুলেটর'}
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onNavigateSection('/contact')} className="hover:text-[#FDFCF8] transition-colors text-left">
+                  {language === 'en' ? 'Book 1-on-1 Consultation' : 'যোগাযোগ ও কনসাল্টেশন'}
                 </button>
               </li>
             </ul>
@@ -127,7 +150,115 @@ export const Footer: React.FC<FooterProps> = ({
               })()}
             </div>
 
-            <div>
+            {/* Social Media Links from Settings */}
+            {settings?.socialLinks && (
+              <div className="pt-2 space-y-2">
+                <div className="text-[11px] font-semibold text-[#8A957F] uppercase tracking-wider flex items-center gap-1.5">
+                  <Share2 className="w-3.5 h-3.5 text-[#E2725B]" />
+                  <span>{language === 'en' ? 'Official Social Profiles' : 'সোশ্যাল মিডিয়া প্রোফাইল'}</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {settings.socialLinks.facebook && (
+                    <a
+                      href={settings.socialLinks.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1 bg-[#3A4533] hover:bg-[#1877F2] text-[#FDFCF8] rounded-lg text-xs font-semibold transition-all inline-flex items-center gap-1.5 border border-[#4A5D3B]/40 hover:border-[#1877F2]"
+                      title="Facebook Page"
+                    >
+                      <span className="font-bold text-[11px]">Facebook</span>
+                      <ExternalLink className="w-3 h-3 opacity-70" />
+                    </a>
+                  )}
+                  {settings.socialLinks.tiktok && (
+                    <a
+                      href={settings.socialLinks.tiktok}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1 bg-[#3A4533] hover:bg-[#FE2C55] text-[#FDFCF8] rounded-lg text-xs font-semibold transition-all inline-flex items-center gap-1.5 border border-[#4A5D3B]/40 hover:border-[#FE2C55]"
+                      title="TikTok Account"
+                    >
+                      <span className="font-bold text-[11px]">TikTok</span>
+                      <ExternalLink className="w-3 h-3 opacity-70" />
+                    </a>
+                  )}
+                  {settings.socialLinks.youtube && (
+                    <a
+                      href={settings.socialLinks.youtube}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1 bg-[#3A4533] hover:bg-[#FF0000] text-[#FDFCF8] rounded-lg text-xs font-semibold transition-all inline-flex items-center gap-1.5 border border-[#4A5D3B]/40 hover:border-[#FF0000]"
+                      title="YouTube Channel"
+                    >
+                      <span className="font-bold text-[11px]">YouTube</span>
+                      <ExternalLink className="w-3 h-3 opacity-70" />
+                    </a>
+                  )}
+                  {settings.socialLinks.linkedin && (
+                    <a
+                      href={settings.socialLinks.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1 bg-[#3A4533] hover:bg-[#0A66C2] text-[#FDFCF8] rounded-lg text-xs font-semibold transition-all inline-flex items-center gap-1.5 border border-[#4A5D3B]/40 hover:border-[#0A66C2]"
+                      title="LinkedIn Profile"
+                    >
+                      <span className="font-bold text-[11px]">LinkedIn</span>
+                      <ExternalLink className="w-3 h-3 opacity-70" />
+                    </a>
+                  )}
+                  {settings.socialLinks.instagram && (
+                    <a
+                      href={settings.socialLinks.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1 bg-[#3A4533] hover:bg-[#E4405F] text-[#FDFCF8] rounded-lg text-xs font-semibold transition-all inline-flex items-center gap-1.5 border border-[#4A5D3B]/40 hover:border-[#E4405F]"
+                      title="Instagram"
+                    >
+                      <span className="font-bold text-[11px]">Instagram</span>
+                      <ExternalLink className="w-3 h-3 opacity-70" />
+                    </a>
+                  )}
+                  {settings.socialLinks.xTwitter && (
+                    <a
+                      href={settings.socialLinks.xTwitter}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1 bg-[#3A4533] hover:bg-slate-700 text-[#FDFCF8] rounded-lg text-xs font-semibold transition-all inline-flex items-center gap-1.5 border border-[#4A5D3B]/40"
+                      title="X / Twitter"
+                    >
+                      <span className="font-bold text-[11px]">X / Twitter</span>
+                      <ExternalLink className="w-3 h-3 opacity-70" />
+                    </a>
+                  )}
+                  {settings.socialLinks.telegram && (
+                    <a
+                      href={settings.socialLinks.telegram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1 bg-[#3A4533] hover:bg-[#229ED9] text-[#FDFCF8] rounded-lg text-xs font-semibold transition-all inline-flex items-center gap-1.5 border border-[#4A5D3B]/40 hover:border-[#229ED9]"
+                      title="Telegram"
+                    >
+                      <span className="font-bold text-[11px]">Telegram</span>
+                      <ExternalLink className="w-3 h-3 opacity-70" />
+                    </a>
+                  )}
+                  {settings.socialLinks.customLinks?.map((item) => (
+                    <a
+                      key={item.id}
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1 bg-[#3A4533] hover:bg-[#4A5D3B] text-[#FDFCF8] rounded-lg text-xs font-semibold transition-all inline-flex items-center gap-1.5 border border-[#4A5D3B]/40"
+                    >
+                      <span className="font-bold text-[11px]">{item.label}</span>
+                      <ExternalLink className="w-3 h-3 opacity-70" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="pt-2">
               <button
                 onClick={onOpenLeadForm}
                 className="px-5 py-2 bg-[#E2725B] hover:bg-[#c95d46] text-[#FDFCF8] rounded-xl text-xs font-bold transition-colors"

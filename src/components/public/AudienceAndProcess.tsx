@@ -17,12 +17,12 @@ export const AudienceAndProcess: React.FC<AudienceAndProcessProps> = ({ onOpenLe
     { title: "Food & Restaurant", icon: Utensils, label: "Food, Bakeries & Cloud Kitchens", desc: "Hyper-local geo-targeting & direct order delivery volume" },
     { title: "Local Service Businesses", icon: Store, label: "Local Services & Consultancies", desc: "High-intent lead generation & automated WhatsApp inquiries" }
   ] : [
-    { title: "E-commerce Brands", icon: ShoppingBag, label: "ই-কমার্স ব্র্যান্ড ও অনলাইন শপ", desc: "ওয়েবসাইট পারচেজ ও রিটার্গেটিং অপটিমাইজেশন" },
-    { title: "Fashion & Apparel", icon: Sparkles, label: "ফ্যাশন, ক্লথিং ও লাইফস্টাইল", desc: "UGC ভিডিও ও ট্রেন্ডিং ক্রিয়েটিভ টেস্ট" },
-    { title: "Beauty & Cosmetics", icon: Sparkles, label: "বিউটি, স্কিনকেয়ার ও কসমেটিক্স", desc: "ইনগ্রিডিয়েন্ট ডেমো ও প্রুফ-বেসড কনভার্সন" },
-    { title: "Electronics & Gadgets", icon: Smartphone, label: "ইলেকট্রনিক্স ও গ্যাজেট", desc: "ফিচার ওয়াকথ্রু ও ডিরেক্ট মেসেজিং ক্যাম্পেইন" },
-    { title: "Food & Restaurant", icon: Utensils, label: "ফুড, বেকারি ও ক্লাউড কিচেন", desc: "লোকাল এরিয়া পিনপয়েন্টিং ও অর্ডার ড্রাইভ" },
-    { title: "Local Service Businesses", icon: Store, label: "লোকাল সার্ভিস ও প্রফেশনাল সেবা", desc: "কোয়ালিফাইড লিড ও হোয়াটসঅ্যাপ কনভার্সেশন" }
+    { title: "ই-কমার্স ব্র্যান্ড", icon: ShoppingBag, label: "ই-কমার্স ব্র্যান্ড ও অনলাইন শপ", desc: "ওয়েবসাইট পারচেজ ও রিটার্গেটিং অপটিমাইজেশন" },
+    { title: "ফ্যাশন ও লাইফস্টাইল", icon: Sparkles, label: "ফ্যাশন, ক্লথিং ও লাইফস্টাইল", desc: "UGC ভিডিও ও ট্রেন্ডিং ক্রিয়েটিভ টেস্ট" },
+    { title: "বিউটি ও স্কিনকেয়ার", icon: Sparkles, label: "বিউটি, স্কিনকেয়ার ও কসমেটিক্স", desc: "ইনগ্রিডিয়েন্ট ডেমো ও প্রুফ-বেসড কনভার্সন" },
+    { title: "ইলেকট্রনিক্স ও গ্যাজেট", icon: Smartphone, label: "ইলেকট্রনিক্স ও গ্যাজেট", desc: "ফিচার ওয়াকথ্রু ও ডিরেক্ট মেসেজিং ক্যাম্পেইন" },
+    { title: "ফুড ও কিচেন", icon: Utensils, label: "ফুড, বেকারি ও ক্লাউড কিচেন", desc: "লোকাল এরিয়া পিনপয়েন্টিং ও অর্ডার ড্রাইভ" },
+    { title: "লোকাল সার্ভিস", icon: Store, label: "লোকাল সার্ভিস ও প্রফেশনাল সেবা", desc: "কোয়ালিফাইড লিড ও হোয়াটসঅ্যাপ কনভার্সেশন" }
   ];
 
   const steps = language === 'en' ? [
@@ -58,28 +58,28 @@ export const AudienceAndProcess: React.FC<AudienceAndProcessProps> = ({ onOpenLe
     {
       num: "০১",
       title: "বিজনেস ও অফার অ্যানালাইসিস",
-      eng: "Understand the Business & Market",
+      eng: "বিজনেস মডেল ও বাজার যাচাই",
       desc: "আপনার প্রোডাক্টের প্রাইসিং, মার্জিন, টার্গেট অডিয়েন্স এবং বর্তমান ল্যান্ডিং পেজ বা মেসেজিং ফ্লো পুঙ্খানুপুঙ্খ অডিট করা।",
       icon: Search
     },
     {
       num: "০২",
       title: "ট্র্যাকিং ও পিক্সেল ইন্টিগ্রেশন",
-      eng: "Plan & Setup Tracking Infrastructure",
+      eng: "পিক্সেল ও CAPI কনফিগারেশন",
       desc: "টিকটক পিক্সেল ও ফেসবুক কনভার্সন এপিআই (CAPI) নিখুঁতভাবে সেটআপ করা যাতে প্রতিটি ইভেন্ট নির্ভুল রেকর্ড হয়।",
       icon: Sliders
     },
     {
       num: "০৩",
       title: "ক্রিয়েটিভ টেস্টিং ও লঞ্চ",
-      eng: "Launch Structured Creative Angles",
+      eng: "মাল্টি-অ্যাঙ্গেল ক্রিয়েটিভ টেস্ট",
       desc: "৩-৫টি ভিন্ন ক্রিয়েটিভ অ্যাঙ্গেল (UGC, ডেমো, অফার) এবং ব্রড ও ইন্টারেস্ট অডিয়েন্সে ক্যাম্পেইন লাইভ করা।",
       icon: Rocket
     },
     {
       num: "০৪",
       title: "ডেটা-নির্ভর অপ্টিমাইজেশন",
-      eng: "Scale & Optimize Based on Data",
+      eng: "পারফরম্যান্স স্কেলিং ও রিটার্গেটিং",
       desc: "সাপ্তাহিক সিপিএ (CPA), সিটিআর (CTR) এবং আরওআই (ROAS) বিশ্লেষণ করে উইনিং অ্যাডে বাজেট স্কেল করা এবং দুর্বল অ্যাড বন্ধ করা।",
       icon: LineChart
     }

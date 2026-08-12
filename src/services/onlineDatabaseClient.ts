@@ -184,7 +184,7 @@ class OnlineDatabaseClient {
 
     this.debounceTimer = setTimeout(() => {
       this.flushPendingSync();
-    }, 400);
+    }, 150);
   }
 
   /**

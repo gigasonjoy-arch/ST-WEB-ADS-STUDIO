@@ -485,6 +485,110 @@ export const ProfileManagement: React.FC<ProfileManagementProps> = ({
           </div>
         </div>
 
+        {/* SECTION 4: Social Media Links & Channels */}
+        <div className="bg-white p-6 sm:p-7 rounded-3xl border border-[#D9DED1] shadow-2xs space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-[#D9DED1]">
+            <div className="flex items-center gap-2">
+              <LinkIcon className="w-4 h-4 text-[#E2725B]" />
+              <h2 className="text-sm font-bold text-[#2C3327] uppercase tracking-wider">
+                সোশ্যাল মিডিয়া প্রোফাইল লিঙ্ক (Social Media Links)
+              </h2>
+            </div>
+            {onNavigateTab && (
+              <button
+                type="button"
+                onClick={() => onNavigateTab('SOCIAL_MEDIA')}
+                className="text-xs font-bold text-[#4A5D3B] hover:text-[#3A4533] inline-flex items-center gap-1 bg-[#F5F7F2] px-3 py-1.5 rounded-xl border border-[#D9DED1]"
+              >
+                <span>সম্পূর্ণ সোশ্যাল প্যানেল</span>
+                <ExternalLink className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+
+          <p className="text-xs text-[#5C6652]">
+            আপনার অফিসিয়াল ফেসবুক, টিকটক, ইউটিউব, লিঙ্কডইন লিঙ্ক কনফিগার করুন। এগুলো ফুটার এবং কন্টাক্ট সেকশনে সরাসরি প্রদর্শিত হবে।
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[11px] font-bold text-[#2C3327] mb-1">
+                ফেসবুক পেজ / প্রোফাইল (Facebook)
+              </label>
+              <input
+                type="text"
+                value={formData.socialLinks?.facebook || ''}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  socialLinks: {
+                    ...(formData.socialLinks || {}),
+                    facebook: e.target.value
+                  }
+                })}
+                placeholder="https://facebook.com/sonjoysarkar.official"
+                className="w-full bg-[#FDFCF8] border border-[#D9DED1] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2C3327]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-[#2C3327] mb-1">
+                টিকটক অ্যাকাউন্ট (TikTok)
+              </label>
+              <input
+                type="text"
+                value={formData.socialLinks?.tiktok || ''}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  socialLinks: {
+                    ...(formData.socialLinks || {}),
+                    tiktok: e.target.value
+                  }
+                })}
+                placeholder="https://tiktok.com/@sonjoysarkar"
+                className="w-full bg-[#FDFCF8] border border-[#D9DED1] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2C3327]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-[#2C3327] mb-1">
+                ইউটিউব চ্যানেল (YouTube)
+              </label>
+              <input
+                type="text"
+                value={formData.socialLinks?.youtube || ''}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  socialLinks: {
+                    ...(formData.socialLinks || {}),
+                    youtube: e.target.value
+                  }
+                })}
+                placeholder="https://youtube.com/@stwebads"
+                className="w-full bg-[#FDFCF8] border border-[#D9DED1] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2C3327]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-[#2C3327] mb-1">
+                লিঙ্কডইন প্রোফাইল (LinkedIn)
+              </label>
+              <input
+                type="text"
+                value={formData.socialLinks?.linkedin || ''}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  socialLinks: {
+                    ...(formData.socialLinks || {}),
+                    linkedin: e.target.value
+                  }
+                })}
+                placeholder="https://linkedin.com/in/sonjoysarkar"
+                className="w-full bg-[#FDFCF8] border border-[#D9DED1] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2C3327]"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4">
           <button

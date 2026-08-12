@@ -225,7 +225,16 @@ app.post('/api/ai/chat', async (req, res) => {
 
 // Dynamic SEO robots.txt endpoint
 app.get('/robots.txt', (_req, res) => {
-  res.type('text/plain');
+  try {
+    const db = loadDatabase();
+    const robots = db.siteSettings?.robots?.content;
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    if (robots && robots.trim().length > 0) {
+      return res.send(robots);
+    }
+  } catch (e) {}
+
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   res.send(`User-agent: *
 Allow: /
 Disallow: /admin
@@ -237,8 +246,70 @@ Sitemap: https://stwebads.com/sitemap.xml`);
 // Dynamic XML Sitemap endpoint
 app.get('/sitemap.xml', (_req, res) => {
   const today = new Date().toISOString().split('T')[0];
-  res.type('application/xml');
-  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+  res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+  
+  try {
+    const db = loadDatabase();
+    const baseUrl = (db.siteSettings?.sitemap?.baseUrl || 'https://stwebads.com').replace(/\/$/, '');
+    const customPages = Array.isArray(db.customPages) ? db.customPages.filter((p: any) => p.status === 'published') : [];
+    const caseStudies = Array.isArray(db.caseStudies) ? db.caseStudies : [];
+
+    let urlsXml = `  <url>
+    <loc>${baseUrl}/</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/services</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/case-studies</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/media-gallery</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/tiktok-ads</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/facebook-ads</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/contact</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+
+    customPages.forEach((p: any) => {
+      const slug = (p.slug || '').replace(/^\/+/, '');
+      if (slug && !['services', 'case-studies', 'media-gallery', 'tiktok-ads', 'facebook-ads', 'contact'].includes(slug)) {
+        urlsXml += `\n  <url>\n    <loc>${baseUrl}/${slug}</loc>\n    <lastmod>${p.updatedAt ? p.updatedAt.split('T')[0] : today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>`;
+      }
+    });
+
+    return res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urlsXml}
+</urlset>`);
+  } catch (e) {
+    return res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://stwebads.com/</loc>
@@ -247,30 +318,25 @@ app.get('/sitemap.xml', (_req, res) => {
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://stwebads.com/#services</loc>
+    <loc>https://stwebads.com/services</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://stwebads.com/#case-studies</loc>
+    <loc>https://stwebads.com/case-studies</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://stwebads.com/media-gallery</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stwebads.com/#calculator</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stwebads.com/#tiktok-guide</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
   </url>
 </urlset>`);
+  }
 });
 
   // Vite middleware for development vs static asset serving for production
