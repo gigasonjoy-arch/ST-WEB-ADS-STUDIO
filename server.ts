@@ -224,7 +224,7 @@ app.post('/api/ai/chat', async (req, res) => {
 });
 
 // Dynamic SEO robots.txt endpoint
-app.get('/robots.txt', (_req, res) => {
+app.get('/robots.txt', (req, res) => {
   try {
     const db = loadDatabase();
     const robots = db.siteSettings?.robots?.content;
@@ -234,23 +234,30 @@ app.get('/robots.txt', (_req, res) => {
     }
   } catch (e) {}
 
+  const host = req.get('host') || 'sonjoysarkar.netlify.app';
+  const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' || host.includes('netlify.app') ? 'https' : 'http';
+  const siteUrl = `${protocol}://${host}`;
+
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   res.send(`User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /admin/*
 
-Sitemap: https://stwebads.com/sitemap.xml`);
+Sitemap: https://sonjoysarkar.netlify.app/sitemap.xml`);
 });
 
 // Dynamic XML Sitemap endpoint
-app.get('/sitemap.xml', (_req, res) => {
+app.get('/sitemap.xml', (req, res) => {
   const today = new Date().toISOString().split('T')[0];
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
   
   try {
     const db = loadDatabase();
-    const baseUrl = (db.siteSettings?.sitemap?.baseUrl || 'https://stwebads.com').replace(/\/$/, '');
+    let baseUrl = (db.siteSettings?.sitemap?.baseUrl || '').replace(/\/$/, '');
+    if (!baseUrl || baseUrl === 'https://stwebads.com') {
+      baseUrl = 'https://sonjoysarkar.netlify.app';
+    }
     const customPages = Array.isArray(db.customPages) ? db.customPages.filter((p: any) => p.status === 'published') : [];
     const caseStudies = Array.isArray(db.caseStudies) ? db.caseStudies : [];
 
@@ -295,11 +302,23 @@ app.get('/sitemap.xml', (_req, res) => {
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/privacy-policy</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/terms</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>`;
 
     customPages.forEach((p: any) => {
       const slug = (p.slug || '').replace(/^\/+/, '');
-      if (slug && !['services', 'case-studies', 'media-gallery', 'tiktok-ads', 'facebook-ads', 'contact'].includes(slug)) {
+      if (slug && !['services', 'case-studies', 'media-gallery', 'tiktok-ads', 'facebook-ads', 'contact', 'privacy-policy', 'terms'].includes(slug)) {
         urlsXml += `\n  <url>\n    <loc>${baseUrl}/${slug}</loc>\n    <lastmod>${p.updatedAt ? p.updatedAt.split('T')[0] : today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>`;
       }
     });
@@ -312,25 +331,43 @@ ${urlsXml}
     return res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://stwebads.com/</loc>
+    <loc>https://sonjoysarkar.netlify.app/</loc>
     <lastmod>${today}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://stwebads.com/services</loc>
+    <loc>https://sonjoysarkar.netlify.app/services</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://stwebads.com/case-studies</loc>
+    <loc>https://sonjoysarkar.netlify.app/case-studies</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://stwebads.com/media-gallery</loc>
+    <loc>https://sonjoysarkar.netlify.app/media-gallery</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sonjoysarkar.netlify.app/tiktok-ads</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sonjoysarkar.netlify.app/facebook-ads</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sonjoysarkar.netlify.app/contact</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>

@@ -24,12 +24,23 @@ import {
   Minimize2,
   Trash2,
   Mic,
-  MicOff
+  MicOff,
+  Check,
+  AlertCircle,
+  ChevronDown,
+  ChevronUp,
+  Layers,
+  CheckSquare,
+  Eye,
+  ShieldCheck,
+  Zap,
+  ExternalLink
 } from 'lucide-react';
 import { 
   AdminTab, 
   AdminAiMessage, 
   AdminAiAction, 
+  AdminAiActionProposal,
   SiteSettings, 
   CaseStudy, 
   CalculatorBenchmark, 
@@ -37,6 +48,7 @@ import {
   KnowledgeGapItem 
 } from '../../types';
 import { storageService } from '../../services/storageService';
+import { AdminAgentEngine } from '../../services/adminAgentEngine';
 
 interface AdminAiAssistantDrawerProps {
   isOpen: boolean;
@@ -49,20 +61,24 @@ const INITIAL_MESSAGES: AdminAiMessage[] = [
   {
     id: 'msg-admin-welcome',
     sender: 'assistant',
-    text: `স্বাগতম অ্যাডমিন স্টুডিওতে! আমি আপনার **Admin AI Assistant**।
+    text: `স্বাগতম অ্যাডমিন স্টুডিওতে! আমি আপনার **Verified Admin AI Copilot**।
 
-আমি আপনাকে অ্যাডমিন প্যানেলের যেকোনো সেটিংস, ফিচার ও কনফিগারেশন খুঁজে পেতে এবং কাজ দ্রুত সম্পন্ন করতে সাহায্য করব:
+🛡️ **জিরো-হ্যালুসিনেশন ও হিউম্যান-ইন-দ্য-লুপ পলিসি**:
+আমি আন্দাজে কোনো কাল্পনিক তথ্য বা ক্লায়েন্ট ডেটা তৈরি করি না। আপনি আমাকে যে তথ্য প্রদান করবেন, আমি তা সুশৃঙ্খলভাবে সাজিয়ে **অ্যাকশন প্রিভিউ কার্ড** প্রস্তুত করব। 
 
-- 🧭 **সরাসরি নেভিগেশন**: "WhatsApp নাম্বার পরিবর্তন করব কীভাবে?", "Calculator benchmark কোথায়?", "Header logo show/hide করব কীভাবে?" বললে সরাসরি সেই সেটিংসে নিয়ে যাব।
-- 🔍 **কনটেন্ট সার্চ**: যেকোনো প্রশ্ন, কেস স্টাডি বা বেঞ্চমার্ক খোঁজার জন্য সার্চ করতে পারেন।
-- 🧹 **সিস্টেম অডিট**: কোনো অসম্পূর্ণ, ড্রাফট বা অপ্রয়োজনীয় তথ্য রয়েছে কি না তা স্ক্যান করতে পারেন।`,
+আপনার সরাসরি **"নিশ্চিত করুন ও সেভ করুন"** বাটনে ক্লিকের পূর্বে কোনো ডেটা সাইটে বা ডেটাবেসে যুক্ত বা পাবলিকলি প্রকাশিত হবে না।
+
+📌 **কীভাবে ব্যবহার করবেন:**
+- **কেস স্টাডি যোগ**: *"ক্লায়েন্ট: Silk Vogue, বাজেট: ৪০,০০০ টাকা, সেলস: ১,৬০,০০০ টাকা, অর্ডার: ৩১০টি, প্ল্যাটফর্ম: TikTok। কেস স্টাডি যোগ করো"*
+- **প্রশ্নোত্তর যোগ**: *"প্রশ্ন: ডেলিভারি চার্জ কত? উত্তর: ঢাকা ৮০ টাকা, ঢাকার বাইরে ১৩০ টাকা। নলেজ বেসে যোগ করো"*
+- **কনফিগারেশন**: *"ডলার এক্সচেঞ্জ রেট ১৩০ টাকা করো"* অথবা *"WhatsApp নম্বর 01815124970 সেট করো"*
+- **ড্রাফট পাবলিশ**: *"সব ড্রাফট কেস স্টাডি লাইভে পাবলিশ করো"*`,
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     suggestions: [
-      'WhatsApp number কোথা থেকে পরিবর্তন করব?',
-      'Calculator-এর benchmark কোথায় পরিবর্তন করব?',
-      'Header-এর logo এবং company name কীভাবে পরিবর্তন করব?',
-      'TikTok Pixel ও GTM কোথায় সেট করব?',
-      'সিস্টেমের অসম্পূর্ণ বা ড্রাফট তথ্য স্ক্যান করুন'
+      'ক্লায়েন্ট: Aarong, বাজেট: 45000, সেলস: 180000, অর্ডার: 350, প্ল্যাটফর্ম: TikTok। কেস স্টাডি যোগ করো',
+      'প্রশ্ন: ডেলিভারি সময় কতদিন? উত্তর: ঢাকা ২৪-৪৮ ঘণ্টা, ঢাকার বাইরে ৩-৪ দিন। নলেজ বেসে যোগ করো',
+      'সব ড্রাফট কেস স্টাডি লাইভে পাবলিশ করো',
+      'ডলার এক্সচেঞ্জ রেট পরিবর্তন করে ১৩০ টাকা করো'
     ]
   }
 ];
@@ -93,6 +109,8 @@ export const AdminAiAssistantDrawer: React.FC<AdminAiAssistantDrawerProps> = ({
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [isListening, setIsListening] = useState<boolean>(false);
   const [voiceNotice, setVoiceNotice] = useState<string | null>(null);
+  const [expandedPayloads, setExpandedPayloads] = useState<Record<string, boolean>>({});
+  const [executingProposalId, setExecutingProposalId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const voiceTimeoutRef = useRef<any>(null);
@@ -113,7 +131,7 @@ export const AdminAiAssistantDrawer: React.FC<AdminAiAssistantDrawerProps> = ({
         const rec = new SpeechRecognition();
         rec.continuous = false;
         rec.interimResults = true;
-        rec.lang = 'bn-BD'; // Supports Bangla/English recognition
+        rec.lang = 'bn-BD';
 
         rec.onstart = () => {
           setIsListening(true);
@@ -234,6 +252,104 @@ export const AdminAiAssistantDrawer: React.FC<AdminAiAssistantDrawerProps> = ({
     onClose();
   };
 
+  const togglePayloadView = (proposalId: string) => {
+    setExpandedPayloads(prev => ({
+      ...prev,
+      [proposalId]: !prev[proposalId]
+    }));
+  };
+
+  const handleConfirmProposal = async (messageId: string, proposal: AdminAiActionProposal) => {
+    setExecutingProposalId(proposal.id);
+
+    // Update status to EXECUTING
+    setMessages(prev => prev.map(m => {
+      if (m.id === messageId && m.proposal) {
+        return {
+          ...m,
+          proposal: { ...m.proposal, status: 'EXECUTING' }
+        };
+      }
+      return m;
+    }));
+
+    try {
+      const result = await AdminAgentEngine.executeProposal(proposal);
+
+      // Update message with COMPLETED status and execution result
+      setMessages(prev => prev.map(m => {
+        if (m.id === messageId && m.proposal) {
+          return {
+            ...m,
+            proposal: {
+              ...m.proposal,
+              status: result.success ? 'COMPLETED' : 'REJECTED',
+              executionResult: result
+            }
+          };
+        }
+        return m;
+      }));
+
+      // Add assistant confirmation follow-up message
+      const confirmMsg: AdminAiMessage = {
+        id: `msg-confirm-${Date.now()}`,
+        sender: 'assistant',
+        text: result.success 
+          ? `✅ **অ্যাকশন সফলভাবে এক্সিকিউট সম্পন্ন হয়েছে!**\n\n${result.messageBn}\n\nসংশ্লিষ্ট ডেটাবেস এবং লাইভ সাইটে এটি সাথে সাথে আপডেট হয়েছে। আপনি সরাসরি সংশ্লিষ্ট প্যানেলে গিয়ে পরিবর্তন দেখতে পারেন:`
+          : `⚠️ **অ্যাকশন সম্পন্ন করতে সমস্যা হয়েছে:**\n\n${result.messageBn}`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        actions: [
+          {
+            id: `act-view-res-${Date.now()}`,
+            label: `View ${proposal.targetTab}`,
+            labelBn: `${proposal.titleBn.split(' ')[0]} তালিকায় দেখুন`,
+            tab: proposal.targetTab,
+            subTab: proposal.targetSubTab,
+            type: 'NAVIGATE'
+          }
+        ]
+      };
+
+      setMessages(prev => [...prev, confirmMsg]);
+    } catch (err: any) {
+      setMessages(prev => prev.map(m => {
+        if (m.id === messageId && m.proposal) {
+          return {
+            ...m,
+            proposal: {
+              ...m.proposal,
+              status: 'REJECTED',
+              executionResult: {
+                success: false,
+                messageEn: err?.message || 'Execution error',
+                messageBn: 'অ্যাকশন সম্পন্ন করা যায়নি।'
+              }
+            }
+          };
+        }
+        return m;
+      }));
+    } finally {
+      setExecutingProposalId(null);
+    }
+  };
+
+  const handleCancelProposal = (messageId: string) => {
+    setMessages(prev => prev.map(m => {
+      if (m.id === messageId && m.proposal) {
+        return {
+          ...m,
+          proposal: {
+            ...m.proposal,
+            status: 'REJECTED'
+          }
+        };
+      }
+      return m;
+    }));
+  };
+
   const processAdminQuery = (rawQuery: string) => {
     const query = rawQuery.trim();
     if (!query) return;
@@ -250,453 +366,81 @@ export const AdminAiAssistantDrawer: React.FC<AdminAiAssistantDrawerProps> = ({
     setIsThinking(true);
 
     setTimeout(() => {
-      const qLower = query.toLowerCase();
-      let responseText = '';
-      let actions: AdminAiAction[] = [];
-      let suggestions: string[] = [];
-
-      // 1. WHATSAPP / CONTACT SETTINGS
-      if (qLower.includes('whatsapp') || qLower.includes('হোয়াটসঅ্যাপ') || qLower.includes('নাম্বার') || qLower.includes('phone') || qLower.includes('ফোন')) {
-        responseText = `**WhatsApp নম্বর ও মেসেজ পরিবর্তন:**
-
-হোয়াটসঅ্যাপ নম্বর পরিবর্তন করতে আপনি **সাইট ও সিস্টেম সেটিংস** ট্যাবের অধীনে **হোয়াটসঅ্যাপ ও এসইও (WHATSAPP_SEO)** সাব-ট্যাব ব্যবহার করতে পারেন।
-
-সেখানে আপনি:
-1. সরাসরি ফোন নম্বর (যেমন: \`+8801815124970\`)
-2. ভিজিটরের জন্য ডিফল্ট প্রি-ফিল মেসেজ
-3. ফ্লোটিং চ্যাট উইজেট অন/অফ
-
-কাস্টমাইজ করতে পারবেন। নিচের বাটনে ক্লিক করলে আমি আপনাকে সরাসরি সেখানে নিয়ে যাব:`;
-        actions = [
-          {
-            id: 'act-nav-whatsapp',
-            label: 'Go to WhatsApp & SEO Settings',
-            labelBn: 'WhatsApp Settings-এ যান',
-            tab: 'SETTINGS',
-            subTab: 'WHATSAPP_SEO',
-            elementId: 'setting-whatsapp-input',
-            type: 'NAVIGATE'
-          }
-        ];
-        suggestions = [
-          'Header-এ WhatsApp বাটন দেখাব কীভাবে?',
-          'Calculator-এর benchmark কোথায় পরিবর্তন করব?'
-        ];
-      }
-
-      // 2. CALCULATOR BENCHMARKS
-      else if (
-        qLower.includes('calculator') || 
-        qLower.includes('benchmark') || 
-        qLower.includes('ক্যালকুলেটর') || 
-        qLower.includes('বেঞ্চমার্ক') || 
-        qLower.includes('cpc') || 
-        qLower.includes('cpm') || 
-        qLower.includes('cvr') || 
-        qLower.includes('roi') ||
-        qLower.includes('price range')
-      ) {
-        responseText = `**TikTok & Facebook Ads Calculator Benchmarks:**
-
-ক্যালকুলেটরের ইন্ডাস্ট্রি-ভিত্তিক বেঞ্চমার্ক ডেটা (যেমন: CPC, CPM, CTR, CVR, ডলার কনভার্সন রেট) পরিচালনা করতে **ক্যালকুলেটর বেঞ্চমার্ক** সেকশনে যান।
-
-এখানে আপনি:
-- বিভিন্ন ইন্ডাস্ট্রির মেট্রিকস (E-commerce, Fashion, Gadgets, etc.) এডিট বা নতুন যোগ করতে পারেন
-- প্রোডাক্ট প্রাইস রেঞ্জ (টায়ার) কনফিগার করতে পারেন
-- ড্রপডাউন ক্যাটাগরি সাজাতে পারেন
-
-নিচের বাটনে ক্লিক করে সরাসরি ক্যালকুলেটর বেঞ্চমার্ক প্যানেলে প্রবেশ করুন:`;
-        actions = [
-          {
-            id: 'act-nav-calculator-benchmarks',
-            label: 'Open Calculator Benchmarks',
-            labelBn: 'ক্যালকুলেটর বেঞ্চমার্কে যান',
-            tab: 'CALCULATOR_BENCHMARKS',
-            subTab: 'BENCHMARKS_TABLE',
-            elementId: 'benchmarks-table-view',
-            type: 'NAVIGATE'
-          }
-        ];
-        suggestions = [
-          'ডলার এক্সচেঞ্জ রেট (USD to BDT) পরিবর্তন কোথায়?',
-          'অপ্রয়োজনীয় বা শূন্য বেঞ্চমার্ক ডেটা স্ক্যান করুন'
-        ];
-      }
-
-      // 3. HEADER LOGO & COMPANY NAME VISIBILITY (NEW)
-      else if (
-        qLower.includes('header') || 
-        qLower.includes('logo') || 
-        qLower.includes('লোগো') || 
-        qLower.includes('হেডার') || 
-        qLower.includes('company name') || 
-        qLower.includes('কোম্পানির নাম') || 
-        qLower.includes('visibility') || 
-        qLower.includes('brand name') ||
-        qLower.includes('tagline')
-      ) {
-        responseText = `**হেডার লোগো এবং কোম্পানির নাম কন্ট্রোল:**
-
-হেডারের ভিজিবিলিটি এবং লেআউট পুরোপুরি ব্যাকএন্ড কন্ট্রোল্ড করা হয়েছে। আপনি **সাইট ও সিস্টেম সেটিংস** ট্যাবের অধীনে **হেডার ও লোগো কন্ট্রোল (HEADER_MANAGEMENT)** সেকশন থেকে পরিবর্তন করতে পারেন:
-
-- **ডেস্কটপ লোগো ডিসপ্লে মোড**: লোগো + নাম (Both), শুধুমাত্র লোগো (Logo Only), শুধুমাত্র নাম (Name Only), অথবা গোপন (Hidden)।
-- **মোবাইল লোগো মোড**: মোবাইলের জন্য আলাদা ডিসপ্লে মোড নির্ধারণ।
-- **লোগো টাইপ**: টেক্সট ব্যাজ (ST) অথবা নিজস্ব ইমেজ আপলোড/URL।
-- **ট্যাগলাইন ও ব্র্যান্ড নেম**: বাংলা ও ইংরেজিতে কাস্টমাইজেশন।
-- **হেডার মেনু ও CTA বাটন**: নতুন লিঙ্ক যোগ, অন/অফ এবং বাটন অ্যাকশন।
-
-নিচের বাটনে ক্লিক করলে সরাসরি হেডার সেটিংস খুলে যাবে:`;
-        actions = [
-          {
-            id: 'act-nav-header-settings',
-            label: 'Open Header & Logo Settings',
-            labelBn: 'হেডার ও লোগো সেটিংসে যান',
-            tab: 'SETTINGS',
-            subTab: 'HEADER_MANAGEMENT',
-            elementId: 'header-management-panel',
-            type: 'NAVIGATE'
-          }
-        ];
-        suggestions = [
-          'মোবাইলে শুধুমাত্র লোগো দেখাব কীভাবে?',
-          'হেডারের Book Free Audit বাটনের লিংক পরিবর্তন কীভাবে করব?'
-        ];
-      }
-
-      // 4. GTM, TIKTOK PIXEL, META PIXEL
-      else if (
-        qLower.includes('gtm') || 
-        qLower.includes('pixel') || 
-        qLower.includes('পিক্সেল') || 
-        qLower.includes('tag manager') || 
-        qLower.includes('tiktok pixel') || 
-        qLower.includes('meta pixel') || 
-        qLower.includes('analytics') || 
-        qLower.includes('ট্র্যাকিং')
-      ) {
-        responseText = `**Google Tag Manager ও পিক্সেল ট্র্যাকিং কনফিগারেশন:**
-
-GTM কন্টেইনার আইডি, TikTok Pixel ID, Meta Pixel ID এবং Google Analytics 4 আইডি বসানোর জন্য অ্যাডমিনের **GTM ও পিক্সেল ট্র্যাকিং (GTM_TRACKING)** ট্যাব ব্যবহার করুন।
-
-- সব স্ক্রিপ্ট স্বয়ংক্রিয়ভাবে ডিডুপ্লিকেশন গার্ডের মাধ্যমে রান হয়।
-- কাস্টম Head ও Body স্ক্রিপ্টও এখানে বসাতে পারেন।
-
-সরাসরি যেতে নিচের অ্যাকশন বাটনে ক্লিক করুন:`;
-        actions = [
-          {
-            id: 'act-nav-gtm-pixels',
-            label: 'Open GTM & Pixels Settings',
-            labelBn: 'GTM ও পিক্সেল সেটিংসে যান',
-            tab: 'GTM_TRACKING',
-            type: 'NAVIGATE'
-          }
-        ];
-        suggestions = [
-          'পিক্সেল আইডি ডুপ্লিকেট হচ্ছে কি না কীভাবে বুঝব?',
-          'Google Analytics আইডি কোথায় বসাব?'
-        ];
-      }
-
-      // 5. CASE STUDIES
-      else if (
-        qLower.includes('case study') || 
-        qLower.includes('কেস স্টাডি') || 
-        qLower.includes('proof') || 
-        qLower.includes('প্রুফ') || 
-        qLower.includes('client result') ||
-        qLower.includes('পাবলিশ')
-      ) {
-        responseText = `**কেস স্টাডি ও ভেরিফাইড ফলাফল ম্যানেজমেন্ট:**
-
-নতুন কেস স্টাডি যোগ করতে, এক্সিস্টিং কেস স্টাডি এডিট করতে বা ড্রাফট থেকে লাইভে পাবলিশ করতে **কেস স্টাডি ও প্রুফ (CASE_STUDIES)** সেকশনে যান।
-
-সেখানে আপনি:
-- ক্লায়েন্টের নাম, ইন্ডাস্ট্রি ও স্পেন্ড/রিটার্ন (ROAS)
-- রেজাল্ট স্ক্রিনশট ও মিডিয়া
-- ড্রাফট বনাম লাইভ স্ট্যাটাস
-
-ম্যানেজ করতে পারবেন। সরাসরি যেতে নিচের বাটন ব্যবহার করুন:`;
-        actions = [
-          {
-            id: 'act-nav-case-studies',
-            label: 'Open Case Studies Manager',
-            labelBn: 'কেস স্টাডি ম্যানেজমেন্টে যান',
-            tab: 'CASE_STUDIES',
-            type: 'NAVIGATE'
-          }
-        ];
-        suggestions = [
-          'ড্রাফট কেস স্টাডি লাইভ করব কীভাবে?',
-          'নতুন কেস স্টাডি কীভাবে যোগ করব?'
-        ];
-      }
-
-      // 6. KNOWLEDGE BASE & KNOWLEDGE GAPS
-      else if (
-        qLower.includes('knowledge base') || 
-        qLower.includes('নলেজ বেস') || 
-        qLower.includes('প্রশ্ন') || 
-        qLower.includes('উত্তর') || 
-        qLower.includes('gap') || 
-        qLower.includes('গ্যাপ') || 
-        qLower.includes('অজানা') ||
-        qLower.includes('ai chat')
-      ) {
-        responseText = `**এআই নলেজ বেস ও অজানা প্রশ্ন (Knowledge Gaps):**
-
-- **নলেজ বেস (KNOWLEDGE_BASE)**: এখানে আপনার এজেন্সির সেবা, বাজেট পলিসি ও কাজের ধাপের অফিশিয়াল প্রশ্নোত্তর সাজানো থাকে।
-- **নলেজ গ্যাপ (KNOWLEDGE_GAPS)**: ওয়েবসাইট ভিজিটররা এআই চ্যাটে এমন কোনো প্রশ্ন করলে যার উত্তর পূর্বে সেভ ছিল না, তা স্বয়ংক্রিয়ভাবে এখানে তালিকাভুক্ত হয়।
-
-কোথায় যেতে চান বেছে নিন:`;
-        actions = [
-          {
-            id: 'act-nav-kb',
-            label: 'Open Knowledge Base',
-            labelBn: 'নলেজ বেসে যান',
-            tab: 'KNOWLEDGE_BASE',
-            type: 'NAVIGATE'
-          },
-          {
-            id: 'act-nav-gaps',
-            label: 'Open Knowledge Gaps',
-            labelBn: 'নলেজ গ্যাপ পেজে যান',
-            tab: 'KNOWLEDGE_GAPS',
-            type: 'NAVIGATE'
-          }
-        ];
-        suggestions = [
-          'ভিজিটরদের অজানা প্রশ্নের উত্তর কীভাবে যোগ করব?',
-          'নতুন প্রশ্ন-উত্তর যোগ করার নিয়ম কী?'
-        ];
-      }
-
-      // 7. LEADS & CLIENT CRM
-      else if (
-        qLower.includes('lead') || 
-        qLower.includes('লিড') || 
-        qLower.includes('ক্লায়েন্ট') || 
-        qLower.includes('inquiry') || 
-        qLower.includes('অডিট রিকোয়েস্ট') ||
-        qLower.includes('crm')
-      ) {
-        responseText = `**লিড ও ক্লায়েন্ট CRM:**
-
-ল্যান্ডিং পেজের লিড ফর্ম, ক্যালকুলেটরের অডিট রিকোয়েস্ট এবং এআই চ্যাট থেকে সংগৃহীত সব লিড **লিড ও ক্লায়েন্ট CRM (LEADS)** ট্যাবে স্বয়ংক্রিয়ভাবে জমা হয়।
-
-এখানে আপনি:
-- নতুন (NEW), যোগাযোগকৃত (CONTACTED) বা কনভার্টেড (CLOSED) স্ট্যাটাস আপডেট করতে পারেন
-- ১-ক্লিকে ক্লায়েন্টের সাথে হোয়াটসঅ্যাপ চ্যাট শুরু করতে পারেন
-- সব লিড এক ক্লিকে গুগল শিট বা CSV ফাইলে এক্সপোর্ট করতে পারেন
-
-সরাসরি যেতে নিচের অ্যাকশনে ক্লিক করুন:`;
-        actions = [
-          {
-            id: 'act-nav-leads',
-            label: 'Open Lead CRM',
-            labelBn: 'লিড ম্যানেজমেন্টে যান',
-            tab: 'LEADS',
-            type: 'NAVIGATE'
-          }
-        ];
-        suggestions = [
-          'গুগল শিটে কীভাবে লিড অটোমেটিক যাবে?',
-          'লিড স্ট্যাটাস পরিবর্তন করব কীভাবে?'
-        ];
-      }
-
-      // 8. SECURITY & PASSCODE
-      else if (
-        qLower.includes('passcode') || 
-        qLower.includes('পাসকোড') || 
-        qLower.includes('password') || 
-        qLower.includes('পাসওয়ার্ড') || 
-        qLower.includes('security') || 
-        qLower.includes('সিকিউরিটি') ||
-        qLower.includes('লগইন')
-      ) {
-        responseText = `**অ্যাডমিন সিকিউরিটি ও পাসকোড পরিবর্তন:**
-
-অ্যাডমিন প্যানেলে প্রবেশের পাসকোড পরিবর্তন করতে **সাইট ও সিস্টেম সেটিংস** ট্যাবের অধীনে **সিকিউরিটি ও পাসকোড (SECURITY)** সাব-সেকশনে যান।
-
-সেখানে বর্তমান পাসকোডটি ভেরিফাই করে আপনার পছন্দের নতুন পাসকোড সেট করতে পারবেন। সরাসরি যেতে নিচের বাটন ব্যবহার করুন:`;
-        actions = [
-          {
-            id: 'act-nav-security',
-            label: 'Go to Security & Passcode',
-            labelBn: 'সিকিউরিটি ও পাসকোড সেটিংসে যান',
-            tab: 'SETTINGS',
-            subTab: 'SECURITY',
-            elementId: 'setting-security-passcode-form',
-            type: 'NAVIGATE'
-          }
-        ];
-        suggestions = [
-          'পাসকোড ভুলে গেলে কী করব?',
-          'লগআউট করার নিয়ম কী?'
-        ];
-      }
-
-      // 9. SYSTEM AUDIT & IRRELEVANT / OUTDATED INFO CLEANUP
-      else if (
-        qLower.includes('audit') || 
-        qLower.includes('অডিট') || 
-        qLower.includes('স্ক্যান') || 
-        qLower.includes('অসম্পূর্ণ') || 
-        qLower.includes('অপ্রয়োজনীয়') || 
-        qLower.includes('ড্রাফট') || 
-        qLower.includes('clean') ||
-        qLower.includes('ভুল')
-      ) {
-        const caseStudies = storageService.getCaseStudies(true);
-        const benchmarks = storageService.getBenchmarks(true);
-        const gaps = storageService.getKnowledgeGaps().filter(g => g.status !== 'resolved');
-        const draftStudies = caseStudies.filter(c => !c.isPublished);
-        const missingMetrics = benchmarks.filter(b => !b.cpcBDT || !b.cvrPercent || b.cvrPercent <= 0);
-
-        responseText = `**সিস্টেম অডিট ও কন্টেন্ট স্ক্যান ফলাফল:**
-
-সিস্টেমের ডেটাবেস স্ক্যান করে নিচের পয়েন্টগুলো পাওয়া গেছে:
-- 📝 **ড্রাফট কেস স্টাডি**: ${draftStudies.length}টি অপ্রকাশিত ড্রাফট রয়েছে${draftStudies.length > 0 ? ` (যেমন: "${draftStudies[0].title}")` : ''}।
-- 📊 **অসম্পূর্ণ ক্যালকুলেটর বেঞ্চমার্ক**: ${missingMetrics.length}টি ক্যাটাগরির CVR বা CTR ডেটা শূন্য বা অসম্পূর্ণ।
-- ❓ **অমীমাংসিত নলেজ গ্যাপ**: ${gaps.length}টি ভিজিটর প্রশ্নের উত্তর নলেজ বেসে দেওয়া বাকি।
-- 🌐 **হেডার কনফিগারেশন**: ${settings.header?.logoDisplayMode ? `সক্রিয় (${settings.header.logoDisplayMode})` : 'ডিফল্ট'}।
-
-সরাসরি সমাধান করতে সংশ্লিষ্ট সেকশনে যান:`;
-
-        if (draftStudies.length > 0) {
-          actions.push({
-            id: 'act-audit-drafts',
-            label: 'Review Draft Case Studies',
-            labelBn: 'ড্রাফট কেস স্টাডি দেখুন',
-            tab: 'CASE_STUDIES',
-            type: 'NAVIGATE'
-          });
-        }
-
-        if (missingMetrics.length > 0) {
-          actions.push({
-            id: 'act-audit-benchmarks',
-            label: 'Fix Benchmark Metrics',
-            labelBn: 'বেঞ্চমার্ক মেট্রিকস ঠিক করুন',
-            tab: 'CALCULATOR_BENCHMARKS',
-            type: 'NAVIGATE'
-          });
-        }
-
-        if (gaps.length > 0) {
-          actions.push({
-            id: 'act-audit-gaps',
-            label: 'Resolve Knowledge Gaps',
-            labelBn: 'নলেজ গ্যাপ সমাধান করুন',
-            tab: 'KNOWLEDGE_GAPS',
-            type: 'NAVIGATE'
-          });
-        }
-
-        suggestions = [
-          'হেডার লোগো এবং নাম সেটিংস চেক করুন',
-          'ডলার এক্সচেঞ্জ রেট চেক করুন'
-        ];
-      }
-
-      // 10. GOOGLE SHEETS & WORKSPACE SYNC
-      else if (
-        qLower.includes('google sheet') || 
-        qLower.includes('শিট') || 
-        qLower.includes('drive') || 
-        qLower.includes('workspace') || 
-        qLower.includes('ড্রাইভ') || 
-        qLower.includes('export')
-      ) {
-        responseText = `**Google Workspace ও স্প্রেডশিট সিঙ্ক:**
-
-নতুন লিড জমা পড়লে সাথে সাথে গুগল শিটে অটো-ব্যাকআপ পেতে **ক্লাউড ও ওয়ার্কস্পেস (WORKSPACE_SYNC)** ট্যাবে যান। 
-
-এখানে আপনি আপনার Google Sheet ID লিঙ্ক করতে পারেন। সরাসরি যেতে নিচের বাটন ক্লিক করুন:`;
-        actions = [
-          {
-            id: 'act-nav-workspace',
-            label: 'Go to Workspace Sync',
-            labelBn: 'Google Workspace Sync-এ যান',
-            tab: 'WORKSPACE_SYNC',
-            type: 'NAVIGATE'
-          }
-        ];
-        suggestions = [
-          'লিড কীভাবে এক্সপোর্ট করব?',
-          'ব্যাকআপ ফাইল ডাউনলোড করব কীভাবে?'
-        ];
-      }
-
-      // 11. GENERAL / SEARCH FALLBACK
-      else {
-        // Search across knowledge base & case studies
-        const allKb = storageService.getKnowledgeBase(false);
-        const matchedKb = allKb.filter(item => 
-          item.question.toLowerCase().includes(qLower) || 
-          item.answer.toLowerCase().includes(qLower)
-        );
-
-        if (matchedKb.length > 0) {
-          responseText = `আপনার অনুসন্ধানের সাথে প্রাসঙ্গিক **${matchedKb.length}টি নলেজ বেস এন্ট্রি** পাওয়া গেছে:
-
-${matchedKb.slice(0, 2).map((item, idx) => `**${idx + 1}. ${item.question}**\n${item.answer.substring(0, 140)}...`).join('\n\n')}
-
-এটি এডিট বা ম্যানেজ করতে নলেজ বেস সেকশনে যেতে পারেন:`;
-          actions = [
-            {
-              id: 'act-nav-kb-search',
-              label: 'Open Knowledge Base',
-              labelBn: 'নলেজ বেস সেকশনে যান',
-              tab: 'KNOWLEDGE_BASE',
-              type: 'NAVIGATE'
-            }
-          ];
-        } else {
-          responseText = `আমি আপনার প্রশ্নটি পেয়েছি। অ্যাডমিন প্যানেলে এই সংক্রান্ত কাজগুলো সহজে সম্পন্ন করার জন্য নিচের নেভিগেশন শর্টকাটগুলো ব্যবহার করতে পারেন:`;
-          actions = [
-            {
-              id: 'act-nav-settings',
-              label: 'General & Site Settings',
-              labelBn: 'সাইট ও সিস্টেম সেটিংসে যান',
-              tab: 'SETTINGS',
-              type: 'NAVIGATE'
-            },
-            {
-              id: 'act-nav-dashboard',
-              label: 'Dashboard Overview',
-              labelBn: 'ড্যাশবোর্ডে ফিরে যান',
-              tab: 'DASHBOARD',
-              type: 'NAVIGATE'
-            }
-          ];
-        }
-
-        suggestions = [
-          'WhatsApp number কোথা থেকে পরিবর্তন করব?',
-          'Header-এর logo এবং company name কীভাবে পরিবর্তন করব?',
-          'Calculator-এর benchmark কোথায় পরিবর্তন করব?'
-        ];
-      }
+      // Process using our Zero-API-Key Autonomous Admin Agent Engine
+      const result = AdminAgentEngine.processCommand(query, settings);
 
       const botReply: AdminAiMessage = {
         id: `msg-bot-${Date.now()}`,
         sender: 'assistant',
-        text: responseText,
+        text: result.text,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        actions,
-        suggestions
+        proposal: result.proposal,
+        actions: result.actions,
+        suggestions: result.suggestions
       };
 
       setMessages(prev => [...prev, botReply]);
       setIsThinking(false);
-    }, 350);
+    }, 280);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       processAdminQuery(inputQuery);
+    }
+  };
+
+  const renderProposalBadge = (type: string) => {
+    switch (type) {
+      case 'BULK_CREATE_CASE_STUDIES':
+      case 'PUBLISH_DRAFT_CASE_STUDIES':
+        return (
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+            <FileText className="w-3 h-3" />
+            <span>কেস স্টাডি অটোমেশন</span>
+          </span>
+        );
+      case 'BULK_ADD_KNOWLEDGE_BASE':
+      case 'RESOLVE_KNOWLEDGE_GAPS':
+        return (
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-300 flex items-center gap-1">
+            <Layers className="w-3 h-3" />
+            <span>নলেজ গ্রাফ ও কিউএ</span>
+          </span>
+        );
+      case 'UPDATE_CALCULATOR_BENCHMARK':
+      case 'UPDATE_EXCHANGE_RATE':
+        return (
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1">
+            <Calculator className="w-3 h-3" />
+            <span>ক্যালকুলেটর বেঞ্চমার্ক</span>
+          </span>
+        );
+      case 'UPDATE_SITE_SETTINGS':
+      case 'UPDATE_HEADER_SETTINGS':
+      case 'UPDATE_WHATSAPP_SETTINGS':
+      case 'UPDATE_GTM_PIXELS':
+        return (
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-300 flex items-center gap-1">
+            <Settings className="w-3 h-3" />
+            <span>সিস্টেম কনফিগারেশন</span>
+          </span>
+        );
+      case 'TRIGGER_CLOUD_SYNC':
+        return (
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-300 flex items-center gap-1">
+            <Database className="w-3 h-3" />
+            <span>ক্লাউড ডেটাবেস সিঙ্ক</span>
+          </span>
+        );
+      default:
+        return (
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-neutral-100 text-neutral-800 border border-neutral-300 flex items-center gap-1">
+            <Zap className="w-3 h-3" />
+            <span>অটোনোমাস অ্যাকশন</span>
+          </span>
+        );
     }
   };
 
@@ -719,12 +463,13 @@ ${matchedKb.slice(0, 2).map((item, idx) => `**${idx + 1}. ${item.question}**\n${
                 <h2 className="font-serif text-lg font-bold text-[#2C3327]">
                   Admin AI Assistant
                 </h2>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#E8EAE2] text-[#4A5D3B] border border-[#D9DED1]">
-                  Admin & Editor Copilot
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                  <ShieldCheck className="w-3 h-3" />
+                  <span>Action Engine Active (Zero API Key)</span>
                 </span>
               </div>
               <p className="text-xs text-[#5C6652]">
-                সেটিংস গাইডেন্স, ১-ক্লিক ডিরেক্ট নেভিগেশন ও সিস্টেম ম্যানেজমেন্ট
+                অটোনোমাস এক্সিকিউশন, প্রিভিউ ভেরিফিকেশন ও অ্যাডমিন কন্ট্রোল
               </p>
             </div>
           </div>
@@ -758,6 +503,8 @@ ${matchedKb.slice(0, 2).map((item, idx) => `**${idx + 1}. ${item.question}**\n${
         <div className="flex-1 p-5 overflow-y-auto space-y-4 bg-[#FDFCF8]">
           {messages.map((msg) => {
             const isUser = msg.sender === 'user';
+            const proposal = msg.proposal;
+
             return (
               <div
                 key={msg.id}
@@ -769,7 +516,8 @@ ${matchedKb.slice(0, 2).map((item, idx) => `**${idx + 1}. ${item.question}**\n${
                   </div>
                 )}
 
-                <div className={`max-w-[85%] space-y-2.5 ${isUser ? 'items-end' : 'items-start'}`}>
+                <div className={`max-w-[92%] space-y-3 ${isUser ? 'items-end' : 'items-start'}`}>
+                  {/* Text Bubble */}
                   <div
                     className={`p-4 rounded-2xl text-xs leading-relaxed ${
                       isUser
@@ -779,6 +527,190 @@ ${matchedKb.slice(0, 2).map((item, idx) => `**${idx + 1}. ${item.question}**\n${
                   >
                     {msg.text}
                   </div>
+
+                  {/* ⚡ ACTION PREVIEW & PROPOSAL CARD (Human-in-the-loop Engine) */}
+                  {proposal && (
+                    <div className="rounded-2xl border border-neutral-200 bg-white shadow-sm overflow-hidden animate-fadeIn text-xs">
+                      {/* Proposal Top Bar */}
+                      <div className="p-3.5 bg-neutral-50/80 border-b border-neutral-200 flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-2">
+                          {renderProposalBadge(proposal.actionType)}
+                          <span className="font-bold text-[#2C3327] text-xs">
+                            {proposal.titleBn || proposal.titleEn}
+                          </span>
+                        </div>
+
+                        {/* Status Chip */}
+                        <div>
+                          {proposal.status === 'PENDING_CONFIRMATION' && (
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+                              <span>অনুমোদনের অপেক্ষায়</span>
+                            </span>
+                          )}
+                          {proposal.status === 'EXECUTING' && (
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-300 flex items-center gap-1">
+                              <RefreshCw className="w-3 h-3 animate-spin" />
+                              <span>কার্যকর হচ্ছে...</span>
+                            </span>
+                          )}
+                          {proposal.status === 'COMPLETED' && (
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3" />
+                              <span>সম্পন্ন হয়েছে</span>
+                            </span>
+                          )}
+                          {proposal.status === 'REJECTED' && (
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-neutral-200 text-neutral-700 border border-neutral-300 flex items-center gap-1">
+                              <X className="w-3 h-3" />
+                              <span>বাতিলকৃত</span>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Proposal Body */}
+                      <div className="p-4 space-y-3 bg-white">
+                        <p className="text-neutral-700 leading-relaxed">
+                          {proposal.summaryBn || proposal.summaryEn}
+                        </p>
+
+                        {/* Collapsible Payload Inspection */}
+                        <div className="border border-neutral-200 rounded-xl overflow-hidden">
+                          <button
+                            type="button"
+                            onClick={() => togglePayloadView(proposal.id)}
+                            className="w-full px-3.5 py-2.5 bg-neutral-50 hover:bg-neutral-100/80 flex items-center justify-between text-neutral-700 text-[11px] font-bold transition-colors"
+                          >
+                            <span className="flex items-center gap-1.5">
+                              <Eye className="w-3.5 h-3.5 text-neutral-500" />
+                              <span>প্রস্তুতকৃত ডেটা পে-লোড দেখুন ({proposal.dataCount ? `${proposal.dataCount}টি আইটেম` : 'কনফিগারেশন'})</span>
+                            </span>
+                            {expandedPayloads[proposal.id] ? (
+                              <ChevronUp className="w-4 h-4 text-neutral-500" />
+                            ) : (
+                              <ChevronDown className="w-4 h-4 text-neutral-500" />
+                            )}
+                          </button>
+
+                          {expandedPayloads[proposal.id] && (
+                            <div className="p-3 bg-neutral-50/50 border-t border-neutral-200 max-h-60 overflow-y-auto space-y-2 text-[11px]">
+                              {/* Case studies preview */}
+                              {proposal.payload?.caseStudies && (
+                                <div className="space-y-2">
+                                  {proposal.payload.caseStudies.map((cs: CaseStudy, idx: number) => (
+                                    <div key={idx} className="p-2.5 bg-white rounded-lg border border-neutral-200 shadow-2xs space-y-1">
+                                      <div className="flex items-center justify-between font-bold text-neutral-900">
+                                        <span>#{idx + 1} {cs.titleBn || cs.title}</span>
+                                        <span className="text-emerald-700 font-bold">{cs.roas}x ROAS</span>
+                                      </div>
+                                      <div className="flex items-center gap-2 text-[10px] text-neutral-500 flex-wrap">
+                                        <span className="bg-neutral-100 px-1.5 py-0.5 rounded">ইন্ডাস্ট্রি: {cs.industryBn || cs.industry}</span>
+                                        <span className="bg-neutral-100 px-1.5 py-0.5 rounded">প্ল্যাটফর্ম: {cs.platform}</span>
+                                        <span className="bg-neutral-100 px-1.5 py-0.5 rounded">স্পেন্ড: ৳{cs.adSpendBDT?.toLocaleString('en-IN')}</span>
+                                        <span className="bg-neutral-100 px-1.5 py-0.5 rounded">পারচেজ: {cs.purchases}+</span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* Knowledge items preview */}
+                              {proposal.payload?.items && (
+                                <div className="space-y-2">
+                                  {proposal.payload.items.map((kb: KnowledgeBaseItem, idx: number) => (
+                                    <div key={idx} className="p-2.5 bg-white rounded-lg border border-neutral-200 shadow-2xs space-y-1">
+                                      <div className="font-bold text-neutral-900">
+                                        Q{idx + 1}: {kb.questionBn || kb.question}
+                                      </div>
+                                      <p className="text-neutral-600 line-clamp-2">
+                                        A: {kb.answerBn || kb.answer}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* Benchmark preview */}
+                              {proposal.payload?.benchmark && (
+                                <div className="p-2.5 bg-white rounded-lg border border-neutral-200 shadow-2xs space-y-1.5">
+                                  <div className="font-bold text-neutral-900">
+                                    {proposal.payload.benchmark.productCategory} ({proposal.payload.benchmark.platform})
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-2 text-[10px]">
+                                    <div className="bg-neutral-100 p-1.5 rounded">CPM: ৳{proposal.payload.benchmark.cpmBDT}</div>
+                                    <div className="bg-neutral-100 p-1.5 rounded">CVR: {proposal.payload.benchmark.cvrPercent}%</div>
+                                    <div className="bg-neutral-100 p-1.5 rounded">CTR: {proposal.payload.benchmark.ctrPercent}%</div>
+                                    <div className="bg-neutral-100 p-1.5 rounded">CPA: ৳{proposal.payload.benchmark.cpaBDT}</div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Generic payload fallback */}
+                              {!proposal.payload?.caseStudies && !proposal.payload?.items && !proposal.payload?.benchmark && (
+                                <pre className="text-[10px] text-neutral-700 bg-white p-2 rounded border border-neutral-200 overflow-x-auto">
+                                  {JSON.stringify(proposal.payload, null, 2)}
+                                </pre>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Execution Controls */}
+                        {proposal.status === 'PENDING_CONFIRMATION' && (
+                          <div className="pt-2 flex items-center gap-2 flex-wrap">
+                            <button
+                              type="button"
+                              onClick={() => handleConfirmProposal(msg.id, proposal)}
+                              disabled={executingProposalId === proposal.id}
+                              className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 hover:scale-[1.02] disabled:opacity-50"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                              <span>নিশ্চিত করুন ও সেভ করুন</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleCancelProposal(msg.id)}
+                              disabled={executingProposalId === proposal.id}
+                              className="px-3.5 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl text-xs font-semibold transition-colors"
+                            >
+                              বাতিল করুন
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onNavigateTab(proposal.targetTab, { subTab: proposal.targetSubTab });
+                                onClose();
+                              }}
+                              className="px-3 py-2 text-neutral-600 hover:text-neutral-900 text-xs font-medium flex items-center gap-1 ml-auto"
+                            >
+                              <span>সংশ্লিষ্ট ট্যাবে যান</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Success banner if executed */}
+                        {proposal.status === 'COMPLETED' && proposal.executionResult && (
+                          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 space-y-1">
+                            <div className="font-bold flex items-center gap-1.5 text-xs text-emerald-800">
+                              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                              <span>{proposal.executionResult.messageBn}</span>
+                            </div>
+                            {proposal.executionResult.details && (
+                              <ul className="text-[10px] text-emerald-700 list-disc list-inside pt-1 space-y-0.5">
+                                {proposal.executionResult.details.map((d, i) => (
+                                  <li key={i}>{d}</li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Interactive Action Buttons for Navigation */}
                   {msg.actions && msg.actions.length > 0 && (
@@ -808,9 +740,10 @@ ${matchedKb.slice(0, 2).map((item, idx) => `**${idx + 1}. ${item.question}**\n${
                         <button
                           key={idx}
                           onClick={() => processAdminQuery(sug)}
-                          className="text-[11px] bg-[#E8EAE2] hover:bg-[#D9DED1] text-[#2C3327] px-3 py-1 rounded-full font-medium transition-colors text-left"
+                          className="text-[11px] bg-[#E8EAE2] hover:bg-[#D9DED1] text-[#2C3327] px-3 py-1 rounded-full font-medium transition-colors text-left flex items-center gap-1"
                         >
-                          {sug}
+                          <Sparkles className="w-3 h-3 text-[#4A5D3B]" />
+                          <span>{sug}</span>
                         </button>
                       ))}
                     </div>
@@ -833,7 +766,7 @@ ${matchedKb.slice(0, 2).map((item, idx) => `**${idx + 1}. ${item.question}**\n${
                 <span className="w-1.5 h-1.5 rounded-full bg-[#4A5D3B] animate-bounce" />
                 <span className="w-1.5 h-1.5 rounded-full bg-[#4A5D3B] animate-bounce [animation-delay:0.2s]" />
                 <span className="w-1.5 h-1.5 rounded-full bg-[#4A5D3B] animate-bounce [animation-delay:0.4s]" />
-                <span className="font-semibold text-xs ml-1">তথ্য ও নেভিগেশন রুট লোড হচ্ছে...</span>
+                <span className="font-semibold text-xs ml-1">অ্যাকশন প্ল্যান ও ডেটা পে-লোড প্রস্তুত হচ্ছে...</span>
               </div>
             </div>
           )}
@@ -846,35 +779,37 @@ ${matchedKb.slice(0, 2).map((item, idx) => `**${idx + 1}. ${item.question}**\n${
           {/* Quick Shortcuts Bar */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-2 text-xs no-scrollbar">
             <button
-              onClick={() => processAdminQuery('WhatsApp number কোথা থেকে পরিবর্তন করব?')}
-              className="px-2.5 py-1 bg-[#F5F1EB] hover:bg-[#E8EAE2] text-[#4A5D3B] rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors"
+              onClick={() => processAdminQuery('ক্লায়েন্ট: Silk Craze, বাজেট: 35000, সেলস: 140000, অর্ডার: 280, প্ল্যাটফর্ম: TikTok। কেস স্টাডি যোগ করো')}
+              className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors flex items-center gap-1"
             >
-              WhatsApp নম্বর
+              <Zap className="w-3 h-3 text-emerald-600" />
+              <span>+কেস স্টাডি ইনপুট</span>
             </button>
             <button
-              onClick={() => processAdminQuery('Calculator-এর benchmark কোথায় পরিবর্তন করব?')}
-              className="px-2.5 py-1 bg-[#F5F1EB] hover:bg-[#E8EAE2] text-[#4A5D3B] rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors"
+              onClick={() => processAdminQuery('প্রশ্ন: ক্যাম্পেইন অডিটের নিয়ম কী? উত্তর: আমাদের ফ্রি অডিট ফর্ম পূরণ করলে ২৪ ঘণ্টায় বিশদ রিপোর্ট পাঠানো হয়। নলেজ বেসে যোগ করো')}
+              className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors flex items-center gap-1"
             >
-              ক্যালকুলেটর বেঞ্চমার্ক
+              <Layers className="w-3 h-3 text-blue-600" />
+              <span>+প্রশ্নোত্তর ইনপুট</span>
             </button>
             <button
-              onClick={() => processAdminQuery('Header-এর logo এবং company name কীভাবে পরিবর্তন করব?')}
+              onClick={() => processAdminQuery('ড্রাফট কেস স্টাডিগুলো সব লাইভে পাবলিশ করো')}
               className="px-2.5 py-1 bg-[#F5F1EB] hover:bg-[#E8EAE2] text-[#4A5D3B] rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors"
             >
-              হেডার ও লোগো
+              ড্রাফট পাবলিশ
             </button>
             <button
-              onClick={() => processAdminQuery('TikTok Pixel ও GTM কোথায় সেট করব?')}
+              onClick={() => processAdminQuery('ডলার এক্সচেঞ্জ রেট পরিবর্তন করে ১৩০ টাকা করো')}
+              className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors flex items-center gap-1"
+            >
+              <Calculator className="w-3 h-3 text-amber-600" />
+              <span>ডলার রেট ১৩০ ৳</span>
+            </button>
+            <button
+              onClick={() => processAdminQuery('সব পেন্ডিং নলেজ গ্যাপ সমাধান করো')}
               className="px-2.5 py-1 bg-[#F5F1EB] hover:bg-[#E8EAE2] text-[#4A5D3B] rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors"
             >
-              GTM ও পিক্সেল
-            </button>
-            <button
-              onClick={() => processAdminQuery('সিস্টেমের অসম্পূর্ণ বা ড্রাফট তথ্য স্ক্যান করুন')}
-              className="px-2.5 py-1 bg-[#F5F1EB] hover:bg-[#E8EAE2] text-amber-700 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors flex items-center gap-1"
-            >
-              <Sparkles className="w-3 h-3 text-amber-600" />
-              <span>অডিট ও স্ক্যান</span>
+              নলেজ গ্যাপ সমাধান
             </button>
           </div>
 
@@ -901,7 +836,7 @@ ${matchedKb.slice(0, 2).map((item, idx) => `**${idx + 1}. ${item.question}**\n${
                 placeholder={
                   isListening
                     ? "শুনছি... মুখে বলুন (বাংলা / English)..."
-                    : "যেকোনো সেটিংস, ফিচার বা প্রশ্নের জন্য এখানে লিখুন (বাংলা / English)..."
+                    : "আপনার ডেটা লিখুন (যেমন: 'ক্লায়েন্ট: Aarong, বাজেট: 45000, সেলস: 180000, অর্ডার: 350। কেস স্টাডি যোগ করো')..."
                 }
                 className={`w-full bg-[#FDFCF8] border rounded-xl pl-3.5 pr-10 py-2.5 text-xs text-[#2C3327] outline-none transition-all ${
                   isListening
@@ -937,3 +872,4 @@ ${matchedKb.slice(0, 2).map((item, idx) => `**${idx + 1}. ${item.question}**\n${
     </div>
   );
 };
+

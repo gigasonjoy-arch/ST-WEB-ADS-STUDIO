@@ -69,20 +69,20 @@ export default function App() {
 
   const [activePageSlug, setActivePageSlug] = useState<string | null>(() => {
     try {
-      const path = window.location.pathname.replace(/^\/+/, '').replace(/\/+$/, '');
       const hash = window.location.hash;
+      const path = window.location.pathname.replace(/^\/+/, '').replace(/\/+$/, '');
       
-      if (path.startsWith('page/')) {
-        return path.replace(/^page\//, '');
-      }
-      if (path && path !== 'index.html' && path !== 'admin') {
-        return path;
-      }
       if (hash.startsWith('#page/')) {
-        return hash.replace('#page/', '');
+        return hash.replace('#page/', '').trim();
       }
       if (hash.startsWith('#/') && !hash.startsWith('#/admin')) {
-        return hash.replace('#/', '');
+        return hash.replace('#/', '').trim();
+      }
+      if (path.startsWith('page/')) {
+        return path.replace(/^page\//, '').trim();
+      }
+      if (path === 'media-gallery' || path === 'robots.txt' || path === 'sitemap.xml') {
+        return path;
       }
     } catch {}
     return null;
@@ -134,20 +134,20 @@ export default function App() {
       const path = window.location.pathname.replace(/^\/+/, '').replace(/\/+$/, '');
       const hash = window.location.hash;
 
-      if (path.startsWith('page/')) {
-        const slug = path.replace(/^page\//, '').trim();
-        setActivePageSlug(slug || null);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (path && path !== 'index.html' && path !== 'admin') {
-        setActivePageSlug(path);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (hash.startsWith('#page/')) {
+      if (hash.startsWith('#page/')) {
         const slug = hash.replace('#page/', '').trim();
         setActivePageSlug(slug || null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (hash.startsWith('#/') && !hash.startsWith('#/admin')) {
         const slug = hash.replace('#/', '').trim();
         setActivePageSlug(slug || null);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (path.startsWith('page/')) {
+        const slug = path.replace(/^page\//, '').trim();
+        setActivePageSlug(slug || null);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (path === 'media-gallery' || path === 'robots.txt' || path === 'sitemap.xml') {
+        setActivePageSlug(path);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         setActivePageSlug(null);

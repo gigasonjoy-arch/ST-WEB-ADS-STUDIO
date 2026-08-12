@@ -896,6 +896,41 @@ export interface AdminTask {
   metadata?: Record<string, any>;
 }
 
+export type AdminAiActionType = 
+  | 'BULK_CREATE_CASE_STUDIES'
+  | 'PUBLISH_DRAFT_CASE_STUDIES'
+  | 'BULK_ADD_KNOWLEDGE_BASE'
+  | 'RESOLVE_KNOWLEDGE_GAPS'
+  | 'UPDATE_CALCULATOR_BENCHMARK'
+  | 'UPDATE_EXCHANGE_RATE'
+  | 'UPDATE_SITE_SETTINGS'
+  | 'UPDATE_HEADER_SETTINGS'
+  | 'UPDATE_WHATSAPP_SETTINGS'
+  | 'UPDATE_GTM_PIXELS'
+  | 'BATCH_UPDATE_LEADS'
+  | 'TRIGGER_CLOUD_SYNC'
+  | 'CUSTOM_EXECUTION';
+
+export interface AdminAiActionProposal {
+  id: string;
+  actionType: AdminAiActionType;
+  titleEn: string;
+  titleBn: string;
+  summaryEn: string;
+  summaryBn: string;
+  targetTab: AdminTab;
+  targetSubTab?: string;
+  dataCount?: number;
+  payload: any;
+  status: 'PENDING_CONFIRMATION' | 'EXECUTING' | 'COMPLETED' | 'REJECTED';
+  executionResult?: {
+    success: boolean;
+    messageEn: string;
+    messageBn: string;
+    details?: string[];
+  };
+}
+
 export interface AdminAiAction {
   id: string;
   label: string;
@@ -916,6 +951,7 @@ export interface AdminAiMessage {
   timestamp: string;
   actions?: AdminAiAction[];
   suggestions?: string[];
+  proposal?: AdminAiActionProposal;
   meta?: Record<string, any>;
 }
 

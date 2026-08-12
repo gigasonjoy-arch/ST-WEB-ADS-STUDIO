@@ -473,17 +473,17 @@ class StorageService {
       }
       if (!this.hasItem(STORAGE_KEYS.ROBOTS_SETTINGS)) {
         this.setItem(STORAGE_KEYS.ROBOTS_SETTINGS, initialSiteSettings.robots || {
-          content: "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\n\nSitemap: https://stwebads.com/sitemap.xml",
+          content: "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\n\nSitemap: https://sonjoysarkar.netlify.app/sitemap.xml",
           allowAll: true,
           disallowAdmin: true,
-          sitemapUrl: "https://stwebads.com/sitemap.xml",
+          sitemapUrl: "https://sonjoysarkar.netlify.app/sitemap.xml",
           customRules: "",
           lastUpdated: new Date().toISOString().split('T')[0]
         });
       }
       if (!this.hasItem(STORAGE_KEYS.SITEMAP_SETTINGS)) {
         this.setItem(STORAGE_KEYS.SITEMAP_SETTINGS, initialSiteSettings.sitemap || {
-          baseUrl: "https://stwebads.com",
+          baseUrl: "https://sonjoysarkar.netlify.app",
           includeCustomPages: true,
           includeServices: true,
           includeCaseStudies: true,
@@ -564,7 +564,7 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
         containerId: (saved?.gtm?.containerId && saved.gtm.containerId !== 'GTM-XXXXXXX') ? saved.gtm.containerId : 'GTM-P3WLNDR6',
         tiktokPixelId: saved?.gtm?.tiktokPixelId || '',
         metaPixelId: saved?.gtm?.metaPixelId || '',
-        googleAnalyticsId: saved?.gtm?.googleAnalyticsId || '',
+        googleAnalyticsId: saved?.gtm?.googleAnalyticsId || initialSiteSettings.gtm?.googleAnalyticsId || 'G-LCYQY3Y1CQ',
         customHeadScript: saved?.gtm?.customHeadScript || '',
         customBodyScript: saved?.gtm?.customBodyScript || ''
       },
@@ -1828,14 +1828,22 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
   // --- Robots.txt & Sitemap Management ---
   public getRobotsSettings(): RobotsSettings {
     const fallback: RobotsSettings = {
-      content: "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\n\nSitemap: https://stwebads.com/sitemap.xml",
+      content: "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\n\nSitemap: https://sonjoysarkar.netlify.app/sitemap.xml",
       allowAll: true,
       disallowAdmin: true,
-      sitemapUrl: "https://stwebads.com/sitemap.xml",
+      sitemapUrl: "https://sonjoysarkar.netlify.app/sitemap.xml",
       customRules: "",
       lastUpdated: new Date().toISOString().split('T')[0]
     };
-    return this.getItem<RobotsSettings>(STORAGE_KEYS.ROBOTS_SETTINGS, fallback);
+    const settings = this.getItem<RobotsSettings>(STORAGE_KEYS.ROBOTS_SETTINGS, fallback);
+    if (settings && settings.content && settings.content.includes('stwebads.com')) {
+      settings.content = settings.content.replace(/https?:\/\/stwebads\.com/g, 'https://sonjoysarkar.netlify.app');
+      if (settings.sitemapUrl && settings.sitemapUrl.includes('stwebads.com')) {
+        settings.sitemapUrl = settings.sitemapUrl.replace(/https?:\/\/stwebads\.com/g, 'https://sonjoysarkar.netlify.app');
+      }
+      this.setItem(STORAGE_KEYS.ROBOTS_SETTINGS, settings);
+    }
+    return settings;
   }
 
   public saveRobotsSettings(settings: RobotsSettings): void {
@@ -1873,7 +1881,7 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
 
   public getSitemapSettings(): SitemapSettings {
     const fallback: SitemapSettings = {
-      baseUrl: "https://stwebads.com",
+      baseUrl: "https://sonjoysarkar.netlify.app",
       includeCustomPages: true,
       includeServices: true,
       includeCaseStudies: true,
@@ -1881,7 +1889,12 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
       priority: 0.8,
       lastGenerated: new Date().toISOString().split('T')[0]
     };
-    return this.getItem<SitemapSettings>(STORAGE_KEYS.SITEMAP_SETTINGS, fallback);
+    const settings = this.getItem<SitemapSettings>(STORAGE_KEYS.SITEMAP_SETTINGS, fallback);
+    if (settings && (settings.baseUrl === 'https://stwebads.com' || settings.baseUrl.includes('stwebads.com'))) {
+      settings.baseUrl = 'https://sonjoysarkar.netlify.app';
+      this.setItem(STORAGE_KEYS.SITEMAP_SETTINGS, settings);
+    }
+    return settings;
   }
 
   public saveSitemapSettings(settings: SitemapSettings): void {
@@ -1896,7 +1909,10 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
 
   public generateSitemapXml(): string {
     const settings = this.getSitemapSettings();
-    const baseUrl = (settings.baseUrl || 'https://stwebads.com').replace(/\/$/, '');
+    let baseUrl = (settings.baseUrl || 'https://sonjoysarkar.netlify.app').replace(/\/$/, '');
+    if (baseUrl.includes('stwebads.com')) {
+      baseUrl = 'https://sonjoysarkar.netlify.app';
+    }
     const today = new Date().toISOString().split('T')[0];
 
     const urls: Array<{ loc: string; lastmod: string; changefreq: string; priority: string }> = [];

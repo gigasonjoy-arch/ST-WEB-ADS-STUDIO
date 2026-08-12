@@ -104,15 +104,15 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
     users: initialUsers,
     adminUsers: initialAdminUsers,
     robotsSettings: initialSiteSettings.robots || {
-      content: "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\n\nSitemap: https://stwebads.com/sitemap.xml",
+      content: "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\n\nSitemap: https://sonjoysarkar.netlify.app/sitemap.xml",
       allowAll: true,
       disallowAdmin: true,
-      sitemapUrl: "https://stwebads.com/sitemap.xml",
+      sitemapUrl: "https://sonjoysarkar.netlify.app/sitemap.xml",
       customRules: "",
       lastUpdated: new Date().toISOString().split('T')[0]
     },
     sitemapSettings: initialSiteSettings.sitemap || {
-      baseUrl: "https://stwebads.com",
+      baseUrl: "https://sonjoysarkar.netlify.app",
       includeCustomPages: true,
       includeServices: true,
       includeCaseStudies: true,

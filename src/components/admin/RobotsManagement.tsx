@@ -20,10 +20,10 @@ import { storageService } from '../../services/storageService';
 
 export const RobotsManagement: React.FC = () => {
   const [settings, setSettings] = useState<RobotsSettings>({
-    content: "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\n\nSitemap: https://stwebads.com/sitemap.xml",
+    content: "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\n\nSitemap: https://sonjoysarkar.netlify.app/sitemap.xml",
     allowAll: true,
     disallowAdmin: true,
-    sitemapUrl: "https://stwebads.com/sitemap.xml",
+    sitemapUrl: "https://sonjoysarkar.netlify.app/sitemap.xml",
     customRules: "",
     lastUpdated: new Date().toISOString().split('T')[0]
   });
@@ -78,10 +78,10 @@ export const RobotsManagement: React.FC = () => {
 
   const handleResetDefault = () => {
     const defaultSettings: RobotsSettings = {
-      content: "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\n\nSitemap: https://stwebads.com/sitemap.xml",
+      content: "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\n\nSitemap: https://sonjoysarkar.netlify.app/sitemap.xml",
       allowAll: true,
       disallowAdmin: true,
-      sitemapUrl: "https://stwebads.com/sitemap.xml",
+      sitemapUrl: "https://sonjoysarkar.netlify.app/sitemap.xml",
       customRules: "",
       lastUpdated: new Date().toISOString().split('T')[0]
     };
@@ -281,7 +281,7 @@ export const RobotsManagement: React.FC = () => {
                   <div className="relative">
                     <input
                       type="url"
-                      placeholder="https://stwebads.com/sitemap.xml"
+                      placeholder="https://sonjoysarkar.netlify.app/sitemap.xml"
                       value={settings.sitemapUrl}
                       onChange={(e) => setSettings({ ...settings, sitemapUrl: e.target.value })}
                       className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500 font-mono"

@@ -50,6 +50,34 @@ export const AiChatWidget: React.FC<AiChatWidgetProps> = ({
   const [isListening, setIsListening] = useState<boolean>(false);
   const [speechSupported, setSpeechSupported] = useState<boolean>(false);
   const [voiceNotice, setVoiceNotice] = useState<string | null>(null);
+
+  // Proactive Teaser state to attract visitors
+  const [showTeaser, setShowTeaser] = useState<boolean>(false);
+  const [teaserDismissed, setTeaserDismissed] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem('st_ai_teaser_dismissed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    if (!teaserDismissed && !isOpen) {
+      const timer = setTimeout(() => {
+        setShowTeaser(true);
+      }, 1600);
+      return () => clearTimeout(timer);
+    }
+  }, [teaserDismissed, isOpen]);
+
+  const dismissTeaser = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setShowTeaser(false);
+    setTeaserDismissed(true);
+    try {
+      sessionStorage.setItem('st_ai_teaser_dismissed', 'true');
+    } catch {}
+  };
   
   // In-chat lead capture form state
   const [leadName, setLeadName] = useState<string>('');
@@ -369,29 +397,139 @@ export const AiChatWidget: React.FC<AiChatWidgetProps> = ({
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-40">
-      
-      {/* Floating Action Button / Launcher */}
+    <>
+      {/* Floating Action Button & Proactive Teaser Launcher */}
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="bg-[#4A5D3B] hover:bg-[#3A4533] text-[#FDFCF8] p-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center gap-3 group border border-[#D9DED1]/30"
-          id="ai-chat-launcher"
-          aria-label="Open AI Assistant"
-        >
-          <div className="relative">
-            <Bot className="w-6 h-6" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#E2725B] rounded-full ring-2 ring-[#4A5D3B]"></span>
-          </div>
-          <span className="text-xs font-bold pr-1 hidden sm:inline-block">
-            {language === 'en' ? 'AI Ads Specialist' : 'AI Assistant'}
-          </span>
-        </button>
+        <div className="fixed bottom-5 right-3.5 sm:bottom-6 sm:right-6 z-40 flex flex-col items-end pointer-events-none">
+          
+          {/* Proactive Welcome / Teaser Bubble (Speech Bubble) */}
+          {showTeaser && (
+            <div 
+              className="pointer-events-auto mb-3 max-w-[290px] sm:max-w-[340px] bg-[#FFFFFF] border-2 border-[#4A5D3B]/25 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 shadow-[0_15px_35px_-5px_rgba(44,51,39,0.35)] transition-all duration-300 animate-fadeIn relative group"
+            >
+              {/* Triangular speech bubble pointer at bottom right */}
+              <div className="absolute -bottom-2.5 right-8 sm:right-10 w-4 h-4 bg-[#FFFFFF] border-r-2 border-b-2 border-[#4A5D3B]/25 transform rotate-45"></div>
+
+              {/* Teaser Header */}
+              <div className="flex items-center justify-between pb-2 border-b border-[#D9DED1]/60">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-[#4A5D3B] text-[#FDFCF8] flex items-center justify-center text-[10px] shadow-xs">
+                    <Bot className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="text-xs font-bold text-[#2C3327]">
+                    {language === 'en' ? "Sonjoy's AI Ads Guide" : 'সঞ্জয়ের এআই সহকারী'}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <span className="flex h-2 w-2 relative">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  <button
+                    onClick={dismissTeaser}
+                    className="p-1 text-[#8A957F] hover:text-[#2C3327] rounded-md transition-colors text-xs ml-1"
+                    title={language === 'en' ? 'Dismiss' : 'বন্ধ করুন'}
+                    aria-label="Dismiss teaser"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Teaser Body message */}
+              <div 
+                onClick={() => {
+                  setIsOpen(true);
+                  setShowTeaser(false);
+                }}
+                className="mt-2.5 cursor-pointer"
+              >
+                <p className="text-xs text-[#5C6652] leading-relaxed">
+                  {language === 'en'
+                    ? '👋 Need help estimating TikTok & Meta ads budget, ROAS, or need a free strategy audit? Ask me right away!'
+                    : '👋 বিজ্ঞাপনে কত বাজেট লাগবে, কীভাবে বেশি সেলস পাবেন বা ফ্রি ওয়েবসাইট অডিট চান? এখনই প্রশ্ন করুন!'}
+                </p>
+
+                {/* Interactive Quick Action Tags */}
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsOpen(true);
+                      setShowTeaser(false);
+                      handleSend(language === 'en' ? 'What is the recommended budget for TikTok Ads?' : 'টিকটক অ্যাডে কেমন বাজেট লাগে?');
+                    }}
+                    className="px-2.5 py-1 rounded-full bg-[#F5F1EB] hover:bg-[#E8EAE2] text-[#4A5D3B] text-[10px] font-bold border border-[#D9DED1] transition-colors flex items-center gap-1 shadow-2xs"
+                  >
+                    <Calculator className="w-3 h-3 text-[#4A5D3B]" />
+                    <span>{language === 'en' ? 'Estimate Budget' : 'বাজেট হিসাব করুন'}</span>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsOpen(true);
+                      setShowTeaser(false);
+                      handleSend(language === 'en' ? 'I need a Free Website & Pixel Audit' : 'আমার ওয়েবসাইটের জন্য ফ্রি অডিট চাই');
+                    }}
+                    className="px-2.5 py-1 rounded-full bg-[#F5F1EB] hover:bg-[#E8EAE2] text-[#4A5D3B] text-[10px] font-bold border border-[#D9DED1] transition-colors flex items-center gap-1 shadow-2xs"
+                  >
+                    <Sparkles className="w-3 h-3 text-[#E2725B]" />
+                    <span>{language === 'en' ? 'Free Audit' : 'ফ্রি অডিট চান?'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Upgraded Large Eye-Catching Floating Button */}
+          <button
+            onClick={() => {
+              setIsOpen(true);
+              setShowTeaser(false);
+            }}
+            className="pointer-events-auto group relative flex items-center gap-2.5 sm:gap-3.5 bg-gradient-to-r from-[#2C3327] via-[#3A4533] to-[#4A5D3B] hover:from-[#22291E] hover:to-[#3F4F33] text-[#FDFCF8] p-2.5 sm:py-3.5 sm:px-5 rounded-full shadow-[0_12px_36px_-6px_rgba(44,51,39,0.5)] hover:shadow-[0_18px_45px_-4px_rgba(74,93,59,0.65)] border-2 border-[#D9DED1]/40 hover:border-[#E2725B]/70 transition-all duration-300 hover:-translate-y-1 active:scale-95"
+            id="ai-chat-launcher"
+            aria-label="Open AI Assistant"
+          >
+            {/* Pulsating background ring aura */}
+            <span className="absolute -inset-1 rounded-full bg-gradient-to-r from-[#4A5D3B]/40 via-[#E2725B]/30 to-[#4A5D3B]/40 blur-xs opacity-75 group-hover:opacity-100 transition duration-500 animate-pulse pointer-events-none"></span>
+
+            {/* Left Bot Icon Avatar */}
+            <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#4A5D3B] flex items-center justify-center text-[#FDFCF8] border-2 border-white/30 shadow-inner shrink-0 group-hover:scale-105 transition-transform duration-300">
+              <Bot className="w-6 h-6 sm:w-6.5 sm:h-6.5" />
+              {/* Online pulsing indicator */}
+              <span className="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-[#2C3327]"></span>
+              </span>
+            </div>
+
+            {/* Text & Badges - Desktop & Mobile */}
+            <div className="text-left pr-1 sm:pr-2">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="text-xs sm:text-sm font-bold text-white tracking-tight">
+                  {language === 'en' ? 'AI Ads Specialist' : 'এআই অ্যাসিস্ট্যান্ট'}
+                </span>
+                <span className="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>Live</span>
+                </span>
+              </div>
+              <p className="text-[10px] sm:text-[11px] text-[#D9DED1] font-medium hidden sm:block">
+                {language === 'en' ? 'Free Strategy & Budget Audit' : 'ফ্রি অডিট ও বাজেট জানুন'}
+              </p>
+            </div>
+
+            {/* Sparkles accent icon */}
+            <Sparkles className="w-4 h-4 text-amber-300 shrink-0 group-hover:rotate-12 transition-transform duration-300 mr-1 hidden sm:block" />
+          </button>
+        </div>
       )}
 
       {/* Floating Chat Modal / Drawer */}
       {isOpen && (
-        <div className="bg-[#FFFFFF] rounded-[32px] border border-[#D9DED1] shadow-2xl w-[360px] sm:w-[420px] h-[580px] max-h-[88vh] flex flex-col overflow-hidden animate-fadeIn">
+        <div className="fixed inset-x-3 bottom-3 sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-[425px] h-[590px] max-h-[88vh] z-50 bg-[#FFFFFF] rounded-3xl sm:rounded-[32px] border border-[#D9DED1] shadow-[0_25px_60px_-15px_rgba(44,51,39,0.55)] flex flex-col overflow-hidden animate-fadeIn">
           
           {/* Top Bar */}
           <div className="bg-[#2C3327] text-[#FDFCF8] p-4 px-5 flex items-center justify-between shrink-0">
@@ -666,7 +804,7 @@ export const AiChatWidget: React.FC<AiChatWidgetProps> = ({
         </div>
       )}
 
-    </div>
+    </>
   );
 };
 

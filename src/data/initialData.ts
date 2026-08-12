@@ -226,7 +226,7 @@ export const initialSiteSettings: SiteSettings = {
     ogTitle: "ST Web & Ads Studio | Sonjoy Sarkar",
     ogDescription: "Data-driven TikTok and Facebook ads optimization for Bangladeshi brands.",
     ogImage: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
-    canonicalUrl: "https://stwebads.com",
+    canonicalUrl: "https://sonjoysarkar.netlify.app",
     robotsIndex: true
   },
   gtm: {
@@ -234,7 +234,7 @@ export const initialSiteSettings: SiteSettings = {
     containerId: "GTM-P3WLNDR6",
     tiktokPixelId: "",
     metaPixelId: "",
-    googleAnalyticsId: "",
+    googleAnalyticsId: "G-LCYQY3Y1CQ",
     customHeadScript: "",
     customBodyScript: ""
   },
@@ -275,15 +275,15 @@ export const initialSiteSettings: SiteSettings = {
   favicon: DEFAULT_FAVICON_SETTINGS,
   homePage: initialHomePageSettings,
   robots: {
-    content: "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\n\nSitemap: https://stwebads.com/sitemap.xml",
+    content: "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\n\nSitemap: https://sonjoysarkar.netlify.app/sitemap.xml",
     allowAll: true,
     disallowAdmin: true,
-    sitemapUrl: "https://stwebads.com/sitemap.xml",
+    sitemapUrl: "https://sonjoysarkar.netlify.app/sitemap.xml",
     customRules: "",
     lastUpdated: "2026-08-12"
   },
   sitemap: {
-    baseUrl: "https://stwebads.com",
+    baseUrl: "https://sonjoysarkar.netlify.app",
     includeCustomPages: true,
     includeServices: true,
     includeCaseStudies: true,
@@ -312,8 +312,8 @@ export const initialSiteSettings: SiteSettings = {
     name: "ST Web & Ads Studio | Sonjoy Sarkar",
     alternateName: "ST Web & Ads Studio",
     description: "High-performance TikTok & Facebook advertising specialist in Bangladesh. Data-driven campaign architectures, conversion rate optimization, creative testing, and scalable ROAS.",
-    url: "https://stwebads.com",
-    logoUrl: "https://stwebads.com/logo.png",
+    url: "https://sonjoysarkar.netlify.app",
+    logoUrl: "https://sonjoysarkar.netlify.app/logo.png",
     imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
     telephone: "+8801815124970",
     email: "sonjoy.ads.studio@gmail.com",
@@ -373,8 +373,8 @@ export const initialSchemaMarkupSettings: SchemaMarkupSettings = {
   name: "ST Web & Ads Studio | Sonjoy Sarkar",
   alternateName: "ST Web & Ads Studio",
   description: "High-performance TikTok & Facebook advertising specialist in Bangladesh. Data-driven campaign architectures, conversion rate optimization, creative testing, and scalable ROAS.",
-  url: "https://stwebads.com",
-  logoUrl: "https://stwebads.com/logo.png",
+  url: "https://sonjoysarkar.netlify.app",
+  logoUrl: "https://sonjoysarkar.netlify.app/logo.png",
   imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
   telephone: "+8801815124970",
   email: "sonjoy.ads.studio@gmail.com",

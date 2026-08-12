@@ -120,7 +120,7 @@ export const RobotsTxtView: React.FC<RobotsTxtViewProps> = ({ onBackToHome }) =>
           </div>
 
           <pre className="p-6 text-sm text-indigo-200 font-mono leading-relaxed whitespace-pre-wrap selection:bg-indigo-500 selection:text-white">
-            {content || 'User-agent: *\nAllow: /\nDisallow: /admin\n\nSitemap: https://stwebads.com/sitemap.xml'}
+            {content || 'User-agent: *\nAllow: /\nDisallow: /admin\n\nSitemap: https://sonjoysarkar.netlify.app/sitemap.xml'}
           </pre>
         </div>
 

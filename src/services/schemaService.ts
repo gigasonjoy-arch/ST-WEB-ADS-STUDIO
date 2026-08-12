@@ -7,7 +7,7 @@ export class SchemaService {
    */
   public generateMainSchema(settings: SchemaMarkupSettings, siteSettings?: SiteSettings): Record<string, any> {
     const brandName = settings.name || siteSettings?.brandName || 'ST Web & Ads Studio';
-    const siteUrl = (settings.url || siteSettings?.seo?.canonicalUrl || 'https://stwebads.com').replace(/\/$/, '');
+    const siteUrl = (settings.url || siteSettings?.seo?.canonicalUrl || 'https://sonjoysarkar.netlify.app').replace(/\/$/, '');
     const logoUrl = settings.logoUrl || `${siteUrl}/logo.png`;
     const imageUrl = settings.imageUrl || siteSettings?.seo?.ogImage || `${siteUrl}/banner.jpg`;
     const phone = settings.telephone || siteSettings?.phone || siteSettings?.whatsappNumber || '+8801815124970';

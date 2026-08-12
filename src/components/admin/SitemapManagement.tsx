@@ -21,7 +21,7 @@ import { storageService } from '../../services/storageService';
 
 export const SitemapManagement: React.FC = () => {
   const [settings, setSettings] = useState<SitemapSettings>({
-    baseUrl: "https://stwebads.com",
+    baseUrl: "https://sonjoysarkar.netlify.app",
     includeCustomPages: true,
     includeServices: true,
     includeCaseStudies: true,
@@ -194,7 +194,7 @@ export const SitemapManagement: React.FC = () => {
                 </label>
                 <input
                   type="url"
-                  placeholder="https://stwebads.com"
+                  placeholder="https://sonjoysarkar.netlify.app"
                   value={settings.baseUrl}
                   onChange={(e) => setSettings({ ...settings, baseUrl: e.target.value })}
                   className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-teal-500 font-mono"

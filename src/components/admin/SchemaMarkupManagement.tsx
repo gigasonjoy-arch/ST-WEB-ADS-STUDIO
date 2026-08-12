@@ -163,7 +163,7 @@ export const SchemaMarkupManagement: React.FC = () => {
     }
   };
 
-  const googleTestUrl = schemaService.getGoogleRichResultsTestUrl(settings.url || 'https://stwebads.com');
+  const googleTestUrl = schemaService.getGoogleRichResultsTestUrl(settings.url || 'https://sonjoysarkar.netlify.app');
 
   return (
     <div className="space-y-6">
@@ -388,7 +388,7 @@ export const SchemaMarkupManagement: React.FC = () => {
                     type="url"
                     value={settings.url}
                     onChange={(e) => setSettings({ ...settings, url: e.target.value })}
-                    placeholder="https://stwebads.com"
+                    placeholder="https://sonjoysarkar.netlify.app"
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
                   />
                 </div>
@@ -401,7 +401,7 @@ export const SchemaMarkupManagement: React.FC = () => {
                     type="text"
                     value={settings.logoUrl || ''}
                     onChange={(e) => setSettings({ ...settings, logoUrl: e.target.value })}
-                    placeholder="https://stwebads.com/logo.png"
+                    placeholder="https://sonjoysarkar.netlify.app/logo.png"
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
                   />
                 </div>
@@ -794,7 +794,7 @@ export const SchemaMarkupManagement: React.FC = () => {
                   setValidationResult({ isValid: true });
                 }
               }}
-              placeholder={`{\n  "@context": "https://schema.org",\n  "@type": "ProfessionalService",\n  "name": "ST Web & Ads Studio",\n  "url": "https://stwebads.com"\n}`}
+              placeholder={`{\n  "@context": "https://schema.org",\n  "@type": "ProfessionalService",\n  "name": "ST Web & Ads Studio",\n  "url": "https://sonjoysarkar.netlify.app"\n}`}
               className="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl text-xs text-indigo-300 font-mono focus:outline-none focus:border-indigo-500 leading-relaxed"
             />
 
