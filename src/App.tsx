@@ -37,7 +37,11 @@ export default function App() {
   // App view state
   const [isAdminMode, setIsAdminMode] = useState<boolean>(false);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
-    return sessionStorage.getItem('st_admin_auth') === 'true';
+    try {
+      return sessionStorage.getItem('st_admin_auth') === 'true';
+    } catch {
+      return false;
+    }
   });
   const [adminPasscode, setAdminPasscode] = useState<string>('');
   const [adminLoginError, setAdminLoginError] = useState<string>('');

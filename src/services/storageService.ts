@@ -123,60 +123,72 @@ class StorageService {
     }
   }
 
+  private hasItem(key: string): boolean {
+    try {
+      return localStorage.getItem(key) !== null;
+    } catch {
+      return false;
+    }
+  }
+
   private initDefaults() {
-    if (!localStorage.getItem(STORAGE_KEYS.SITE_SETTINGS)) {
-      this.setItem(STORAGE_KEYS.SITE_SETTINGS, initialSiteSettings);
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.SOCIAL_LINKS)) {
-      this.setItem(STORAGE_KEYS.SOCIAL_LINKS, initialSocialLinks);
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.CASE_STUDIES)) {
-      this.setItem(STORAGE_KEYS.CASE_STUDIES, initialCaseStudies);
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.DISTRICTS)) {
-      this.setItem(STORAGE_KEYS.DISTRICTS, initialDistricts);
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.BENCHMARKS)) {
-      this.setItem(STORAGE_KEYS.BENCHMARKS, initialBenchmarks);
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.RECOMMENDATIONS)) {
-      this.setItem(STORAGE_KEYS.RECOMMENDATIONS, initialRecommendationRules);
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.PRODUCT_PRICE_RANGES)) {
-      this.setItem(STORAGE_KEYS.PRODUCT_PRICE_RANGES, initialProductPriceRanges);
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.KNOWLEDGE_BASE)) {
-      this.setItem(STORAGE_KEYS.KNOWLEDGE_BASE, initialKnowledgeBase);
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.MEDIA)) {
-      this.setItem(STORAGE_KEYS.MEDIA, initialMedia);
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.USERS)) {
-      this.setItem(STORAGE_KEYS.USERS, initialUsers);
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.ADMIN_USERS)) {
-      this.setItem(STORAGE_KEYS.ADMIN_USERS, initialAdminUsers);
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.CURRENT_USER)) {
-      this.setItem(STORAGE_KEYS.CURRENT_USER, initialAdminUsers[0]); // Default admin
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.AI_SETTINGS)) {
-      const defaultAiSettings: AISettings = {
-        enabled: true,
-        provider: 'Gemini',
-        primaryModel: 'gemini-3.6-flash',
-        backupModel: 'gemini-3.6-flash',
-        temperature: 0.2,
-        maxOutputTokens: 800,
-        systemInstruction: `You are the official AI assistant for Sonjoy Sarkar and ST Web & Ads Studio.
+    try {
+      if (!this.hasItem(STORAGE_KEYS.SITE_SETTINGS)) {
+        this.setItem(STORAGE_KEYS.SITE_SETTINGS, initialSiteSettings);
+      }
+      if (!this.hasItem(STORAGE_KEYS.SOCIAL_LINKS)) {
+        this.setItem(STORAGE_KEYS.SOCIAL_LINKS, initialSocialLinks);
+      }
+      if (!this.hasItem(STORAGE_KEYS.CASE_STUDIES)) {
+        this.setItem(STORAGE_KEYS.CASE_STUDIES, initialCaseStudies);
+      }
+      if (!this.hasItem(STORAGE_KEYS.DISTRICTS)) {
+        this.setItem(STORAGE_KEYS.DISTRICTS, initialDistricts);
+      }
+      if (!this.hasItem(STORAGE_KEYS.BENCHMARKS)) {
+        this.setItem(STORAGE_KEYS.BENCHMARKS, initialBenchmarks);
+      }
+      if (!this.hasItem(STORAGE_KEYS.RECOMMENDATIONS)) {
+        this.setItem(STORAGE_KEYS.RECOMMENDATIONS, initialRecommendationRules);
+      }
+      if (!this.hasItem(STORAGE_KEYS.PRODUCT_PRICE_RANGES)) {
+        this.setItem(STORAGE_KEYS.PRODUCT_PRICE_RANGES, initialProductPriceRanges);
+      }
+      if (!this.hasItem(STORAGE_KEYS.KNOWLEDGE_BASE)) {
+        this.setItem(STORAGE_KEYS.KNOWLEDGE_BASE, initialKnowledgeBase);
+      }
+      if (!this.hasItem(STORAGE_KEYS.MEDIA)) {
+        this.setItem(STORAGE_KEYS.MEDIA, initialMedia);
+      }
+      if (!this.hasItem(STORAGE_KEYS.USERS)) {
+        this.setItem(STORAGE_KEYS.USERS, initialUsers);
+      }
+      if (!this.hasItem(STORAGE_KEYS.ADMIN_USERS)) {
+        this.setItem(STORAGE_KEYS.ADMIN_USERS, initialAdminUsers);
+      }
+      if (!this.hasItem(STORAGE_KEYS.CURRENT_USER)) {
+        this.setItem(STORAGE_KEYS.CURRENT_USER, initialAdminUsers[0]); // Default admin
+      }
+      if (!this.hasItem(STORAGE_KEYS.AI_SETTINGS)) {
+        const defaultAiSettings: AISettings = {
+          enabled: true,
+          provider: 'Gemini',
+          primaryModel: 'gemini-3.6-flash',
+          backupModel: 'gemini-3.6-flash',
+          temperature: 0.2,
+          maxOutputTokens: 800,
+          systemInstruction: `You are the official AI assistant for Sonjoy Sarkar and ST Web & Ads Studio.
 Your sole purpose is to answer questions strictly grounded in the published Knowledge Base and approved Case Studies.
 Do NOT invent claims, client names, ROAS guarantees, or pricing.
 If information is not present in the Knowledge Base, respond politely: "এই বিষয়ে আমার কাছে পর্যাপ্ত তথ্য নেই। আপনার প্রশ্নটি আমাদের টিমের কাছে পাঠানো হয়েছে।"
 Always encourage the user with helpful next steps: Lead Form, Ads Prediction Calculator, or WhatsApp.`,
-        knowledgeRetrievalStrictness: 'STRICT_KB_ONLY',
-        ctaStrategy: 'CONTEXTUAL'
-      };
-      this.setItem(STORAGE_KEYS.AI_SETTINGS, defaultAiSettings);
+          knowledgeRetrievalStrictness: 'STRICT_KB_ONLY',
+          ctaStrategy: 'CONTEXTUAL'
+        };
+        this.setItem(STORAGE_KEYS.AI_SETTINGS, defaultAiSettings);
+      }
+    } catch (e) {
+      console.warn('Init defaults notice:', e);
     }
   }
 

@@ -423,16 +423,24 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Default to English ('en') as requested by the user
   const [language, setLanguageState] = useState<Language>(() => {
-    const saved = localStorage.getItem('st_app_language');
-    if (saved === 'bn' || saved === 'en') {
-      return saved;
+    try {
+      const saved = localStorage.getItem('st_app_language');
+      if (saved === 'bn' || saved === 'en') {
+        return saved;
+      }
+    } catch (e) {
+      console.warn('Could not read language from storage', e);
     }
     return 'en'; // English by default
   });
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem('st_app_language', lang);
+    try {
+      localStorage.setItem('st_app_language', lang);
+    } catch (e) {
+      console.warn('Could not save language to storage', e);
+    }
   };
 
   const toggleLanguage = () => {

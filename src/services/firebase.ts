@@ -15,17 +15,29 @@ import {
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, Auth } from 'firebase/auth';
 import firebaseConfig from '../../firebase-applet-config.json';
 
-// Initialize Firebase App safely (singleton)
-export const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+// Initialize Firebase App safely (singleton) with fallback
+let appInstance: any = null;
+let dbInstance: any = null;
+let authInstance: any = null;
+let googleAuthProviderInstance: any = null;
 
-// Initialize Firestore
-export const db: Firestore = getFirestore(app);
+try {
+  if (firebaseConfig && (firebaseConfig.apiKey || firebaseConfig.projectId)) {
+    appInstance = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    dbInstance = getFirestore(appInstance);
+    authInstance = getAuth(appInstance);
+    googleAuthProviderInstance = new GoogleAuthProvider();
+    googleAuthProviderInstance.addScope('https://www.googleapis.com/auth/drive.file');
+    googleAuthProviderInstance.addScope('https://www.googleapis.com/auth/spreadsheets');
+  }
+} catch (e) {
+  console.warn('Firebase initialization notice (offline / fallback mode):', e);
+}
 
-// Initialize Auth
-export const auth: Auth = getAuth(app);
-export const googleAuthProvider = new GoogleAuthProvider();
-googleAuthProvider.addScope('https://www.googleapis.com/auth/drive.file');
-googleAuthProvider.addScope('https://www.googleapis.com/auth/spreadsheets');
+export const app = appInstance;
+export const db: Firestore = dbInstance;
+export const auth: Auth = authInstance;
+export const googleAuthProvider = googleAuthProviderInstance;
 
 export { 
   collection, 
@@ -36,5 +48,8 @@ export {
   deleteDoc, 
   query, 
   orderBy, 
-  onSnapshot 
+  onSnapshot,
+  signInWithPopup,
+  signOut
 };
+
