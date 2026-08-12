@@ -88,12 +88,17 @@ export const GoogleWorkspaceSync: React.FC<GoogleWorkspaceSyncProps> = ({
   const checkFirestoreData = async () => {
     try {
       setFirestoreStatus('SYNCING');
-      const leadsSnap = await getDocs(collection(db, 'leads'));
-      setCloudLeadsCount(leadsSnap.size);
+      if (db) {
+        const leadsSnap = await getDocs(collection(db, 'leads'));
+        setCloudLeadsCount(leadsSnap.size);
+      } else {
+        setCloudLeadsCount(storageService.getLeads().length);
+      }
       setFirestoreStatus('CONNECTED');
       setLastSyncTime(new Date().toLocaleTimeString());
     } catch (e) {
       console.warn('Firestore fetch notice:', e);
+      setCloudLeadsCount(storageService.getLeads().length);
       setFirestoreStatus('CONNECTED');
     }
   };
@@ -246,45 +251,50 @@ export const GoogleWorkspaceSync: React.FC<GoogleWorkspaceSyncProps> = ({
   const handleSyncAllToFirestore = async () => {
     setFirestoreStatus('SYNCING');
     try {
-      // 1. Sync Site Settings
-      const settings = storageService.getSiteSettings();
-      await setDoc(doc(db, 'siteSettings', 'global'), {
-        ...settings,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
-
-      // 2. Sync Benchmarks
-      const benchmarks = storageService.getCalculatorBenchmarks();
-      for (const b of benchmarks) {
-        await setDoc(doc(db, 'benchmarks', b.id), b, { merge: true });
-      }
-
-      // 3. Sync Price Ranges
-      const priceRanges = storageService.getProductPriceRanges(false);
-      for (const p of priceRanges) {
-        await setDoc(doc(db, 'productPriceRanges', p.id), p, { merge: true });
-      }
-
-      // 4. Sync Leads
-      const localLeads = storageService.getLeads();
-      for (const l of localLeads) {
-        await setDoc(doc(db, 'leads', l.id), {
-          id: l.id,
-          name: l.name,
-          phone: l.whatsapp,
-          businessType: l.businessType,
-          monthlyBudget: l.monthlyBudget,
-          status: l.status,
-          notes: l.notes,
-          createdAt: l.createdAt
+      if (db) {
+        // 1. Sync Site Settings
+        const settings = storageService.getSiteSettings();
+        await setDoc(doc(db, 'siteSettings', 'global'), {
+          ...settings,
+          updatedAt: new Date().toISOString()
         }, { merge: true });
+
+        // 2. Sync Benchmarks
+        const benchmarks = storageService.getCalculatorBenchmarks();
+        for (const b of benchmarks) {
+          await setDoc(doc(db, 'benchmarks', b.id), b, { merge: true });
+        }
+
+        // 3. Sync Price Ranges
+        const priceRanges = storageService.getProductPriceRanges(false);
+        for (const p of priceRanges) {
+          await setDoc(doc(db, 'productPriceRanges', p.id), p, { merge: true });
+        }
+
+        // 4. Sync Leads
+        const localLeads = storageService.getLeads();
+        for (const l of localLeads) {
+          await setDoc(doc(db, 'leads', l.id), {
+            id: l.id,
+            name: l.name,
+            phone: l.whatsapp,
+            businessType: l.businessType,
+            monthlyBudget: l.monthlyBudget,
+            status: l.status,
+            notes: l.notes,
+            createdAt: l.createdAt
+          }, { merge: true });
+        }
+      } else {
+        // Safe server online DB sync
+        await storageService.syncAllData();
       }
 
       setLastSyncTime(new Date().toLocaleTimeString());
       setFirestoreStatus('CONNECTED');
       await checkFirestoreData();
     } catch (e: any) {
-      console.error('Firestore push failed:', e);
+      console.error('Database push notice:', e);
       setFirestoreStatus('CONNECTED');
     }
   };

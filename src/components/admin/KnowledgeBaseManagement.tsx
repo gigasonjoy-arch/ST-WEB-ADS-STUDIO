@@ -75,11 +75,13 @@ export const KnowledgeBaseManagement: React.FC<KnowledgeBaseManagementProps> = (
   };
 
   const filteredItems = items.filter(item => {
-    const matchesSearch = 
-      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.answer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.keywords.some(k => k.toLowerCase().includes(searchQuery.toLowerCase()));
+    if (!item) return false;
+    const q = (searchQuery || '').toLowerCase().trim();
+    const matchesSearch = !q ||
+      (item.title || '').toLowerCase().includes(q) ||
+      (item.question || '').toLowerCase().includes(q) ||
+      (item.answer || '').toLowerCase().includes(q) ||
+      (Array.isArray(item.keywords) && item.keywords.some(k => (k || '').toLowerCase().includes(q)));
     
     const matchesCategory = selectedCategory === 'ALL' || item.category === selectedCategory;
     return matchesSearch && matchesCategory;
@@ -93,15 +95,16 @@ export const KnowledgeBaseManagement: React.FC<KnowledgeBaseManagementProps> = (
     let bestMatch: KnowledgeBaseItem | null = null;
     let highestScore = 0;
 
-    items.filter(i => i.status === 'published').forEach(item => {
+    items.filter(i => i && i.status === 'published').forEach(item => {
       let score = 0;
-      item.keywords.forEach(kw => {
-        if (q.includes(kw.toLowerCase())) score += 5;
+      const kws = Array.isArray(item.keywords) ? item.keywords : [];
+      kws.forEach(kw => {
+        if (kw && q.includes((kw || '').toLowerCase())) score += 5;
       });
       words.forEach(word => {
-        if (item.title.toLowerCase().includes(word)) score += 3;
-        if (item.question.toLowerCase().includes(word)) score += 4;
-        if (item.answer.toLowerCase().includes(word)) score += 1;
+        if (item.title && item.title.toLowerCase().includes(word)) score += 3;
+        if (item.question && item.question.toLowerCase().includes(word)) score += 4;
+        if (item.answer && item.answer.toLowerCase().includes(word)) score += 1;
       });
       score += (item.priority || 5) * 0.5;
 

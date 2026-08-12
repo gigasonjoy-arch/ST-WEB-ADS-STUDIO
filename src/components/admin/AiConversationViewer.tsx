@@ -213,16 +213,18 @@ export const AiConversationViewer: React.FC<AiConversationViewerProps> = ({
   }, [conversations]);
 
   const filteredConversations = conversations.filter(c => {
+    if (!c) return false;
     if (selectedTopicForFilter) {
-      const topicMatches = c.topics.some(t => t.toLowerCase().includes(selectedTopicForFilter.toLowerCase())) ||
-        c.messages.some(m => m.text.toLowerCase().includes(selectedTopicForFilter.toLowerCase()));
+      const filterTerm = (selectedTopicForFilter || '').toLowerCase().trim();
+      const topicMatches = (Array.isArray(c.topics) && c.topics.some(t => (t || '').toLowerCase().includes(filterTerm))) ||
+        (Array.isArray(c.messages) && c.messages.some(m => (m?.text || '').toLowerCase().includes(filterTerm)));
       if (!topicMatches) return false;
     }
     if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
-    const matchesVisitor = c.visitorId.toLowerCase().includes(q);
-    const matchesMessage = c.messages.some(m => m.text.toLowerCase().includes(q));
-    const matchesTopic = c.topics.some(t => t.toLowerCase().includes(q));
+    const q = searchQuery.toLowerCase().trim();
+    const matchesVisitor = (c.visitorId || '').toLowerCase().includes(q);
+    const matchesMessage = Array.isArray(c.messages) && c.messages.some(m => (m?.text || '').toLowerCase().includes(q));
+    const matchesTopic = Array.isArray(c.topics) && c.topics.some(t => (t || '').toLowerCase().includes(q));
     return matchesVisitor || matchesMessage || matchesTopic;
   });
 

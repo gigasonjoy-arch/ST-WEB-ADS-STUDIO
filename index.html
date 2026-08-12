@@ -1,6 +1,36 @@
 <!doctype html>
 <html lang="bn">
   <head>
+    <script>
+      (function() {
+        function shouldSuppress(msg) {
+          if (!msg) return false;
+          var s = typeof msg === 'string' ? msg : (msg.message || String(msg));
+          return s.indexOf('WebSocket') !== -1 ||
+                 s.indexOf('websocket') !== -1 ||
+                 s.indexOf('closed without opened') !== -1 ||
+                 s.indexOf('[vite]') !== -1;
+        }
+
+        window.addEventListener('unhandledrejection', function(event) {
+          if (event && shouldSuppress(event.reason)) {
+            event.preventDefault();
+            if (typeof event.stopImmediatePropagation === 'function') {
+              event.stopImmediatePropagation();
+            }
+          }
+        }, true);
+
+        window.addEventListener('error', function(event) {
+          if (event && (shouldSuppress(event.message) || shouldSuppress(event.error))) {
+            event.preventDefault();
+            if (typeof event.stopImmediatePropagation === 'function') {
+              event.stopImmediatePropagation();
+            }
+          }
+        }, true);
+      })();
+    </script>
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],

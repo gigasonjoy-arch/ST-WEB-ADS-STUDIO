@@ -144,10 +144,13 @@ export const PageManagement: React.FC<PageManagementProps> = ({ onPreviewPage })
 
   const filteredPages = pages.filter((p) => {
     const matchesStatus = statusFilter === 'ALL' || p.status === statusFilter;
+    const term = (searchTerm || '').toLowerCase().trim();
+    if (!term) return matchesStatus;
+
     const matchesSearch = 
-      p.titleEn.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.titleBn.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.slug.toLowerCase().includes(searchTerm.toLowerCase());
+      (p.titleEn || '').toLowerCase().includes(term) ||
+      (p.titleBn || '').toLowerCase().includes(term) ||
+      (p.slug || '').toLowerCase().includes(term);
     return matchesStatus && matchesSearch;
   });
 

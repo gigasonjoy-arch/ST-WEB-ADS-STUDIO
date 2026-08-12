@@ -1,0 +1,622 @@
+import fs from 'fs';
+import path from 'path';
+
+// Define the file paths for storage
+const DATA_DIR = path.resolve(process.cwd(), 'data');
+const DB_FILE = path.join(DATA_DIR, 'online_db.json');
+const BACKUP_FILE = path.join(DATA_DIR, 'online_db.backup.json');
+
+// Default initial state
+export interface DatabaseState {
+  siteSettings?: any;
+  themeSettings?: any;
+  faviconSettings?: any;
+  homePageSettings?: any;
+  customPages?: any[];
+  socialLinks?: any[];
+  caseStudies?: any[];
+  districts?: any[];
+  benchmarks?: any[];
+  recommendations?: any[];
+  productPriceRanges?: any[];
+  leads?: any[];
+  knowledgeBase?: any[];
+  knowledgeGaps?: any[];
+  aiConversations?: any[];
+  aiSettings?: any;
+  analyticsEvents?: any[];
+  visitorJourneys?: any[];
+  media?: any[];
+  users?: any[];
+  adminUsers?: any[];
+  robotsSettings?: any;
+  sitemapSettings?: any;
+  auditLogs?: any[];
+  _lastUpdated?: string;
+}
+
+// In-memory cache
+let inMemoryDb: DatabaseState | null = null;
+
+// Ensure data directory exists
+function ensureDataDir() {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+  } catch (err) {
+    console.error('Error creating data directory:', err);
+  }
+}
+
+// Initial defaults factory
+export function getInitialDatabaseDefaults(): DatabaseState {
+  return {
+    siteSettings: {
+      siteNameBn: 'ST Web & Ads Studio',
+      siteNameEn: 'ST Web & Ads Studio',
+      taglineBn: 'বাংলাদেশের শীর্ষ ডেটা-ড্রিভেন টিকটক ও ডিজিটাল অ্যাড গ্রোথ পার্টনার',
+      taglineEn: 'Top Data-Driven TikTok & Digital Ad Agency in Bangladesh',
+      logoUrl: '',
+      phone: '+880 1723-516793',
+      whatsapp: '8801723516793',
+      email: 'giga.sonjoy@gmail.com',
+      address: 'Dhaka, Bangladesh',
+      copyrightText: '© 2026 ST Web & Ads Studio. All rights reserved.',
+      heroHeadlineBn: 'বাংলাদেশে টিকটক ও মেটা বিজ্ঞাপনে সর্বোচ্চ ROAS ও সেলস আনুন',
+      heroHeadlineEn: 'Maximize Your E-commerce ROAS & Sales with Data-Driven Ads in Bangladesh',
+      heroSubheadlineBn: 'কোনো মুখস্থ বাজেট নয় — সঠিক প্রডাক্ট ক্যাটাগরি ও মার্জিন এনালাইসিস করে অ্যাড রান করুন।',
+      heroSubheadlineEn: 'Scale your business with verified audience targeting, pixel tracking & real campaign data.',
+      enableAiChat: true,
+      enableStickyWhatsapp: true,
+      enablePublicCalculator: true,
+      metaPixelId: '',
+      tiktokPixelId: '',
+      googleTagManagerId: '',
+      currency: 'BDT',
+      usdToBdtRate: 122,
+      metaTitle: 'ST Web & Ads Studio | TikTok & Digital Ads Agency Bangladesh',
+      metaDescription: 'Verified ROAS, precision audience targeting, and custom e-commerce growth strategies in Bangladesh.'
+    },
+    themeSettings: {
+      mode: 'light',
+      preset: 'forest_sage',
+      colors: {
+        primary: '#4A5D3B',
+        primaryHover: '#3A4533',
+        secondary: '#8A957F',
+        accent: '#D4A373',
+        accentHover: '#BC8A5F',
+        background: '#FDFCF8',
+        surface: '#FFFFFF',
+        surfaceMuted: '#F4F6F0',
+        textPrimary: '#2C3327',
+        textSecondary: '#5C6652',
+        textMuted: '#8A957F',
+        border: '#D9DED1',
+        borderSubtle: '#EAEFE5'
+      },
+      heroLayout: 'centered',
+      badgeStyle: 'soft',
+      cardElevation: 'flat'
+    },
+    homePageSettings: {
+      featuredCaseStudiesLimit: 3,
+      showOnlyFeaturedCaseStudies: true,
+      caseStudiesHeadlineEn: "Verified Campaigns & Client Growth Case Studies",
+      caseStudiesHeadlineBn: "বাস্তব ক্যাম্পেইন ডেটা ও ক্লায়েন্ট ফলাফলের কেস স্টাডি",
+      caseStudiesSubheadlineEn: "Concrete, data-backed proof from real TikTok & Meta campaigns across Bangladesh e-commerce brands.",
+      caseStudiesSubheadlineBn: "কোনো অনুমান বা মুখস্থ কথা নয় — বাজেট অপটিমাইজেশন ও কনভার্সন ট্র্যাকিংয়ের বাস্তব প্রমাণ।",
+      viewAllCaseStudiesButtonTextEn: "View All 100+ Case Studies & Reports →",
+      viewAllCaseStudiesButtonTextBn: "সকল কেস স্টাডি ও ভেরিফায়েড রিপোর্ট দেখুন →",
+      viewAllCaseStudiesUrl: "/page/case-studies",
+      featuredServicesLimit: 4,
+      showServicesViewAll: true
+    },
+    customPages: [
+      {
+        id: "page-case-studies",
+        slug: "case-studies",
+        title: "All Case Studies & Client Success Reports",
+        titleBn: "সকল কেস স্টাডি ও ক্লায়েন্ট সাকসেস রিপোর্টস",
+        content: `## ভেরিফায়েড ক্যাম্পেইন কেস স্টাডিজ\n\nএখানে রয়েছে বাংলাদেশের শীর্ষস্থানীয় ই-কমার্স ও ফ্যাশন ব্র্যান্ডের লাইভ অ্যাড ক্যাম্পেইন ডেটা।\n\n- **ফ্যাশন ও ক্লদিং**: ৪.২X পর্যন্ত গড় ROAS অর্জিত\n- **স্কিনকেয়ার ও বিউটি**: ৩.৮X গড় ROAS\n- **ক্যাড ও গ্যাজেট**: ৫.১X সর্বোচ্চ পিক সিজন ROAS\n\nপ্রতিটি ক্যাম্পেইনে সঠিক অডিয়েন্স রিসার্চ, মেটা/টিকটক কনভার্সন পিক্সেল এবং রিটার্গেটিং ফানেল ব্যবহার করা হয়েছে।`,
+        contentBn: `## ভেরিফায়েড ক্যাম্পেইন কেস স্টাডিজ\n\nএখানে রয়েছে বাংলাদেশের শীর্ষস্থানীয় ই-কমার্স ও ফ্যাশন ব্র্যান্ডের লাইভ অ্যাড ক্যাম্পেইন ডেটা।\n\n- **ফ্যাশন ও ক্লদিং**: ৪.২X পর্যন্ত গড় ROAS অর্জিত\n- **স্কিনকেয়ার ও বিউটি**: ৩.৮X গড় ROAS\n- **ক্যাড ও গ্যাজেট**: ৫.১X সর্বোচ্চ পিক সিজন ROAS\n\nপ্রতিটি ক্যাম্পেইনে সঠিক অডিয়েন্স রিসার্চ, মেটা/টিকটক কনভার্সন পিক্সেল এবং রিটার্গেটিং ফানেল ব্যবহার করা হয়েছে।`,
+        metaTitle: "Case Studies & Live Results | ST Web & Ads Studio",
+        metaDescription: "Explore verified real-world ROAS, ad spend, and conversion case studies in Bangladesh.",
+        isPublished: true,
+        showInHeaderNav: true,
+        showInFooterNav: true,
+        navOrder: 1,
+        layout: "standard",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: "page-privacy-policy",
+        slug: "privacy-policy",
+        title: "Privacy Policy",
+        titleBn: "গোপনীয়তা ও ডেটা পলিসি",
+        content: `## Privacy Policy & Data Transparency\n\nAt ST Web & Ads Studio, we take your privacy and data security seriously. We do not sell or distribute personal client information.\n\n- **Information We Collect**: Names, contact WhatsApp/phone, and business information submitted voluntarily via our calculator and lead forms.\n- **Use of Information**: Exclusively to deliver digital marketing consultation, campaign performance quotes, and account management.\n- **Data Protection**: Industry-standard SSL encryption and secure cloud database protocols.`,
+        contentBn: `## গোপনীয়তা নীতি ও ডেটা সুরক্ষা\n\nST Web & Ads Studio-তে আমরা আপনার গোপনীয়তাকে সর্বোচ্চ গুরুত্ব দেই।\n\n- **সংগৃহীত তথ্যাদি**: লিড ফর্ম বা ক্যালকুলেটরে দেওয়া নাম, মোবাইল নম্বর এবং ব্যবসার ধরন।\n- **ব্যবহারের উদ্দেশ্য**: শুধুমাত্র ডিজিটাল মার্কেটিং কনসালটেশন ও ক্যাম্পেইন কোটেশনের জন্য।\n- **নিরাপত্তা**: সর্বাধুনিক এসএসএল এনক্রিপশন ও সিকিউর অনলাইন ক্লাউড ডেটাবেজ।`,
+        metaTitle: "Privacy Policy | ST Web & Ads Studio",
+        metaDescription: "Learn how ST Web & Ads Studio protects your personal and business data.",
+        isPublished: true,
+        showInHeaderNav: false,
+        showInFooterNav: true,
+        navOrder: 2,
+        layout: "standard",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: new Date().toISOString()
+      }
+    ],
+    socialLinks: [
+      { id: '1', platform: 'facebook', url: 'https://facebook.com', label: 'Facebook Page', icon: 'Facebook', active: true, order: 1 },
+      { id: '2', platform: 'tiktok', url: 'https://tiktok.com', label: 'TikTok Channel', icon: 'Video', active: true, order: 2 },
+      { id: '3', platform: 'youtube', url: 'https://youtube.com', label: 'YouTube Channel', icon: 'Youtube', active: true, order: 3 },
+      { id: '4', platform: 'whatsapp', url: 'https://wa.me/8801723516793', label: 'WhatsApp Direct', icon: 'MessageCircle', active: true, order: 4 }
+    ],
+    caseStudies: [
+      {
+        id: 'cs-1',
+        clientName: 'Aura Fashion BD',
+        category: 'Fashion & Clothing',
+        platform: 'TikTok Ads',
+        objective: 'Conversions (Sales)',
+        budgetSpentUSD: 450,
+        revenueUSD: 1890,
+        roas: 4.2,
+        cvr: 4.8,
+        cpaUSD: 2.1,
+        totalOrders: 214,
+        date: '2026-01-15',
+        description: 'Women fashion items scaled using custom creator UGC style videos and purchase objective optimization in Dhaka & Chittagong.',
+        featured: true,
+        tags: ['Fashion', 'TikTok Ads', 'UGC Video', 'Scaling']
+      },
+      {
+        id: 'cs-2',
+        clientName: 'GlowSkin Organics',
+        category: 'Skin Care & Beauty',
+        platform: 'TikTok & Meta Combo',
+        objective: 'Conversions (Sales)',
+        budgetSpentUSD: 320,
+        revenueUSD: 1216,
+        roas: 3.8,
+        cvr: 3.9,
+        cpaUSD: 2.6,
+        totalOrders: 123,
+        date: '2026-02-01',
+        description: 'Organic skincare product launched with TikTok awareness and Meta retargeting to maximize purchase repeat rate.',
+        featured: true,
+        tags: ['Beauty', 'Skincare', 'Combo Strategy']
+      },
+      {
+        id: 'cs-3',
+        clientName: 'TechGadget Hub',
+        category: 'Electronics & Gadgets',
+        platform: 'TikTok Ads',
+        objective: 'Conversions (Sales)',
+        budgetSpentUSD: 600,
+        revenueUSD: 3060,
+        roas: 5.1,
+        cvr: 5.4,
+        cpaUSD: 3.2,
+        totalOrders: 187,
+        date: '2026-02-20',
+        description: 'Smartwatch and TWS earbuds product demonstration video campaigns targeted at tech enthusiasts nationwide.',
+        featured: true,
+        tags: ['Gadgets', 'High ROAS', 'Viral Video']
+      }
+    ],
+    districts: [
+      { id: '1', nameBn: 'ঢাকা', nameEn: 'Dhaka', division: 'Dhaka', tier: 1, cpcMultiplier: 1.0, cvrMultiplier: 1.15, codSuccessRate: 92, deliveryDays: 1, averageAovBonus: 1.1 },
+      { id: '2', nameBn: 'চট্টগ্রাম', nameEn: 'Chittagong', division: 'Chittagong', tier: 1, cpcMultiplier: 0.95, cvrMultiplier: 1.05, codSuccessRate: 88, deliveryDays: 2, averageAovBonus: 1.05 },
+      { id: '3', nameBn: 'সিলেট', nameEn: 'Sylhet', division: 'Sylhet', tier: 1, cpcMultiplier: 0.9, cvrMultiplier: 1.0, codSuccessRate: 86, deliveryDays: 2, averageAovBonus: 1.1 },
+      { id: '4', nameBn: 'রাজশাহী', nameEn: 'Rajshahi', division: 'Rajshahi', tier: 2, cpcMultiplier: 0.85, cvrMultiplier: 0.95, codSuccessRate: 84, deliveryDays: 3, averageAovBonus: 0.95 },
+      { id: '5', nameBn: 'খুলনা', nameEn: 'Khulna', division: 'Khulna', tier: 2, cpcMultiplier: 0.85, cvrMultiplier: 0.95, codSuccessRate: 85, deliveryDays: 3, averageAovBonus: 0.95 },
+      { id: '6', nameBn: 'বরিশাল', nameEn: 'Barisal', division: 'Barisal', tier: 2, cpcMultiplier: 0.8, cvrMultiplier: 0.9, codSuccessRate: 82, deliveryDays: 3, averageAovBonus: 0.9 },
+      { id: '7', nameBn: 'রংপুর', nameEn: 'Rangpur', division: 'Rangpur', tier: 2, cpcMultiplier: 0.8, cvrMultiplier: 0.9, codSuccessRate: 83, deliveryDays: 3, averageAovBonus: 0.9 },
+      { id: '8', nameBn: 'ময়মনসিংহ', nameEn: 'Mymensingh', division: 'Mymensingh', tier: 2, cpcMultiplier: 0.85, cvrMultiplier: 0.95, codSuccessRate: 85, deliveryDays: 2, averageAovBonus: 0.95 }
+    ],
+    benchmarks: [
+      {
+        id: 'bm-fashion',
+        category: 'Fashion & Clothing',
+        labelBn: 'ফ্যাশন ও ক্লদিং (Men/Women)',
+        avgCpcUSD: 0.04,
+        avgCvrPercent: 4.2,
+        expectedRoas: 3.8,
+        minDailyBudgetUSD: 10,
+        codReturnRatePercent: 12,
+        recommendedPlatforms: ['TikTok Ads', 'Meta Reels'],
+        creativeFormats: ['UGC Try-On', 'Outfit Transition', 'Fast Paced Showcase']
+      },
+      {
+        id: 'bm-beauty',
+        category: 'Skin Care & Beauty',
+        labelBn: 'স্কিনকেয়ার ও কসমেটিক্স',
+        avgCpcUSD: 0.05,
+        avgCvrPercent: 3.9,
+        expectedRoas: 3.5,
+        minDailyBudgetUSD: 15,
+        codReturnRatePercent: 9,
+        recommendedPlatforms: ['TikTok Ads', 'Instagram Reels'],
+        creativeFormats: ['Problem-Solution', 'Before-After Showcase', 'Dermatologist/Doctor Review']
+      },
+      {
+        id: 'bm-gadgets',
+        category: 'Electronics & Gadgets',
+        labelBn: 'ইলেকট্রনিক্স ও গ্যাজেট',
+        avgCpcUSD: 0.06,
+        avgCvrPercent: 4.8,
+        expectedRoas: 4.5,
+        minDailyBudgetUSD: 20,
+        codReturnRatePercent: 10,
+        recommendedPlatforms: ['TikTok Ads', 'Facebook Video Ads'],
+        creativeFormats: ['Feature Demo', 'Unboxing', 'Shock Durability Test']
+      }
+    ],
+    productPriceRanges: [
+      {
+        id: "pr-under-500",
+        labelEn: "Under ৳500 (< $3.30)",
+        labelBn: "৳৫০০-এর কম (Low Ticket / Impulse)",
+        minPriceBDT: 0,
+        maxPriceBDT: 499,
+        cvrMultiplier: 1.45,
+        cpcMultiplier: 0.85,
+        recommendedGoal: "Purchase",
+        averageTicketBDT: 380,
+        active: true,
+        sortOrder: 1
+      },
+      {
+        id: "pr-500-999",
+        labelEn: "৳500 – ৳999 ($3.30 – $6.60)",
+        labelBn: "৳৫০০ – ৳৯৯৯ (Fast Moving E-com)",
+        minPriceBDT: 500,
+        maxPriceBDT: 999,
+        cvrMultiplier: 1.25,
+        cpcMultiplier: 0.95,
+        recommendedGoal: "Purchase",
+        averageTicketBDT: 750,
+        active: true,
+        sortOrder: 2
+      },
+      {
+        id: "pr-1000-2499",
+        labelEn: "৳1,000 – ৳2,499 ($6.60 – $16.50)",
+        labelBn: "৳১,০০০ – ৳২,৪৯৯ (Standard Apparel / Accessories)",
+        minPriceBDT: 1000,
+        maxPriceBDT: 2499,
+        cvrMultiplier: 1.0,
+        cpcMultiplier: 1.0,
+        recommendedGoal: "Purchase",
+        averageTicketBDT: 1550,
+        active: true,
+        sortOrder: 3
+      },
+      {
+        id: "pr-2500-plus",
+        labelEn: "৳2,500+ ($16.50+)",
+        labelBn: "৳২,৫০০+ (Premium / High Ticket)",
+        minPriceBDT: 2500,
+        maxPriceBDT: 99999,
+        cvrMultiplier: 0.75,
+        cpcMultiplier: 1.2,
+        recommendedGoal: "Purchase / WhatsApp Lead",
+        averageTicketBDT: 3600,
+        active: true,
+        sortOrder: 4
+      }
+    ],
+    recommendations: [
+      {
+        id: 'rec-1',
+        condition: 'budget < 10',
+        titleBn: 'বাজেট অপটিমাইজেশন পরামর্শ',
+        titleEn: 'Budget Optimization Tip',
+        messageBn: 'দৈনিক $১০ এর নিচে টিকটক অ্যালগরিদম পর্যাপ্ত লার্নিং ডাটা পায় না। প্রতিদিন অন্তত $১০-$১৫ বাজেট নির্ধারণের পরামর্শ দেওয়া হলো।',
+        messageEn: 'TikTok learning phase needs at least $10-$15 daily budget for optimal purchase conversions.'
+      }
+    ],
+    leads: [],
+    knowledgeBase: [
+      {
+        id: 'kb-1',
+        category: 'Services',
+        question: 'What services does ST Web & Ads Studio offer?',
+        questionBn: 'এসটি ওয়েব অ্যান্ড অ্যাডস স্টুডিও কী কী সেবা প্রদান করে?',
+        answer: 'We provide specialized TikTok Ads management, Meta Ads (Facebook & Instagram), Conversion Pixel & GTM Server-Side tracking, Creative Video Scripting, and E-commerce Scaling Consultation in Bangladesh.',
+        answerBn: 'আমরা বাংলাদেশে টিকটক অ্যাড ম্যানেজমেন্ট, মেটা বিজ্ঞাপন (ফেসবুক ও ইনস্টাগ্রাম), কনভার্সন পিক্সেল ও সার্ভার-সাইড ট্র্যাকিং, ভিডিও কনটেন্ট স্ট্র্যাটেজি এবং ই-কমার্স ব্র্যান্ড স্কেলিং সেবা দিয়ে থাকি।',
+        tags: ['services', 'tiktok', 'meta', 'agency']
+      },
+      {
+        id: 'kb-2',
+        category: 'Budget & Pricing',
+        question: 'What is the minimum budget required to start TikTok Ads in Bangladesh?',
+        questionBn: 'বাংলাদেশে টিকটক অ্যাড শুরু করতে সর্বনিম্ন কত বাজেট প্রয়োজন?',
+        answer: 'You can start with a minimum testing budget of $10 to $15 per day (approx ৳1,200 - ৳1,800 BDT) for 5-7 days to train the TikTok Pixel and find winning creatives.',
+        answerBn: 'সাধারণত প্রতিদিন $১০ থেকে $১৫ (আনুমানিক ১২০০-১৮০০ টাকা) টেস্ট বাজেট দিয়ে ৫-৭ দিনের মধ্যে বিজয়ী অডিয়েন্স ও ক্রিয়েটিভ খুঁজে পাওয়া সম্ভব।',
+        tags: ['budget', 'pricing', 'start']
+      }
+    ],
+    knowledgeGaps: [],
+    aiConversations: [],
+    aiSettings: {
+      systemPrompt: 'You are the intelligent assistant for ST Web & Ads Studio, Bangladesh premier TikTok & Meta Ads agency.',
+      welcomeMessageBn: 'স্বাগতম! আমি এসটি ওয়েব অ্যান্ড অ্যাডস স্টুডিও-এর এআই অ্যাসিস্ট্যান্ট। আপনার বিজনেস গ্রোথ ও অ্যাড বাজেট সম্পর্কে যেকোনো প্রশ্ন করতে পারেন।',
+      welcomeMessageEn: 'Welcome! I am the AI assistant of ST Web & Ads Studio. Ask me anything about scaling your ads and budget in Bangladesh.',
+      leadCaptureTriggerThreshold: 2,
+      temperature: 0.7
+    },
+    analyticsEvents: [],
+    visitorJourneys: [],
+    media: [
+      {
+        id: 'med-1',
+        title: 'TikTok Ads Mastery Guide Banner',
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=1200&q=80',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=400&q=80',
+        category: 'TikTok Guide',
+        uploadedAt: '2026-01-10T00:00:00.000Z'
+      }
+    ],
+    users: [],
+    adminUsers: [
+      {
+        id: 'usr-admin-root',
+        name: 'Super Admin',
+        email: 'giga.sonjoy@gmail.com',
+        mobile: '01723516793',
+        passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918',
+        role: 'SUPER_ADMIN',
+        isActive: true,
+        createdAt: '2026-01-01T00:00:00.000Z'
+      }
+    ],
+    robotsSettings: {
+      rawContent: `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\n\nSitemap: https://stwebads.com/sitemap.xml`,
+      allowAll: true,
+      disallowAdmin: true,
+      includeSitemap: true,
+      sitemapUrl: 'https://stwebads.com/sitemap.xml',
+      crawlDelay: 0,
+      customRules: ''
+    },
+    sitemapSettings: {
+      baseUrl: "https://stwebads.com",
+      includeCustomPages: true,
+      includeServices: true,
+      includeCaseStudies: true,
+      changefreq: "weekly",
+      priority: 0.8,
+      lastGenerated: new Date().toISOString().split('T')[0]
+    },
+    auditLogs: [
+      {
+        id: 'log-1',
+        timestamp: new Date().toISOString(),
+        action: 'ONLINE_DATABASE_INITIALIZED',
+        details: 'Initial cloud database schema and collection seeds bootstrapped.',
+        userId: 'system'
+      }
+    ],
+    _lastUpdated: new Date().toISOString()
+  };
+}
+
+// Load database from file or initialize
+export function loadDatabase(): DatabaseState {
+  if (inMemoryDb) {
+    return inMemoryDb;
+  }
+
+  ensureDataDir();
+
+  try {
+    if (fs.existsSync(DB_FILE)) {
+      const raw = fs.readFileSync(DB_FILE, 'utf8');
+      const parsed = JSON.parse(raw);
+      inMemoryDb = { ...getInitialDatabaseDefaults(), ...parsed };
+      return inMemoryDb!;
+    }
+  } catch (err) {
+    console.error('Error reading online_db.json, attempting backup...', err);
+    try {
+      if (fs.existsSync(BACKUP_FILE)) {
+        const rawBackup = fs.readFileSync(BACKUP_FILE, 'utf8');
+        inMemoryDb = { ...getInitialDatabaseDefaults(), ...JSON.parse(rawBackup) };
+        return inMemoryDb!;
+      }
+    } catch (bErr) {
+      console.error('Backup read error:', bErr);
+    }
+  }
+
+  // First time bootstrap - initialize in-memory state before saving to avoid recursion
+  const defaults = getInitialDatabaseDefaults();
+  inMemoryDb = defaults;
+  saveDatabase(defaults);
+  return inMemoryDb;
+}
+
+// Save database to persistent file safely
+export function saveDatabase(data: Partial<DatabaseState>): DatabaseState {
+  ensureDataDir();
+
+  // If inMemoryDb is not initialized and data is provided, use defaults + data
+  const current = inMemoryDb ? inMemoryDb : getInitialDatabaseDefaults();
+  const updated: DatabaseState = {
+    ...current,
+    ...data,
+    _lastUpdated: new Date().toISOString()
+  };
+
+  inMemoryDb = updated;
+
+  try {
+    const jsonStr = JSON.stringify(updated, null, 2);
+    const tempFile = `${DB_FILE}.tmp.${Date.now()}`;
+    
+    // Write to temporary file first for atomic replacement
+    fs.writeFileSync(tempFile, jsonStr, 'utf8');
+    fs.renameSync(tempFile, DB_FILE);
+
+    // Also update backup safely
+    try {
+      fs.writeFileSync(BACKUP_FILE, jsonStr, 'utf8');
+    } catch {
+      // Non-critical
+    }
+  } catch (err) {
+    console.error('Failed to write online_db.json to disk (in-memory state preserved):', err);
+  }
+
+  return updated;
+}
+
+// Collection Helpers
+export function getCollection(name: string): any {
+  const db = loadDatabase();
+  return (db as any)[name] ?? null;
+}
+
+export function saveCollection(name: string, data: any): any {
+  const db = loadDatabase();
+  const updatedDb = { ...db, [name]: data };
+  saveDatabase(updatedDb);
+  return updatedDb[name as keyof DatabaseState];
+}
+
+export function upsertCollectionItem(name: string, item: any): any {
+  const db = loadDatabase();
+  const collection = (db as any)[name];
+
+  if (Array.isArray(collection)) {
+    const collectionCopy = [...collection];
+    const index = collectionCopy.findIndex((i: any) => i && i.id === item.id);
+    if (index >= 0) {
+      collectionCopy[index] = { ...collectionCopy[index], ...item, updatedAt: new Date().toISOString() };
+    } else {
+      collectionCopy.unshift({ ...item, createdAt: item.createdAt || new Date().toISOString() });
+    }
+    saveDatabase({ [name]: collectionCopy });
+    return item;
+  } else {
+    const updatedObj = { ...((db as any)[name] || {}), ...item };
+    saveDatabase({ [name]: updatedObj });
+    return updatedObj;
+  }
+}
+
+export function deleteCollectionItem(name: string, id: string): boolean {
+  const db = loadDatabase();
+  const collection = (db as any)[name];
+
+  if (Array.isArray(collection)) {
+    const filtered = collection.filter((i: any) => i && String(i.id) !== String(id));
+    const wasRemoved = filtered.length !== collection.length;
+    saveDatabase({ [name]: filtered });
+    return wasRemoved;
+  }
+  return false;
+}
+
+// Full live CRUD diagnostic test
+export async function runServerCrudTest(): Promise<{
+  success: boolean;
+  timestamp: string;
+  durationMs: number;
+  steps: Array<{ step: string; status: 'SUCCESS' | 'FAILED'; detail: string; latencyMs: number }>;
+}> {
+  const startTime = Date.now();
+  const steps: Array<{ step: string; status: 'SUCCESS' | 'FAILED'; detail: string; latencyMs: number }> = [];
+
+  const testId = `crud-test-${Date.now()}`;
+  const testLead = {
+    id: testId,
+    name: 'Online CRUD Diagnostic Probe',
+    whatsapp: '01700000000',
+    businessType: 'Automated Diagnostic Verification',
+    status: 'NEW',
+    notes: 'Generated by online database diagnostic runner',
+    createdAt: new Date().toISOString()
+  };
+
+  try {
+    // 1. CREATE
+    const t0 = Date.now();
+    upsertCollectionItem('leads', testLead);
+    steps.push({
+      step: '1. Create (Insert Online Record)',
+      status: 'SUCCESS',
+      detail: `Successfully inserted test lead (${testId}) into online server database.`,
+      latencyMs: Date.now() - t0
+    });
+
+    // 2. READ
+    const t1 = Date.now();
+    const leads = getCollection('leads') || [];
+    const found = leads.find((l: any) => l.id === testId);
+    if (!found) {
+      throw new Error(`Record ${testId} not found in online leads collection after insert.`);
+    }
+    steps.push({
+      step: '2. Read (Query Online Record)',
+      status: 'SUCCESS',
+      detail: `Successfully verified record exists in online database with name "${found.name}".`,
+      latencyMs: Date.now() - t1
+    });
+
+    // 3. UPDATE
+    const t2 = Date.now();
+    const updatedName = 'Online CRUD Diagnostic Probe [UPDATED]';
+    upsertCollectionItem('leads', { id: testId, name: updatedName, status: 'QUALIFIED' });
+    const leadsAfterUpdate = getCollection('leads') || [];
+    const foundUpdated = leadsAfterUpdate.find((l: any) => l.id === testId);
+    if (!foundUpdated || foundUpdated.name !== updatedName) {
+      throw new Error(`Record ${testId} did not reflect updated payload in online database.`);
+    }
+    steps.push({
+      step: '3. Update (Modify Online Record)',
+      status: 'SUCCESS',
+      detail: `Successfully updated record attributes in online database.`,
+      latencyMs: Date.now() - t2
+    });
+
+    // 4. DELETE
+    const t3 = Date.now();
+    const deleted = deleteCollectionItem('leads', testId);
+    if (!deleted) {
+      throw new Error(`Failed to delete record ${testId} from online database.`);
+    }
+    steps.push({
+      step: '4. Delete (Remove Online Record)',
+      status: 'SUCCESS',
+      detail: `Successfully removed test record and validated online database cleanup.`,
+      latencyMs: Date.now() - t3
+    });
+
+    return {
+      success: true,
+      timestamp: new Date().toISOString(),
+      durationMs: Date.now() - startTime,
+      steps
+    };
+  } catch (err: any) {
+    steps.push({
+      step: 'Diagnostic Failure',
+      status: 'FAILED',
+      detail: err.message || 'Unknown database test failure',
+      latencyMs: Date.now() - startTime
+    });
+    return {
+      success: false,
+      timestamp: new Date().toISOString(),
+      durationMs: Date.now() - startTime,
+      steps
+    };
+  }
+}

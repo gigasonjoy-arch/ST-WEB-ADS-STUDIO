@@ -23,7 +23,10 @@ import {
   Bot,
   Palette,
   Globe,
-  Film
+  Film,
+  Network,
+  Shield,
+  UserCheck
 } from 'lucide-react';
 import { AdminTab, SiteSettings, AdminTask } from '../../types';
 import { AdminTaskSuggestionDrawer } from './AdminTaskSuggestionDrawer';
@@ -94,6 +97,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
   const navItems: Array<{ id: AdminTab; label: string; icon: React.ComponentType<any>; badge?: number }> = [
     { id: 'DASHBOARD', label: 'ওভারভিউ ড্যাশবোর্ড', icon: LayoutDashboard },
+    { id: 'ONLINE_DATABASE', label: 'অনলাইন ক্লাউড ডাটাবেজ (Cloud DB)', icon: Database },
+    { id: 'USERS', label: 'ইউজার ম্যানেজমেন্ট ও এক্সেস (Users & Security)', icon: Shield },
     { id: 'THEME_COLORS', label: 'থিম ও কালার ইঞ্জিন (Colors & Theme)', icon: Palette },
     { id: 'MEDIA', label: 'মিডিয়া হাব (ইমেজ, ইউটিউব ও টিকটক)', icon: Film },
     { id: 'PAGES', label: 'পেজ ও কনটেন্ট রুলস (Custom Pages)', icon: Layers },
@@ -108,6 +113,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     { id: 'ANALYTICS', label: 'ভিজিটর ও ফানেল অ্যানালিটিক্স', icon: BarChart3 },
     { id: 'GTM_TRACKING', label: 'GTM ও পিক্সেল ট্র্যাকিং (GTM & Pixels)', icon: Tag },
     { id: 'FIREBASE_STATUS', label: 'ডাটাবেস কানেকশন (Firebase Cloud)', icon: Database },
+    { id: 'ROBOTS_TXT', label: 'রোবটস টেক্সট (Robots.txt SEO)', icon: Bot },
+    { id: 'SITEMAP', label: 'এক্সএমএল সাইটম্যাপ (Sitemap.xml)', icon: Network },
     { id: 'SETTINGS', label: 'সাইট ও সিস্টেম সেটিংস', icon: Settings },
   ];
 

@@ -68,12 +68,22 @@ export const LeadManagement: React.FC<LeadManagementProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>(initialStatusFilter || 'ALL');
   const [serviceFilter, setServiceFilter] = useState<string>('ALL');
+  const [isSyncingCloud, setIsSyncingCloud] = useState(false);
+  const [syncFeedback, setSyncFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   useEffect(() => {
     if (initialStatusFilter) {
       setStatusFilter(initialStatusFilter);
     }
   }, [initialStatusFilter]);
+
+  // Subscribe to storageService updates for real-time reactivity
+  useEffect(() => {
+    const unsubscribe = storageService.subscribe(() => {
+      setInternalLeads(storageService.getLeads().map(normalizeLead));
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Deep-linking scroll & highlight effect
   useEffect(() => {
@@ -97,6 +107,25 @@ export const LeadManagement: React.FC<LeadManagementProps> = ({
   const refreshData = () => {
     setInternalLeads(storageService.getLeads().map(normalizeLead));
     if (onRefresh) onRefresh();
+  };
+
+  const handleForceCloudSync = async () => {
+    setIsSyncingCloud(true);
+    setSyncFeedback(null);
+    try {
+      const res = await storageService.forceCloudSync();
+      if (res.success) {
+        setSyncFeedback({ type: 'success', message: res.message });
+        refreshData();
+      } else {
+        setSyncFeedback({ type: 'error', message: res.message });
+      }
+    } catch (e: any) {
+      setSyncFeedback({ type: 'error', message: e?.message || 'সিঙ্ক ব্যর্থ হয়েছে।' });
+    } finally {
+      setIsSyncingCloud(false);
+      setTimeout(() => setSyncFeedback(null), 6000);
+    }
   };
   
   // Modal / Drawer state for Lead Note editing
@@ -224,6 +253,16 @@ export const LeadManagement: React.FC<LeadManagementProps> = ({
 
         <div className="flex flex-wrap items-center gap-2.5">
           <button
+            onClick={handleForceCloudSync}
+            disabled={isSyncingCloud}
+            className="px-3.5 py-2 bg-[#FFFFFF] border border-[#D9DED1] text-[#2C3327] hover:bg-[#F3F4EE] rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-all disabled:opacity-60"
+            title="ক্লাউড ফায়ারবেস ডেটাবেসের সাথে সরাসরি সিঙ্ক করুন"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-[#4A5D3B] ${isSyncingCloud ? 'animate-spin' : ''}`} />
+            <span>{isSyncingCloud ? 'সিঙ্ক হচ্ছে...' : 'ফায়ারবেস সিঙ্ক'}</span>
+          </button>
+
+          <button
             onClick={() => setIsAddingNew(true)}
             className="px-3.5 py-2 bg-[#4A5D3B] text-[#FDFCF8] rounded-xl text-xs font-semibold hover:bg-[#3A4533] flex items-center gap-1.5 shadow-2xs"
           >
@@ -261,6 +300,21 @@ export const LeadManagement: React.FC<LeadManagementProps> = ({
           </button>
         </div>
       </div>
+
+      {syncFeedback && (
+        <div className={`p-3.5 rounded-xl border text-xs flex items-center gap-2.5 transition-all ${
+          syncFeedback.type === 'success' 
+            ? 'bg-[#EAF3E7] border-[#BCD4B4] text-[#2D5A27]' 
+            : 'bg-[#FDF2F2] border-[#F8D7DA] text-[#991B1B]'
+        }`}>
+          {syncFeedback.type === 'success' ? (
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-[#2D5A27]" />
+          ) : (
+            <RefreshCw className="w-4 h-4 shrink-0 text-[#991B1B]" />
+          )}
+          <span className="font-medium">{syncFeedback.message}</span>
+        </div>
+      )}
 
       {/* Filter & Search Bar */}
       <div className="bg-[#FFFFFF] p-4 rounded-2xl border border-[#D9DED1] flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between shadow-2xs">

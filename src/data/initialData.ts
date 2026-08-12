@@ -242,7 +242,24 @@ export const initialSiteSettings: SiteSettings = {
   },
   theme: DEFAULT_THEME_SETTINGS,
   favicon: DEFAULT_FAVICON_SETTINGS,
-  homePage: initialHomePageSettings
+  homePage: initialHomePageSettings,
+  robots: {
+    content: "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\n\nSitemap: https://stwebads.com/sitemap.xml",
+    allowAll: true,
+    disallowAdmin: true,
+    sitemapUrl: "https://stwebads.com/sitemap.xml",
+    customRules: "",
+    lastUpdated: "2026-08-12"
+  },
+  sitemap: {
+    baseUrl: "https://stwebads.com",
+    includeCustomPages: true,
+    includeServices: true,
+    includeCaseStudies: true,
+    changefreq: "weekly",
+    priority: 0.8,
+    lastGenerated: "2026-08-12"
+  }
 };
 
 export const initialSocialLinks: SocialLink[] = [
@@ -907,8 +924,11 @@ export const initialAdminUsers: AdminUser[] = [
     id: "usr-admin-1",
     name: "Sonjoy Sarkar",
     email: "giga.sonjoy@gmail.com",
+    mobile: "01723516793",
     role: "ADMIN",
     status: "ACTIVE",
+    passwordHash: "e949980d22081fdb7020d5bc5043bf7e55fae2fbbe2d7b4db13045610d4812a4", // SHA-256 for stweb2025
+    passcode: "stweb2025",
     createdAt: "2026-08-01",
     lastLogin: "2026-08-11 14:30"
   },
@@ -916,8 +936,11 @@ export const initialAdminUsers: AdminUser[] = [
     id: "usr-editor-1",
     name: "Content Editor (Operations)",
     email: "editor@stwebads.com",
+    mobile: "01700000000",
     role: "EDITOR",
     status: "ACTIVE",
+    passwordHash: "e949980d22081fdb7020d5bc5043bf7e55fae2fbbe2d7b4db13045610d4812a4", // SHA-256 for stweb2025
+    passcode: "stweb2025",
     createdAt: "2026-08-05",
     lastLogin: "2026-08-10 09:15"
   }

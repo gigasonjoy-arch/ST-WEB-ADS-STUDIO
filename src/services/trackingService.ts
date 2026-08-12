@@ -472,7 +472,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     const ttqAlreadyLoaded = typeof window !== 'undefined' &&
       Boolean((window as any).ttq && (window as any).ttq._i && (window as any).ttq._i[cleanId]);
 
-    if (this.appliedTikTokPixelId === cleanId || tiktokAlreadyInDoc || ttqAlreadyLoaded) {
+    if (isGtmActive || this.appliedTikTokPixelId === cleanId || tiktokAlreadyInDoc || ttqAlreadyLoaded) {
       window.__st_loaded_tiktok_pixels.add(cleanId);
       this.appliedTikTokPixelId = cleanId;
       return;

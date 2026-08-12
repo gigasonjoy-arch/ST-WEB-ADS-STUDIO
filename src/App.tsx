@@ -35,11 +35,15 @@ import { ThemeColorManagement } from './components/admin/ThemeColorManagement';
 import { MediaManagement } from './components/admin/MediaManagement';
 import { PageManagement } from './components/admin/PageManagement';
 import { FirebaseConnectionTester } from './components/admin/FirebaseConnectionTester';
+import { OnlineDatabaseManagement } from './components/admin/OnlineDatabaseManagement';
+import { UserManagement } from './components/admin/UserManagement';
+import { RobotsManagement } from './components/admin/RobotsManagement';
+import { SitemapManagement } from './components/admin/SitemapManagement';
 import { CustomPageView } from './components/public/CustomPageView';
 import { themeService } from './services/themeService';
-import { CustomPage } from './types';
+import { CustomPage, AdminUser } from './types';
 
-import { Lock, ShieldCheck, ArrowLeft, KeyRound, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { Lock, ShieldCheck, ArrowLeft, KeyRound, CheckCircle2, Eye, EyeOff, Mail, Smartphone, Users, Bot, Network, Sparkles } from 'lucide-react';
 
 export default function App() {
   // App view state
@@ -76,7 +80,10 @@ export default function App() {
       return false;
     }
   });
-  const [adminPasscode, setAdminPasscode] = useState<string>('');
+  const [adminEmail, setAdminEmail] = useState<string>('giga.sonjoy@gmail.com');
+  const [adminMobile, setAdminMobile] = useState<string>('01723516793');
+  const [adminPasscode, setAdminPasscode] = useState<string>('stweb2025');
+  const [currentAdminUser, setCurrentAdminUser] = useState<AdminUser>(() => storageService.getCurrentAdminUser());
   const [showPasscode, setShowPasscode] = useState<boolean>(false);
   const [adminLoginError, setAdminLoginError] = useState<string>('');
   const [activeAdminTab, setActiveAdminTab] = useState<AdminTab>('DASHBOARD');
@@ -223,20 +230,23 @@ export default function App() {
     trackingService.pushEvent('lead_form_open', { context: contextData ? 'calculator' : 'direct' });
   };
 
-  // Handle Admin login
+  // Handle Admin login with Triple Credential Verification (Email, Mobile, Password/Passcode)
   const handleAdminLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (storageService.verifyAdminPasscode(adminPasscode)) {
+    const verifiedUser = storageService.verifyAdminCredentials(adminEmail, adminMobile, adminPasscode);
+    
+    if (verifiedUser) {
+      setCurrentAdminUser(verifiedUser);
       setIsAdminAuthenticated(true);
       try {
         sessionStorage.setItem('st_admin_auth', 'true');
+        sessionStorage.setItem('st_admin_user', JSON.stringify(verifiedUser));
       } catch (err) {
         console.warn('Could not set session storage', err);
       }
       setAdminLoginError('');
-      setAdminPasscode('');
     } else {
-      setAdminLoginError('ভুল পাসকোড! সঠিক সিকিউরিটি পাসকোড দিয়ে আবার চেষ্টা করুন।');
+      setAdminLoginError('ভুল ইমেইল, মোবাইল নম্বর বা পাসওয়ার্ড! সঠিক তথ্য দিয়ে আবার চেষ্টা করুন।');
     }
   };
 
@@ -276,30 +286,81 @@ export default function App() {
               </p>
             </div>
 
-            <form onSubmit={handleAdminLoginSubmit} className="space-y-4">
+            <form onSubmit={handleAdminLoginSubmit} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-bold text-[#2C3327] mb-1.5">
-                  অ্যাডমিন সিকিউরিটি পাসকোড
+                <label className="block text-[11px] font-bold text-[#2C3327] mb-1">
+                  অ্যাডমিন ইমেইল (Email) *
                 </label>
                 <div className="relative">
-                  <KeyRound className="w-4 h-4 text-[#8A957F] absolute left-3.5 top-3" />
+                  <Mail className="w-3.5 h-3.5 text-[#8A957F] absolute left-3 top-2.5" />
+                  <input
+                    type="email"
+                    placeholder="giga.sonjoy@gmail.com"
+                    value={adminEmail}
+                    onChange={(e) => setAdminEmail(e.target.value)}
+                    required
+                    className="w-full bg-[#FDFCF8] border border-[#D9DED1] pl-9 pr-3 py-2 rounded-xl text-xs font-medium text-[#2C3327] focus:outline-none focus:border-[#4A5D3B]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#2C3327] mb-1">
+                  ভেরিফাইড মোবাইল নম্বর (Mobile Number) *
+                </label>
+                <div className="relative">
+                  <Smartphone className="w-3.5 h-3.5 text-[#8A957F] absolute left-3 top-2.5" />
+                  <input
+                    type="text"
+                    placeholder="01723516793"
+                    value={adminMobile}
+                    onChange={(e) => setAdminMobile(e.target.value)}
+                    required
+                    className="w-full bg-[#FDFCF8] border border-[#D9DED1] pl-9 pr-3 py-2 rounded-xl text-xs font-medium text-[#2C3327] focus:outline-none focus:border-[#4A5D3B]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#2C3327] mb-1">
+                  অ্যাডমিন সিকিউরিটি পাসওয়ার্ড / পাসকোড *
+                </label>
+                <div className="relative">
+                  <KeyRound className="w-3.5 h-3.5 text-[#8A957F] absolute left-3 top-2.5" />
                   <input
                     type={showPasscode ? 'text' : 'password'}
-                    placeholder="আপনার পাসকোড লিখুন"
+                    placeholder="পাসওয়ার্ড লিখুন (যেমন: stweb2025)"
                     value={adminPasscode}
                     onChange={(e) => setAdminPasscode(e.target.value)}
-                    className="w-full bg-[#FDFCF8] border border-[#D9DED1] pl-10 pr-10 py-2.5 rounded-xl text-xs font-medium text-[#2C3327] focus:outline-none focus:border-[#4A5D3B]"
-                    autoFocus
+                    required
+                    className="w-full bg-[#FDFCF8] border border-[#D9DED1] pl-9 pr-9 py-2 rounded-xl text-xs font-medium text-[#2C3327] focus:outline-none focus:border-[#4A5D3B]"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPasscode(!showPasscode)}
-                    className="absolute right-3 top-2.5 text-[#8A957F] hover:text-[#2C3327] transition-colors p-0.5"
+                    className="absolute right-2.5 top-2 text-[#8A957F] hover:text-[#2C3327] transition-colors p-0.5"
                     title={showPasscode ? "পাসকোড লুকান" : "পাসকোড দেখুন"}
                   >
-                    {showPasscode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPasscode ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
                 </div>
+              </div>
+
+              <div className="p-2.5 bg-[#F4F6F0] rounded-xl border border-[#E1E5DC] flex items-center justify-between text-[11px]">
+                <span className="text-[#5C6652] font-medium">ডিফল্ট সুপার অ্যাডমিন:</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAdminEmail('giga.sonjoy@gmail.com');
+                    setAdminMobile('01723516793');
+                    setAdminPasscode('stweb2025');
+                    setAdminLoginError('');
+                  }}
+                  className="text-[#4A5D3B] hover:underline font-bold flex items-center gap-1"
+                >
+                  <Sparkles className="w-3 h-3 text-amber-500" />
+                  <span>অটো ফিল করুন</span>
+                </button>
               </div>
 
               {adminLoginError && (
@@ -349,6 +410,10 @@ export default function App() {
             onNavigateTab={(tab) => setActiveAdminTab(tab)}
             onUpdateLeadStatus={handleLeadStatusChange}
           />
+        )}
+
+        {activeAdminTab === 'ONLINE_DATABASE' && (
+          <OnlineDatabaseManagement />
         )}
 
         {activeAdminTab === 'PROFILE' && (
@@ -474,6 +539,20 @@ export default function App() {
 
         {activeAdminTab === 'FIREBASE_STATUS' && (
           <FirebaseConnectionTester />
+        )}
+
+        {activeAdminTab === 'USERS' && (
+          <UserManagement
+            currentUser={currentAdminUser}
+          />
+        )}
+
+        {activeAdminTab === 'ROBOTS_TXT' && (
+          <RobotsManagement />
+        )}
+
+        {activeAdminTab === 'SITEMAP' && (
+          <SitemapManagement />
         )}
 
         {activeAdminTab === 'SETTINGS' && (

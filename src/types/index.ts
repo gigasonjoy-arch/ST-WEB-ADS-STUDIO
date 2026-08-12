@@ -4,11 +4,15 @@ export interface AdminUser {
   id: string;
   name: string;
   email: string;
+  mobile: string;
   role: 'ADMIN' | 'EDITOR';
   status: 'ACTIVE' | 'DISABLED';
+  passwordHash?: string;
+  password?: string;
   passcode?: string;
   createdAt: string;
   lastLogin?: string;
+  avatarUrl?: string;
 }
 
 export interface ProductPriceRange {
@@ -643,6 +647,27 @@ export interface SiteSettings {
   homePage?: HomePageSettings;
   heroVideoMediaId?: string;
   tiktokEducationVideoMediaId?: string;
+  robots?: RobotsSettings;
+  sitemap?: SitemapSettings;
+}
+
+export interface RobotsSettings {
+  content: string;
+  allowAll: boolean;
+  disallowAdmin: boolean;
+  sitemapUrl: string;
+  customRules: string;
+  lastUpdated: string;
+}
+
+export interface SitemapSettings {
+  baseUrl: string;
+  includeCustomPages: boolean;
+  includeServices: boolean;
+  includeCaseStudies: boolean;
+  changefreq: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+  priority: number;
+  lastGenerated: string;
 }
 
 export interface AuditLogEntry {
@@ -674,6 +699,8 @@ export interface MediaItem {
 
 export type AdminTab = 
   | 'DASHBOARD'
+  | 'ONLINE_DATABASE'
+  | 'USERS'
   | 'PAGES'
   | 'THEME_COLORS'
   | 'LEADS'
@@ -682,13 +709,14 @@ export type AdminTab =
   | 'WORKSPACE_SYNC'
   | 'PROFILE'
   | 'MEDIA'
-  | 'USERS'
   | 'KNOWLEDGE_BASE'
   | 'KNOWLEDGE_GAPS'
   | 'AI_CONVERSATIONS'
   | 'ANALYTICS'
   | 'GTM_TRACKING'
   | 'FIREBASE_STATUS'
+  | 'ROBOTS_TXT'
+  | 'SITEMAP'
   | 'SETTINGS';
 
 export interface FAQItem {

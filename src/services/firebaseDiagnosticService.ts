@@ -1,6 +1,5 @@
-import firebaseConfig from '../../firebase-applet-config.json';
 import { FirebaseTestReport, FirebaseDiagnosticStep } from '../types';
-import { db } from './firebase';
+import { db, activeFirebaseConfig as firebaseConfig } from './firebase';
 import { doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
 
 export class FirebaseDiagnosticService {
