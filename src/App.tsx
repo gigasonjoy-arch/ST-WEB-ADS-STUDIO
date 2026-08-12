@@ -95,9 +95,9 @@ export default function App() {
       return false;
     }
   });
-  const [adminEmail, setAdminEmail] = useState<string>('giga.sonjoy@gmail.com');
-  const [adminMobile, setAdminMobile] = useState<string>('01723516793');
-  const [adminPasscode, setAdminPasscode] = useState<string>('stweb2025');
+  const [adminEmail, setAdminEmail] = useState<string>('');
+  const [adminMobile, setAdminMobile] = useState<string>('');
+  const [adminPasscode, setAdminPasscode] = useState<string>('');
   const [currentAdminUser, setCurrentAdminUser] = useState<AdminUser>(() => storageService.getCurrentAdminUser());
   const [showPasscode, setShowPasscode] = useState<boolean>(false);
   const [adminLoginError, setAdminLoginError] = useState<string>('');
@@ -392,9 +392,10 @@ export default function App() {
                   <Mail className="w-3.5 h-3.5 text-[#8A957F] absolute left-3 top-2.5" />
                   <input
                     type="email"
-                    placeholder="giga.sonjoy@gmail.com"
+                    placeholder="আপনার অ্যাডমিন ইমেইল দিন"
                     value={adminEmail}
                     onChange={(e) => setAdminEmail(e.target.value)}
+                    autoComplete="email"
                     required
                     className="w-full bg-[#FDFCF8] border border-[#D9DED1] pl-9 pr-3 py-2 rounded-xl text-xs font-medium text-[#2C3327] focus:outline-none focus:border-[#4A5D3B]"
                   />
@@ -409,9 +410,10 @@ export default function App() {
                   <Smartphone className="w-3.5 h-3.5 text-[#8A957F] absolute left-3 top-2.5" />
                   <input
                     type="text"
-                    placeholder="01723516793"
+                    placeholder="01XXXXXXXXX"
                     value={adminMobile}
                     onChange={(e) => setAdminMobile(e.target.value)}
+                    autoComplete="tel"
                     required
                     className="w-full bg-[#FDFCF8] border border-[#D9DED1] pl-9 pr-3 py-2 rounded-xl text-xs font-medium text-[#2C3327] focus:outline-none focus:border-[#4A5D3B]"
                   />
@@ -426,9 +428,10 @@ export default function App() {
                   <KeyRound className="w-3.5 h-3.5 text-[#8A957F] absolute left-3 top-2.5" />
                   <input
                     type={showPasscode ? 'text' : 'password'}
-                    placeholder="পাসওয়ার্ড লিখুন (যেমন: stweb2025)"
+                    placeholder="আপনার সিকিউরিটি পাসওয়ার্ড লিখুন"
                     value={adminPasscode}
                     onChange={(e) => setAdminPasscode(e.target.value)}
+                    autoComplete="current-password"
                     required
                     className="w-full bg-[#FDFCF8] border border-[#D9DED1] pl-9 pr-9 py-2 rounded-xl text-xs font-medium text-[#2C3327] focus:outline-none focus:border-[#4A5D3B]"
                   />
@@ -441,23 +444,6 @@ export default function App() {
                     {showPasscode ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
                 </div>
-              </div>
-
-              <div className="p-2.5 bg-[#F4F6F0] rounded-xl border border-[#E1E5DC] flex items-center justify-between text-[11px]">
-                <span className="text-[#5C6652] font-medium">ডিফল্ট সুপার অ্যাডমিন:</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAdminEmail('giga.sonjoy@gmail.com');
-                    setAdminMobile('01723516793');
-                    setAdminPasscode('stweb2025');
-                    setAdminLoginError('');
-                  }}
-                  className="text-[#4A5D3B] hover:underline font-bold flex items-center gap-1"
-                >
-                  <Sparkles className="w-3 h-3 text-amber-500" />
-                  <span>অটো ফিল করুন</span>
-                </button>
               </div>
 
               {adminLoginError && (
