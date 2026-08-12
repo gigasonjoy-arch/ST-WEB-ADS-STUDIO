@@ -315,6 +315,10 @@ class StorageService {
     }
   }
 
+  public async syncAllDataToCloud(): Promise<boolean> {
+    return this.syncAllData();
+  }
+
   public subscribe(listener: () => void): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);

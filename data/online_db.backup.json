@@ -1,29 +1,7 @@
 {
   "siteSettings": {
-    "siteNameBn": "ST Web & Ads Studio",
-    "siteNameEn": "ST Web & Ads Studio",
-    "taglineBn": "বাংলাদেশের শীর্ষ ডেটা-ড্রিভেন টিকটক ও ডিজিটাল অ্যাড গ্রোথ পার্টনার",
-    "taglineEn": "Top Data-Driven TikTok & Digital Ad Agency in Bangladesh",
-    "logoUrl": "",
-    "phone": "+880 1723-516793",
-    "whatsapp": "8801723516793",
-    "email": "giga.sonjoy@gmail.com",
-    "address": "Dhaka, Bangladesh",
-    "copyrightText": "© 2026 ST Web & Ads Studio. All rights reserved.",
-    "heroHeadlineBn": "বাংলাদেশে টিকটক ও মেটা বিজ্ঞাপনে সর্বোচ্চ ROAS ও সেলস আনুন",
-    "heroHeadlineEn": "Maximize Your E-commerce ROAS & Sales with Data-Driven Ads in Bangladesh",
-    "heroSubheadlineBn": "কোনো মুখস্থ বাজেট নয় — সঠিক প্রডাক্ট ক্যাটাগরি ও মার্জিন এনালাইসিস করে অ্যাড রান করুন।",
-    "heroSubheadlineEn": "Scale your business with verified audience targeting, pixel tracking & real campaign data.",
-    "enableAiChat": true,
-    "enableStickyWhatsapp": true,
-    "enablePublicCalculator": true,
-    "metaPixelId": "",
-    "tiktokPixelId": "",
-    "googleTagManagerId": "",
-    "currency": "BDT",
-    "usdToBdtRate": 122,
-    "metaTitle": "ST Web & Ads Studio | TikTok & Digital Ads Agency Bangladesh",
-    "metaDescription": "Verified ROAS, precision audience targeting, and custom e-commerce growth strategies in Bangladesh."
+    "siteNameBn": "Test Save",
+    "sonjoyName": "Sonjoy Sarkar"
   },
   "themeSettings": {
     "mode": "light",
@@ -76,7 +54,7 @@
       "navOrder": 1,
       "layout": "standard",
       "createdAt": "2026-01-01T00:00:00.000Z",
-      "updatedAt": "2026-08-12T08:51:16.522Z"
+      "updatedAt": "2026-08-12T09:28:17.800Z"
     },
     {
       "id": "page-privacy-policy",
@@ -93,7 +71,7 @@
       "navOrder": 2,
       "layout": "standard",
       "createdAt": "2026-01-01T00:00:00.000Z",
-      "updatedAt": "2026-08-12T08:51:16.522Z"
+      "updatedAt": "2026-08-12T09:28:17.800Z"
     }
   ],
   "socialLinks": [
@@ -460,7 +438,855 @@
     "leadCaptureTriggerThreshold": 2,
     "temperature": 0.7
   },
-  "analyticsEvents": [],
+  "analyticsEvents": [
+    {
+      "id": "ev-66ciimh",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T09:28:16.291Z"
+    },
+    {
+      "id": "ev-d6hejjn",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T09:28:16.268Z"
+    },
+    {
+      "id": "ev-0sjwfvt",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T09:15:59.678Z"
+    },
+    {
+      "id": "ev-rabf2y7",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T09:15:59.661Z"
+    },
+    {
+      "id": "ev-d9p70pw",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T09:15:58.870Z"
+    },
+    {
+      "id": "ev-5cms9sa",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T09:15:58.856Z"
+    },
+    {
+      "id": "ev-01y98ds",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T09:14:51.520Z"
+    },
+    {
+      "id": "ev-xa3fih3",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T09:14:51.507Z"
+    },
+    {
+      "id": "ev-0x59v7j",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T09:14:44.036Z"
+    },
+    {
+      "id": "ev-y7tl9hu",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T09:14:44.022Z"
+    },
+    {
+      "id": "ev-mzw74rm",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T09:14:18.840Z"
+    },
+    {
+      "id": "ev-xse0uv7",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T09:14:18.813Z"
+    },
+    {
+      "id": "ev-jk9ihd3",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "LEAD_FORM_OPENED",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "context": "direct"
+      },
+      "timestamp": "2026-08-12T09:12:24.633Z"
+    },
+    {
+      "id": "ev-xwh65h3",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T09:08:31.472Z"
+    },
+    {
+      "id": "ev-htx8nvx",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T09:08:31.457Z"
+    },
+    {
+      "id": "ev-odmn2s2",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:59:04.920Z"
+    },
+    {
+      "id": "ev-1a48cje",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:59:04.902Z"
+    },
+    {
+      "id": "ev-429wmrc",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:56:07.364Z"
+    },
+    {
+      "id": "ev-lnvs5ky",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:56:07.344Z"
+    },
+    {
+      "id": "ev-zw72d38",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:55:56.039Z"
+    },
+    {
+      "id": "ev-13qk863",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:55:56.021Z"
+    },
+    {
+      "id": "ev-ls6mp4q",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:55:53.412Z"
+    },
+    {
+      "id": "ev-orl2p29",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:55:53.390Z"
+    },
+    {
+      "id": "ev-jfznwim",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:55:41.937Z"
+    },
+    {
+      "id": "ev-sbyexwg",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:55:41.932Z"
+    },
+    {
+      "id": "ev-9rjw5wz",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:55:30.770Z"
+    },
+    {
+      "id": "ev-fv38or3",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:55:30.761Z"
+    },
+    {
+      "id": "ev-qonomfr",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:55:18.886Z"
+    },
+    {
+      "id": "ev-znuu43a",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:55:18.881Z"
+    },
+    {
+      "id": "ev-laqhlas",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:55:07.532Z"
+    },
+    {
+      "id": "ev-5y9zn3k",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:55:07.527Z"
+    },
+    {
+      "id": "ev-thzgd33",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:56.757Z"
+    },
+    {
+      "id": "ev-anjqu4i",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:56.731Z"
+    },
+    {
+      "id": "ev-4t0wmxo",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:44.495Z"
+    },
+    {
+      "id": "ev-vplp32t",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:44.469Z"
+    },
+    {
+      "id": "ev-dxk6nz0",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:41.131Z"
+    },
+    {
+      "id": "ev-tp88on8",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:41.120Z"
+    },
+    {
+      "id": "ev-ixbugap",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:37.736Z"
+    },
+    {
+      "id": "ev-01y75lf",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:37.726Z"
+    },
+    {
+      "id": "ev-eczyq3z",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:35.373Z"
+    },
+    {
+      "id": "ev-ah7cqxh",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:35.359Z"
+    },
+    {
+      "id": "ev-fs7bxq1",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:32.168Z"
+    },
+    {
+      "id": "ev-11g10fz",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:32.154Z"
+    },
+    {
+      "id": "ev-vxc1411",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:29.040Z"
+    },
+    {
+      "id": "ev-j14j7kv",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:29.024Z"
+    },
+    {
+      "id": "ev-ncuu661",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:25.918Z"
+    },
+    {
+      "id": "ev-vjqsjn3",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:25.907Z"
+    },
+    {
+      "id": "ev-adwwt52",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:22.654Z"
+    },
+    {
+      "id": "ev-82op0lt",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:22.638Z"
+    },
+    {
+      "id": "ev-yhjidwc",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:19.275Z"
+    },
+    {
+      "id": "ev-yrx3elh",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:19.260Z"
+    },
+    {
+      "id": "ev-2esdcyl",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:16.095Z"
+    },
+    {
+      "id": "ev-i0ap7k0",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:16.077Z"
+    },
+    {
+      "id": "ev-hvev1tm",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:08.339Z"
+    },
+    {
+      "id": "ev-v7zsfk6",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:08.320Z"
+    },
+    {
+      "id": "ev-3sdjil7",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:04.837Z"
+    },
+    {
+      "id": "ev-j2vmoad",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:04.819Z"
+    },
+    {
+      "id": "ev-bt6sbae",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:01.580Z"
+    },
+    {
+      "id": "ev-to77sy9",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:54:01.565Z"
+    },
+    {
+      "id": "ev-s3whf3o",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:53:58.468Z"
+    },
+    {
+      "id": "ev-fd8hh7v",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:53:58.452Z"
+    },
+    {
+      "id": "ev-h2pt31t",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:53:55.247Z"
+    },
+    {
+      "id": "ev-k67i7eq",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:53:55.228Z"
+    },
+    {
+      "id": "ev-7orti6w",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:53:51.916Z"
+    },
+    {
+      "id": "ev-edqvui1",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:53:51.902Z"
+    },
+    {
+      "id": "ev-1d3uvjg",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:53:48.707Z"
+    },
+    {
+      "id": "ev-ywxymqu",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:53:48.687Z"
+    },
+    {
+      "id": "ev-j9zedgn",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:53:42.709Z"
+    },
+    {
+      "id": "ev-0alls9b",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:53:42.687Z"
+    },
+    {
+      "id": "ev-kctn7rb",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:53:31.382Z"
+    },
+    {
+      "id": "ev-ml7fcmp",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:53:31.373Z"
+    },
+    {
+      "id": "ev-x68o1b7",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:53:20.538Z"
+    },
+    {
+      "id": "ev-d9tm7ej",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:53:20.533Z"
+    },
+    {
+      "id": "ev-qhnaff7",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:53:11.894Z"
+    },
+    {
+      "id": "ev-zxcudyq",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:53:11.888Z"
+    },
+    {
+      "id": "ev-04oxefp",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:53:03.134Z"
+    },
+    {
+      "id": "ev-4uz7wzv",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T08:53:03.128Z"
+    }
+  ],
   "visitorJourneys": [],
   "media": [
     {
@@ -507,11 +1333,11 @@
   "auditLogs": [
     {
       "id": "log-1",
-      "timestamp": "2026-08-12T08:51:16.522Z",
+      "timestamp": "2026-08-12T09:28:17.800Z",
       "action": "ONLINE_DATABASE_INITIALIZED",
       "details": "Initial cloud database schema and collection seeds bootstrapped.",
       "userId": "system"
     }
   ],
-  "_lastUpdated": "2026-08-12T08:51:16.524Z"
+  "_lastUpdated": "2026-08-12T09:40:16.125Z"
 }

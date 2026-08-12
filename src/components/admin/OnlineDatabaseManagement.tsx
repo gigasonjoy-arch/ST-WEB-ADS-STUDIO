@@ -16,14 +16,15 @@ import {
   AlertCircle, 
   ExternalLink,
   HardDrive,
-  FileJson,
-  Sparkles,
-  ArrowRight,
+  Globe,
+  Settings,
   Clock,
   Laptop,
-  Smartphone
+  Smartphone,
+  CloudLightning,
+  CheckCircle
 } from 'lucide-react';
-import { onlineDbClient, OnlineDbHealth, CrudTestReport } from '../../services/onlineDatabaseClient';
+import { onlineDbClient, OnlineDbHealth, CrudTestReport, EndpointConfig } from '../../services/onlineDatabaseClient';
 import { storageService } from '../../services/storageService';
 
 export const OnlineDatabaseManagement: React.FC = () => {
@@ -31,9 +32,16 @@ export const OnlineDatabaseManagement: React.FC = () => {
   const [isLoadingHealth, setIsLoadingHealth] = useState<boolean>(true);
   const [isTestingCrud, setIsTestingCrud] = useState<boolean>(false);
   const [crudReport, setCrudReport] = useState<CrudTestReport | null>(null);
-  const [isMigrating, setIsMigrating] = useState<boolean>(false);
+  const [isPushingCloud, setIsPushingCloud] = useState<boolean>(false);
+  const [isPullingCloud, setIsPullingCloud] = useState<boolean>(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-  const [activeSubTab, setActiveSubTab] = useState<'OVERVIEW' | 'CRUD_TEST' | 'COLLECTIONS' | 'BACKUP'>('OVERVIEW');
+  const [activeSubTab, setActiveSubTab] = useState<'OVERVIEW' | 'ENDPOINT' | 'COLLECTIONS' | 'BACKUP'>('OVERVIEW');
+
+  // Custom Endpoint State
+  const [endpointConfig, setEndpointConfig] = useState<EndpointConfig>(onlineDbClient.getEndpointConfig());
+  const [customEndpointInput, setCustomEndpointInput] = useState<string>('');
+  const [isTestingEndpoint, setIsTestingEndpoint] = useState<boolean>(false);
+  const [copiedEndpoint, setCopiedEndpoint] = useState<boolean>(false);
 
   useEffect(() => {
     loadHealth();
@@ -45,6 +53,11 @@ export const OnlineDatabaseManagement: React.FC = () => {
     try {
       const data = await onlineDbClient.getHealth();
       setHealth(data);
+      const conf = onlineDbClient.getEndpointConfig();
+      setEndpointConfig(conf);
+      if (conf.customUrl) {
+        setCustomEndpointInput(conf.customUrl);
+      }
     } catch (err) {
       console.error('Failed to load DB health:', err);
     } finally {
@@ -54,7 +67,7 @@ export const OnlineDatabaseManagement: React.FC = () => {
 
   const showNotification = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message });
-    setTimeout(() => setNotification(null), 5000);
+    setTimeout(() => setNotification(null), 6000);
   };
 
   const handleRunCrudTest = async () => {
@@ -66,7 +79,7 @@ export const OnlineDatabaseManagement: React.FC = () => {
       if (report.success) {
         showNotification('success', 'অনলাইন ডেটাবেজের সম্পূর্ণ CRUD (Create, Read, Update, Delete) টেস্ট সফল হয়েছে!');
       } else {
-        showNotification('error', 'CRUD টেস্টে কোনো সমস্যা পাওয়া গেছে।');
+        showNotification('error', 'CRUD টেস্ট সম্পন্ন হতে সমস্যা হয়েছে। এন্ডপয়েন্ট কানেকশন চেক করুন।');
       }
       loadHealth();
     } catch (err) {
@@ -76,17 +89,65 @@ export const OnlineDatabaseManagement: React.FC = () => {
     }
   };
 
-  const handleForceFullSync = async () => {
-    setIsMigrating(true);
+  const handleForcePushToCloud = async () => {
+    setIsPushingCloud(true);
+    try {
+      const success = await storageService.syncAllDataToCloud();
+      if (success) {
+        showNotification('success', 'আপনার সকল সেটিংস, প্রোফাইল, লিড ও পেজ সফলভাবে ক্লাউড ডেটাবেজে সংরক্ষিত হয়েছে!');
+        loadHealth();
+      } else {
+        showNotification('error', 'ক্লাউড ডেটাবেজে পুশ করতে সমস্যা হয়েছে।');
+      }
+    } catch (err) {
+      showNotification('error', 'ক্লাউড সিঙ্ক করতে ব্যর্থ হয়েছে।');
+    } finally {
+      setIsPushingCloud(false);
+    }
+  };
+
+  const handleForcePullFromCloud = async () => {
+    setIsPullingCloud(true);
     try {
       const fullData = await onlineDbClient.fetchAll();
-      showNotification('success', 'সমস্ত ডেটা ক্লাউড ডেটাবেজের সাথে সফলভাবে সিঙ্ক ও রিফ্রেশ হয়েছে!');
+      if (fullData) {
+        showNotification('success', 'ক্লাউড ডেটাবেজ থেকে সর্বশেষ সকল তথ্য সফলভাবে রিফ্রেশ ও সিঙ্ক হয়েছে!');
+        loadHealth();
+      } else {
+        showNotification('error', 'ক্লাউড থেকে ডেটা পাওয়া যায়নি।');
+      }
+    } catch (err) {
+      showNotification('error', 'ক্লাউড থেকে ডেটা পুল করতে ব্যর্থ হয়েছে।');
+    } finally {
+      setIsPullingCloud(false);
+    }
+  };
+
+  const handleSaveCustomEndpoint = () => {
+    setIsTestingEndpoint(true);
+    try {
+      onlineDbClient.setCustomEndpoint(customEndpointInput.trim() || null);
+      showNotification('success', 'সার্ভার এন্ডপয়েন্ট সফলভাবে কনফিগার করা হয়েছে!');
       loadHealth();
     } catch (err) {
-      showNotification('error', 'মাইগ্রেশন বা সিঙ্কে ত্রুটি হয়েছে।');
+      showNotification('error', 'এন্ডপয়েন্ট সেভ করতে ব্যর্থ হয়েছে।');
     } finally {
-      setIsMigrating(false);
+      setIsTestingEndpoint(false);
     }
+  };
+
+  const handleResetToDefaultEndpoint = () => {
+    onlineDbClient.setCustomEndpoint(null);
+    setCustomEndpointInput('');
+    showNotification('success', 'ডিফল্ট ক্লাউড সার্ভার এন্ডপয়েন্টে রিসেট করা হয়েছে!');
+    loadHealth();
+  };
+
+  const handleCopyEndpoint = () => {
+    navigator.clipboard.writeText(endpointConfig.activeUrl);
+    setCopiedEndpoint(true);
+    setTimeout(() => setCopiedEndpoint(false), 2000);
+    showNotification('success', 'সার্ভার URL কপি করা হয়েছে!');
   };
 
   const handleDownloadBackup = () => {
@@ -126,15 +187,19 @@ export const OnlineDatabaseManagement: React.FC = () => {
               <Database className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-xl font-bold">অনলাইন ক্লাউড ডেটাবেজ ইঞ্জিন (Live Cloud Database)</h2>
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <span>ONLINE & PERSISTENT</span>
+                <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border flex items-center gap-1.5 ${
+                  health?.connected 
+                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                    : 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                }`}>
+                  <span className={`w-2 h-2 rounded-full ${health?.connected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
+                  <span>{health?.connected ? 'ONLINE & SYNCED' : 'CONNECTING...'}</span>
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
-                কোনো লোকাল ডিভাইসে সীমাবদ্ধ নয় — যেকোনো কম্পিউটার ও ডিভাইস থেকে স্বয়ংক্রিয়ভাবে রিয়েল-টাইম সিঙ্ক হয়।
+                অ্যাডমিন বা ওয়েবসাইট থেকে সম্পাদিত প্রতিটি ডাটা সরাসরি অনলাইনে ক্লাউড সার্ভারে পারসিস্ট থাকে।
               </p>
             </div>
           </div>
@@ -142,21 +207,32 @@ export const OnlineDatabaseManagement: React.FC = () => {
 
         <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
           <button
-            onClick={handleRunCrudTest}
-            disabled={isTestingCrud}
+            onClick={handleForcePushToCloud}
+            disabled={isPushingCloud}
             className="flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-md transition-all disabled:opacity-50"
+            title="বর্তমান সকল পরিবর্তন সরাসরি ক্লাউড সার্ভারে সেভ করুন"
           >
-            <Play className={`w-3.5 h-3.5 ${isTestingCrud ? 'animate-spin' : ''}`} />
-            <span>{isTestingCrud ? 'টেস্ট চলছে...' : 'লাইভ CRUD টেস্ট করুন'}</span>
+            <CloudLightning className={`w-3.5 h-3.5 ${isPushingCloud ? 'animate-spin' : ''}`} />
+            <span>{isPushingCloud ? 'ক্লাউডে সেভ হচ্ছে...' : 'এখনই ক্লাউডে সেভ করুন'}</span>
           </button>
 
           <button
-            onClick={handleForceFullSync}
-            disabled={isMigrating}
+            onClick={handleForcePullFromCloud}
+            disabled={isPullingCloud}
             className="flex items-center gap-2 px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-medium transition-colors disabled:opacity-50"
+            title="ক্লাউড থেকে ফ্রেশ ডেটা রিলোড করুন"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isMigrating ? 'animate-spin' : ''}`} />
-            <span>সিঙ্ক ও রিফ্রেশ</span>
+            <RefreshCw className={`w-3.5 h-3.5 ${isPullingCloud ? 'animate-spin' : ''}`} />
+            <span>{isPullingCloud ? 'রিফ্রেশ হচ্ছে...' : 'ক্লাউড থেকে পুল'}</span>
+          </button>
+
+          <button
+            onClick={handleRunCrudTest}
+            disabled={isTestingCrud}
+            className="flex items-center gap-2 px-3 py-2 bg-indigo-600/80 hover:bg-indigo-600 text-white rounded-xl text-xs font-semibold shadow-md transition-all disabled:opacity-50"
+          >
+            <Play className={`w-3.5 h-3.5 ${isTestingCrud ? 'animate-spin' : ''}`} />
+            <span>{isTestingCrud ? 'টেস্ট চলছে...' : 'CRUD টেস্ট'}</span>
           </button>
         </div>
       </div>
@@ -188,10 +264,12 @@ export const OnlineDatabaseManagement: React.FC = () => {
           <div>
             <div className="text-xs text-slate-400 font-medium">কানেকশন স্ট্যাটাস</div>
             <div className="text-base font-bold text-white flex items-center gap-1.5 mt-0.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-              <span>লাইভ কানেক্টেড</span>
+              <span className={`w-2 h-2 rounded-full ${health?.connected ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
+              <span>{health?.connected ? 'সক্রিয় ও লাইভ' : 'কানেক্টিং...'}</span>
             </div>
-            <div className="text-[10px] text-emerald-400 mt-0.5">Zero-Config Online Server</div>
+            <div className="text-[10px] text-emerald-400 mt-0.5">
+              {health?.latencyMs !== undefined ? `${health.latencyMs}ms Latency` : 'Zero-Config Persistent Cloud'}
+            </div>
           </div>
         </div>
 
@@ -204,7 +282,7 @@ export const OnlineDatabaseManagement: React.FC = () => {
             <div className="text-xl font-bold text-white mt-0.5">
               {health ? health.totalCollections : 24} টি কালেকশন
             </div>
-            <div className="text-[10px] text-slate-400">Leads, Pages, Users, etc.</div>
+            <div className="text-[10px] text-slate-400">Leads, Pages, Users, Site Settings</div>
           </div>
         </div>
 
@@ -230,7 +308,7 @@ export const OnlineDatabaseManagement: React.FC = () => {
             <div className="text-xs font-bold text-white mt-1 truncate max-w-[150px]">
               {health ? new Date(health.lastUpdated).toLocaleTimeString() : 'Just now'}
             </div>
-            <div className="text-[10px] text-slate-400">Auto background polling</div>
+            <div className="text-[10px] text-slate-400">Auto background sync</div>
           </div>
         </div>
       </div>
@@ -245,7 +323,7 @@ export const OnlineDatabaseManagement: React.FC = () => {
             <div>
               <h4 className="font-bold text-sm text-emerald-300">ক্রস-ডিভাইস ও মাল্টি-ইউজার পারসিস্টেন্স সক্রিয়</h4>
               <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                পাবলিক ওয়েবসাইট বা অ্যাডমিন প্যানেল থেকে তৈরি বা এডিট করা প্রতিটি ডাটা সরাসরি অনলাইন সার্ভারে সংরক্ষিত হয়। অন্য যেকোনো কম্পিউটার, ল্যাপটপ বা মোবাইল থেকে ওয়েবসাইট খুললে হুবহু একই তথ্য পাওয়া যাবে। ব্রাউজারের ক্যাশ বা লোকাল স্টোরেজ ডিলিট করলেও কোনো ডাটা হারাবে না।
+                পাবলিক ওয়েবসাইট বা অ্যাডমিন প্যানেল থেকে তৈরি বা এডিট করা প্রতিটি ডাটা সরাসরি অনলাইন ক্লাউড সার্ভারে সংরক্ষিত হয়। অন্য যেকোনো কম্পিউটার, ল্যাপটপ বা মোবাইল থেকে ওয়েবসাইট খুললে হুবহু একই তথ্য পাওয়া যাবে। ব্রাউজারের ক্যাশ বা লোকাল স্টোরেজ ডিলিট করলেও কোনো ডাটা হারাবে না।
               </p>
             </div>
           </div>
@@ -264,7 +342,7 @@ export const OnlineDatabaseManagement: React.FC = () => {
       </div>
 
       {/* Navigation Sub-Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+      <div className="flex items-center gap-2 border-b border-slate-800 pb-3 flex-wrap">
         <button
           onClick={() => setActiveSubTab('OVERVIEW')}
           className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
@@ -277,6 +355,17 @@ export const OnlineDatabaseManagement: React.FC = () => {
         </button>
 
         <button
+          onClick={() => setActiveSubTab('ENDPOINT')}
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+            activeSubTab === 'ENDPOINT'
+              ? 'bg-emerald-600 text-white shadow-md'
+              : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+          }`}
+        >
+          ২. সার্ভার এন্ডপয়েন্ট ও ব্রিজ সেটিংস
+        </button>
+
+        <button
           onClick={() => setActiveSubTab('COLLECTIONS')}
           className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
             activeSubTab === 'COLLECTIONS'
@@ -284,7 +373,7 @@ export const OnlineDatabaseManagement: React.FC = () => {
               : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
           }`}
         >
-          ২. অনলাইন কালেকশন তালিকা ({health ? Object.keys(health.collections).length : 24})
+          ৩. অনলাইন কালেকশন তালিকা ({health ? Object.keys(health.collections).length : 24})
         </button>
 
         <button
@@ -295,7 +384,7 @@ export const OnlineDatabaseManagement: React.FC = () => {
               : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
           }`}
         >
-          ৩. ব্যাকআপ ও রিস্টোর (JSON Backup)
+          ৪. ব্যাকআপ ও রিস্টোর (JSON Backup)
         </button>
       </div>
 
@@ -311,7 +400,7 @@ export const OnlineDatabaseManagement: React.FC = () => {
                   <span>বাস্তব অনলাইন CRUD টেস্ট ভেরিফিকেশন (Live CRUD Test)</span>
                 </h3>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  অনলাইন ডেটাবেজে সরাসরি Create → Read → Update → Delete রিয়েল-টাইম অপারেশন টেস্ট
+                  অনলাইন ক্লাউড ডেটাবেজে সরাসরি Create → Read → Update → Delete রিয়েল-টাইম অপারেশন টেস্ট
                 </p>
               </div>
 
@@ -327,7 +416,7 @@ export const OnlineDatabaseManagement: React.FC = () => {
 
             {crudReport ? (
               <div className="space-y-3 pt-2">
-                <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-between text-xs">
+                <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-between text-xs flex-wrap gap-2">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-slate-300">টেস্ট ফলাফল:</span>
                     {crudReport.success ? (
@@ -343,7 +432,7 @@ export const OnlineDatabaseManagement: React.FC = () => {
                     )}
                   </div>
                   <div className="text-slate-400 font-mono text-[11px]">
-                    মোট সময়: {crudReport.durationMs}ms | {new Date(crudReport.timestamp).toLocaleTimeString()}
+                    মোট সময়: {crudReport.durationMs}ms | এন্ডপয়েন্ট: {crudReport.endpointUsed || 'Cloud Server'}
                   </div>
                 </div>
 
@@ -390,7 +479,102 @@ export const OnlineDatabaseManagement: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 2: COLLECTIONS LIST */}
+      {/* TAB 2: ENDPOINT & BRIDGE SETTINGS */}
+      {activeSubTab === 'ENDPOINT' && (
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div>
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <Globe className="w-5 h-5 text-emerald-400" />
+                <span>ক্লাউড সার্ভার এন্ডপয়েন্ট ও ক্রস-ডোমেইন ব্রিজ</span>
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">
+                যেকোনো স্ট্যাটিক হোস্টিং (Netlify, Vercel, ইত্যাদি) থেকে কেন্দ্রীয় ক্লাউড ডেটাবেজের সাথে সংযোগ নিশ্চিতকরণ।
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-300">সক্রিয় ক্লাউড ডেটাবেজ URL:</span>
+                  <button
+                    onClick={handleCopyEndpoint}
+                    className="flex items-center gap-1 text-[11px] text-emerald-400 hover:text-emerald-300 font-mono bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20 transition-colors"
+                  >
+                    {copiedEndpoint ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedEndpoint ? 'কপি হয়েছে' : 'কপি URL'}</span>
+                  </button>
+                </div>
+                <div className="font-mono text-xs text-emerald-300 bg-slate-900 p-2.5 rounded-lg border border-slate-800 break-all select-all">
+                  {endpointConfig.activeUrl}
+                </div>
+                <div className="text-[11px] text-slate-400 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span>মোড: {endpointConfig.mode === 'DIRECT_SAME_ORIGIN' ? 'সরাসরি একই সার্ভার (Direct Node)' : 'রিমোট ক্লাউড ব্রিজ (Remote Cloud Bridge)'}</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-200">
+                  কাস্টম ব্যাকঅ্যান্ড সার্ভার URL কনফিগার (ঐচ্ছিক):
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="url"
+                    value={customEndpointInput}
+                    onChange={(e) => setCustomEndpointInput(e.target.value)}
+                    placeholder="https://your-custom-backend.run.app"
+                    className="flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono"
+                  />
+                  <button
+                    onClick={handleSaveCustomEndpoint}
+                    disabled={isTestingEndpoint}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-colors disabled:opacity-50"
+                  >
+                    সংরক্ষণ
+                  </button>
+                  {endpointConfig.isCustom && (
+                    <button
+                      onClick={handleResetToDefaultEndpoint}
+                      className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition-colors"
+                    >
+                      রিসেট
+                    </button>
+                  )}
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  খালি রাখলে স্বয়ংক্রিয়ভাবে ডিফল্ট উচ্চ-গতির ক্লাউড সার্ভার ব্যবহৃত হবে।
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-3">
+              <h4 className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4" />
+                <span>Netlify ও এক্সটার্নাল ডোমেইনে স্বয়ংক্রিয় সিঙ্ক যেভাবে কাজ করে:</span>
+              </h4>
+              <ul className="text-xs text-slate-300 space-y-2 leading-relaxed">
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <span><strong>স্মার্ট ক্লাউড ব্রিজ:</strong> আপনি Netlify বা অন্য যেকোনো ডোমেইনে ডেটা আপডেট বা প্রোফাইল সেভ করলে তা স্বয়ংক্রিয়ভাবে ক্লাউড সার্ভারে চলে যায়।</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <span><strong>ক্রস-ডিভাইস ভিজিবিলিটি:</strong> মোবাইল বা অন্য কম্পিউটারে ওয়েবসাইট খুললে ক্লাউড থেকে তাৎক্ষণিক ফ্রেশ ডেটা প্রদর্শিত হয়।</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <span><strong>কোনো API Key প্রয়োজন নেই:</strong> বিল্ট-ইন Zero-Config REST প্রটোকল দ্বারা সুরক্ষিত।</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: COLLECTIONS LIST */}
       {activeSubTab === 'COLLECTIONS' && (
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-slate-800">
@@ -439,7 +623,7 @@ export const OnlineDatabaseManagement: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 3: BACKUP & RESTORE */}
+      {/* TAB 4: BACKUP & RESTORE */}
       {activeSubTab === 'BACKUP' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Download Backup */}

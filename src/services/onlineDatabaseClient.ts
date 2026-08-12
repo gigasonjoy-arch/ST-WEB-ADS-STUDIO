@@ -7,6 +7,9 @@ export interface OnlineDbHealth {
   totalRecords: number;
   collections: Record<string, number>;
   lastUpdated: string;
+  endpointUrl?: string;
+  mode?: 'DIRECT_SAME_ORIGIN' | 'REMOTE_CLOUD_BRIDGE' | 'CUSTOM_ENDPOINT';
+  latencyMs?: number;
 }
 
 export interface CrudTestStep {
@@ -21,11 +24,24 @@ export interface CrudTestReport {
   timestamp: string;
   durationMs: number;
   steps: CrudTestStep[];
+  endpointUsed?: string;
 }
+
+export interface EndpointConfig {
+  activeUrl: string;
+  customUrl: string | null;
+  mode: 'DIRECT_SAME_ORIGIN' | 'REMOTE_CLOUD_BRIDGE' | 'CUSTOM_ENDPOINT';
+  defaultCloudUrl: string;
+  isCustom: boolean;
+}
+
+const DEFAULT_CLOUD_ENDPOINT = 'https://ais-pre-gddtnvmgg7qyt6klszb5gb-516905733162.asia-southeast1.run.app';
+const CUSTOM_ENDPOINT_KEY = 'st_online_db_custom_url';
 
 class OnlineDatabaseClient {
   private isOnline = false;
   private lastSyncTime: string | null = null;
+  private lastSyncError: string | null = null;
   private isSyncing = false;
   private syncListeners: Set<(data: any) => void> = new Set();
   private pollInterval: any = null;
@@ -41,6 +57,65 @@ class OnlineDatabaseClient {
     this.setupWindowListeners();
   }
 
+  /**
+   * Smart resolver for the API base URL
+   */
+  public getApiBaseUrl(): string {
+    if (typeof window === 'undefined') return '';
+
+    // 1. Explicit user-customized URL
+    const custom = localStorage.getItem(CUSTOM_ENDPOINT_KEY);
+    if (custom && custom.trim().length > 0) {
+      return custom.trim().replace(/\/+$/, '');
+    }
+
+    const host = window.location.hostname;
+    // 2. Direct same-origin on Node server / Cloud Run / localhost
+    if (host === 'localhost' || host === '127.0.0.1' || host.includes('run.app')) {
+      return '';
+    }
+
+    // 3. Static external deployments (Netlify, Vercel, GitHub Pages, etc.)
+    return DEFAULT_CLOUD_ENDPOINT;
+  }
+
+  public getEndpointConfig(): EndpointConfig {
+    const custom = typeof window !== 'undefined' ? localStorage.getItem(CUSTOM_ENDPOINT_KEY) : null;
+    const base = this.getApiBaseUrl();
+    let mode: 'DIRECT_SAME_ORIGIN' | 'REMOTE_CLOUD_BRIDGE' | 'CUSTOM_ENDPOINT' = 'DIRECT_SAME_ORIGIN';
+
+    if (custom && custom.trim()) {
+      mode = 'CUSTOM_ENDPOINT';
+    } else if (base.length > 0) {
+      mode = 'REMOTE_CLOUD_BRIDGE';
+    }
+
+    return {
+      activeUrl: base || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'),
+      customUrl: custom,
+      mode,
+      defaultCloudUrl: DEFAULT_CLOUD_ENDPOINT,
+      isCustom: !!(custom && custom.trim())
+    };
+  }
+
+  public setCustomEndpoint(url: string | null): void {
+    if (typeof window === 'undefined') return;
+    if (url && url.trim().length > 0) {
+      localStorage.setItem(CUSTOM_ENDPOINT_KEY, url.trim().replace(/\/+$/, ''));
+    } else {
+      localStorage.removeItem(CUSTOM_ENDPOINT_KEY);
+    }
+    // Trigger immediate health test and poll
+    this.fetchAll(true);
+  }
+
+  public getFullUrl(path: string): string {
+    const base = this.getApiBaseUrl();
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    return base ? `${base}${cleanPath}` : cleanPath;
+  }
+
   private setupWindowListeners() {
     if (typeof window !== 'undefined') {
       window.addEventListener('online', () => {
@@ -48,7 +123,6 @@ class OnlineDatabaseClient {
         this.flushPendingSync();
       });
       window.addEventListener('focus', () => {
-        // Silent sync on focus if not synced recently
         const last = this.lastSyncTime ? new Date(this.lastSyncTime).getTime() : 0;
         if (Date.now() - last > 20000) {
           this.fetchAll(true);
@@ -72,13 +146,13 @@ class OnlineDatabaseClient {
     });
   }
 
-  public startAutoSync(intervalMs = 30000) {
+  public startAutoSync(intervalMs = 25000) {
     if (this.pollInterval) clearInterval(this.pollInterval);
     
     // Initial fetch after slight delay
     setTimeout(() => {
       this.fetchAll(true);
-    }, 500);
+    }, 400);
 
     this.pollInterval = setInterval(() => {
       this.fetchAll(true); // background silent poll
@@ -104,7 +178,7 @@ class OnlineDatabaseClient {
 
     this.debounceTimer = setTimeout(() => {
       this.flushPendingSync();
-    }, 600);
+    }, 400);
   }
 
   /**
@@ -120,26 +194,23 @@ class OnlineDatabaseClient {
       return true;
     }
 
-    // Rate-limit / Backoff guard
     if (Date.now() < this.backoffUntil) {
-      // Re-schedule flush after backoff
       setTimeout(() => this.flushPendingSync(), this.backoffUntil - Date.now() + 100);
       return false;
     }
 
     if (this.isFlushInFlight) {
-      // Re-schedule when current finish
-      setTimeout(() => this.flushPendingSync(), 500);
+      setTimeout(() => this.flushPendingSync(), 400);
       return false;
     }
 
     this.isFlushInFlight = true;
     const payloadToSend = { ...this.pendingQueue };
-    // Clear pending keys that we are sending
     this.pendingQueue = {};
 
     try {
-      const res = await fetch('/api/db/sync', {
+      const url = this.getFullUrl('/api/db/sync');
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -149,7 +220,6 @@ class OnlineDatabaseClient {
       });
 
       if (res.status === 429) {
-        // Rate limited - backoff for 3 seconds and re-queue payload
         this.backoffUntil = Date.now() + 3000;
         this.pendingQueue = { ...payloadToSend, ...this.pendingQueue };
         setTimeout(() => this.flushPendingSync(), 3100);
@@ -157,9 +227,9 @@ class OnlineDatabaseClient {
       }
 
       if (!res.ok) {
-        // On 500 or other errors, backoff for 2 seconds and re-queue
         this.backoffUntil = Date.now() + 2000;
         this.pendingQueue = { ...payloadToSend, ...this.pendingQueue };
+        this.lastSyncError = `HTTP ${res.status}: ${res.statusText}`;
         return false;
       }
 
@@ -167,14 +237,15 @@ class OnlineDatabaseClient {
       if (json.success) {
         this.isOnline = true;
         this.lastSyncTime = new Date().toISOString();
+        this.lastSyncError = null;
         return true;
       }
 
       return false;
-    } catch (err) {
-      // Network failure: re-queue and wait
+    } catch (err: any) {
       this.backoffUntil = Date.now() + 2000;
       this.pendingQueue = { ...payloadToSend, ...this.pendingQueue };
+      this.lastSyncError = err?.message || 'Network connection failed';
       return false;
     } finally {
       this.isFlushInFlight = false;
@@ -183,15 +254,24 @@ class OnlineDatabaseClient {
 
   // Health check
   public async getHealth(): Promise<OnlineDbHealth> {
+    const startTime = Date.now();
+    const config = this.getEndpointConfig();
     try {
-      const res = await fetch('/api/db/health', {
+      const url = this.getFullUrl('/api/db/health');
+      const res = await fetch(url, {
         headers: { 'Cache-Control': 'no-cache' }
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      const latencyMs = Date.now() - startTime;
       this.isOnline = data.connected === true;
-      return data;
-    } catch {
+      return {
+        ...data,
+        endpointUrl: config.activeUrl,
+        mode: config.mode,
+        latencyMs
+      };
+    } catch (err: any) {
       this.isOnline = false;
       return {
         status: 'disconnected',
@@ -201,17 +281,21 @@ class OnlineDatabaseClient {
         totalCollections: 0,
         totalRecords: 0,
         collections: {},
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
+        endpointUrl: config.activeUrl,
+        mode: config.mode,
+        latencyMs: 0
       };
     }
   }
 
   // Fetch complete database state
-  public async fetchAll(silent = false): Promise<any | null> {
+  public async fetchAll(_silent = false): Promise<any | null> {
     if (this.isSyncing) return null;
     this.isSyncing = true;
     try {
-      const res = await fetch('/api/db/all', {
+      const url = this.getFullUrl('/api/db/all');
+      const res = await fetch(url, {
         headers: { 'Cache-Control': 'no-cache' }
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -219,11 +303,13 @@ class OnlineDatabaseClient {
       if (json.success && json.data) {
         this.isOnline = true;
         this.lastSyncTime = new Date().toISOString();
+        this.lastSyncError = null;
         this.notifyListeners(json.data);
         return json.data;
       }
       return null;
-    } catch {
+    } catch (err: any) {
+      this.lastSyncError = err?.message || 'Fetch failed';
       return null;
     } finally {
       this.isSyncing = false;
@@ -233,7 +319,8 @@ class OnlineDatabaseClient {
   // Sync entire batch state directly (used for manual restore or bulk sync)
   public async syncBatch(payload: any): Promise<boolean> {
     try {
-      const res = await fetch('/api/db/sync', {
+      const url = this.getFullUrl('/api/db/sync');
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -246,10 +333,12 @@ class OnlineDatabaseClient {
       if (json.success) {
         this.isOnline = true;
         this.lastSyncTime = new Date().toISOString();
+        this.lastSyncError = null;
         return true;
       }
       return false;
-    } catch {
+    } catch (err: any) {
+      this.lastSyncError = err?.message || 'Sync failed';
       return false;
     }
   }
@@ -257,7 +346,8 @@ class OnlineDatabaseClient {
   // Upsert Item in a collection
   public async upsertItem(collection: string, item: any): Promise<any | null> {
     try {
-      const res = await fetch(`/api/db/collection/${collection}`, {
+      const url = this.getFullUrl(`/api/db/collection/${collection}`);
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(item)
@@ -273,7 +363,8 @@ class OnlineDatabaseClient {
   // Delete item from a collection
   public async deleteItem(collection: string, id: string): Promise<boolean> {
     try {
-      const res = await fetch(`/api/db/collection/${collection}/${encodeURIComponent(id)}`, {
+      const url = this.getFullUrl(`/api/db/collection/${collection}/${encodeURIComponent(id)}`);
+      const res = await fetch(url, {
         method: 'DELETE'
       });
       if (!res.ok) return false;
@@ -286,23 +377,28 @@ class OnlineDatabaseClient {
 
   // Run live CRUD test on online server
   public async runLiveCrudTest(): Promise<CrudTestReport> {
+    const config = this.getEndpointConfig();
     try {
-      const res = await fetch('/api/db/test-crud', {
+      const url = this.getFullUrl('/api/db/test-crud');
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return await res.json();
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      const report: CrudTestReport = await res.json();
+      report.endpointUsed = config.activeUrl;
+      return report;
     } catch (err: any) {
       return {
         success: false,
         timestamp: new Date().toISOString(),
         durationMs: 0,
+        endpointUsed: config.activeUrl,
         steps: [
           {
-            step: 'Connection Diagnostic',
+            step: '1. Online Endpoint Handshake',
             status: 'FAILED',
-            detail: err.message || 'Unable to communicate with online server database endpoint.',
+            detail: `Unable to connect to ${config.activeUrl} (${err.message || 'Network error'}). Ensure backend is online.`,
             latencyMs: 0
           }
         ]
@@ -313,7 +409,8 @@ class OnlineDatabaseClient {
   // Reset database to initial defaults
   public async resetToDefaults(): Promise<boolean> {
     try {
-      const res = await fetch('/api/db/reset', { method: 'POST' });
+      const url = this.getFullUrl('/api/db/reset');
+      const res = await fetch(url, { method: 'POST' });
       if (!res.ok) return false;
       const json = await res.json();
       if (json.success) {
@@ -329,16 +426,17 @@ class OnlineDatabaseClient {
   // Download full JSON backup
   public async downloadBackup() {
     try {
-      const res = await fetch('/api/db/backup');
+      const url = this.getFullUrl('/api/db/backup');
+      const res = await fetch(url);
       const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
+      const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = url;
+      link.href = blobUrl;
       link.download = `stweb_cloud_database_backup_${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(blobUrl);
     } catch (err) {
       console.error('Backup download error:', err);
     }
@@ -347,7 +445,8 @@ class OnlineDatabaseClient {
   // Restore database from JSON
   public async restoreFromData(data: any): Promise<boolean> {
     try {
-      const res = await fetch('/api/db/restore', {
+      const url = this.getFullUrl('/api/db/restore');
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -370,6 +469,10 @@ class OnlineDatabaseClient {
 
   public getLastSyncTime(): string | null {
     return this.lastSyncTime;
+  }
+
+  public getLastSyncError(): string | null {
+    return this.lastSyncError;
   }
 }
 

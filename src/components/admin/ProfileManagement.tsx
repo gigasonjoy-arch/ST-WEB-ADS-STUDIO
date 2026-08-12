@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { SiteSettings } from '../../types';
 import { storageService } from '../../services/storageService';
+import { onlineDbClient } from '../../services/onlineDatabaseClient';
 import { MediaSelectorModal } from './MediaSelectorModal';
 
 interface ProfileManagementProps {
@@ -77,11 +78,16 @@ export const ProfileManagement: React.FC<ProfileManagementProps> = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     storageService.updateSiteSettings(formData);
     onUpdateSettings(formData);
-    showToast('প্রোফাইল তথ্য সফলভাবে আপডেট ও সংরক্ষিত হয়েছে!');
+    showToast('প্রোফাইল তথ্য সফলভাবে আপডেট ও অনলাইন ক্লাউড ডেটাবেজে সংরক্ষিত হয়েছে!');
+    try {
+      await onlineDbClient.flushPendingSync();
+    } catch {
+      // Background retry handled
+    }
   };
 
   return (

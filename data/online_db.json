@@ -1,29 +1,7 @@
 {
   "siteSettings": {
-    "siteNameBn": "ST Web & Ads Studio",
-    "siteNameEn": "ST Web & Ads Studio",
-    "taglineBn": "বাংলাদেশের শীর্ষ ডেটা-ড্রিভেন টিকটক ও ডিজিটাল অ্যাড গ্রোথ পার্টনার",
-    "taglineEn": "Top Data-Driven TikTok & Digital Ad Agency in Bangladesh",
-    "logoUrl": "",
-    "phone": "+880 1723-516793",
-    "whatsapp": "8801723516793",
-    "email": "giga.sonjoy@gmail.com",
-    "address": "Dhaka, Bangladesh",
-    "copyrightText": "© 2026 ST Web & Ads Studio. All rights reserved.",
-    "heroHeadlineBn": "বাংলাদেশে টিকটক ও মেটা বিজ্ঞাপনে সর্বোচ্চ ROAS ও সেলস আনুন",
-    "heroHeadlineEn": "Maximize Your E-commerce ROAS & Sales with Data-Driven Ads in Bangladesh",
-    "heroSubheadlineBn": "কোনো মুখস্থ বাজেট নয় — সঠিক প্রডাক্ট ক্যাটাগরি ও মার্জিন এনালাইসিস করে অ্যাড রান করুন।",
-    "heroSubheadlineEn": "Scale your business with verified audience targeting, pixel tracking & real campaign data.",
-    "enableAiChat": true,
-    "enableStickyWhatsapp": true,
-    "enablePublicCalculator": true,
-    "metaPixelId": "",
-    "tiktokPixelId": "",
-    "googleTagManagerId": "",
-    "currency": "BDT",
-    "usdToBdtRate": 122,
-    "metaTitle": "ST Web & Ads Studio | TikTok & Digital Ads Agency Bangladesh",
-    "metaDescription": "Verified ROAS, precision audience targeting, and custom e-commerce growth strategies in Bangladesh."
+    "siteNameBn": "Test Save",
+    "sonjoyName": "Sonjoy Sarkar"
   },
   "themeSettings": {
     "mode": "light",
@@ -76,7 +54,7 @@
       "navOrder": 1,
       "layout": "standard",
       "createdAt": "2026-01-01T00:00:00.000Z",
-      "updatedAt": "2026-08-12T09:08:32.425Z"
+      "updatedAt": "2026-08-12T09:28:17.800Z"
     },
     {
       "id": "page-privacy-policy",
@@ -93,7 +71,7 @@
       "navOrder": 2,
       "layout": "standard",
       "createdAt": "2026-01-01T00:00:00.000Z",
-      "updatedAt": "2026-08-12T09:08:32.425Z"
+      "updatedAt": "2026-08-12T09:28:17.800Z"
     }
   ],
   "socialLinks": [
@@ -461,6 +439,28 @@
     "temperature": 0.7
   },
   "analyticsEvents": [
+    {
+      "id": "ev-66ciimh",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T09:28:16.291Z"
+    },
+    {
+      "id": "ev-d6hejjn",
+      "visitorId": "v-atd116c-msombvne",
+      "eventName": "PAGE_VIEW",
+      "page": "/",
+      "properties": {
+        "path": "/",
+        "title": "ST Web & Ads Studio"
+      },
+      "timestamp": "2026-08-12T09:28:16.268Z"
+    },
     {
       "id": "ev-0sjwfvt",
       "visitorId": "v-atd116c-msombvne",
@@ -1302,17 +1302,14 @@
   "users": [],
   "adminUsers": [
     {
-      "id": "usr-admin-1",
-      "name": "Sonjoy Sarkar",
+      "id": "usr-admin-root",
+      "name": "Super Admin",
       "email": "giga.sonjoy@gmail.com",
       "mobile": "01723516793",
-      "passwordHash": "e949980d22081fdb7020d5bc5043bf7e55fae2fbbe2d7b4db13045610d4812a4",
-      "role": "ADMIN",
-      "status": "ACTIVE",
+      "passwordHash": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
+      "role": "SUPER_ADMIN",
       "isActive": true,
-      "passcode": "stweb2025",
-      "createdAt": "2026-01-01T00:00:00.000Z",
-      "lastLogin": "2026-08-12 02:00"
+      "createdAt": "2026-01-01T00:00:00.000Z"
     }
   ],
   "robotsSettings": {
@@ -1336,11 +1333,11 @@
   "auditLogs": [
     {
       "id": "log-1",
-      "timestamp": "2026-08-12T09:08:32.425Z",
+      "timestamp": "2026-08-12T09:28:17.800Z",
       "action": "ONLINE_DATABASE_INITIALIZED",
       "details": "Initial cloud database schema and collection seeds bootstrapped.",
       "userId": "system"
     }
   ],
-  "_lastUpdated": "2026-08-12T09:16:00.573Z"
+  "_lastUpdated": "2026-08-12T09:40:16.125Z"
 }
