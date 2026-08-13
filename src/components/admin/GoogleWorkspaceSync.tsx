@@ -22,7 +22,9 @@ import {
   Link as LinkIcon,
   Send,
   HelpCircle,
-  Settings
+  Settings,
+  Copy,
+  Check
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { googleWorkspaceService, GoogleSheetExportResult, GoogleDriveFile } from '../../services/googleWorkspaceService';
@@ -73,13 +75,20 @@ export const GoogleWorkspaceSync: React.FC<GoogleWorkspaceSyncProps> = ({
   const [isLoadingDrive, setIsLoadingDrive] = useState(false);
   const [driveFolderCreated, setDriveFolderCreated] = useState<string | null>(null);
 
-  // Webhook and Manual Token inputs
-  const [webhookUrl, setWebhookUrl] = useState<string>(googleWorkspaceService.getWebhookUrl());
+  // Webhook and Fallback Alert inputs
+  const siteSettings = storageService.getSiteSettings();
+  const [webhookUrl, setWebhookUrl] = useState<string>(siteSettings.googleSheetsWebhookUrl || googleWorkspaceService.getWebhookUrl() || '');
+  const [telegramToken, setTelegramToken] = useState<string>(siteSettings.fallbackTelegramToken || '');
+  const [telegramChatId, setTelegramChatId] = useState<string>(siteSettings.fallbackTelegramChatId || '');
+  const [fallbackEmail, setFallbackEmail] = useState<string>(siteSettings.fallbackNotificationEmail || 'sanjoybhootfm@gmail.com');
+  const [fallbackEnabled, setFallbackEnabled] = useState<boolean>(siteSettings.fallbackNotificationEnabled !== false);
+  
   const [isTestingWebhook, setIsTestingWebhook] = useState(false);
   const [webhookSuccess, setWebhookSuccess] = useState<string | null>(null);
   const [manualToken, setManualToken] = useState<string>('');
   const [customClientId, setCustomClientId] = useState<string>(googleWorkspaceService.getOAuthClientId());
   const [showAdvancedAuth, setShowAdvancedAuth] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
 
   useEffect(() => {
     checkFirestoreData();
@@ -88,6 +97,11 @@ export const GoogleWorkspaceSync: React.FC<GoogleWorkspaceSyncProps> = ({
   const checkFirestoreData = async () => {
     try {
       setFirestoreStatus('SYNCING');
+      if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('firestore_quota_exceeded') === 'true') {
+        setCloudLeadsCount(storageService.getLeads().length);
+        setFirestoreStatus('CONNECTED');
+        return;
+      }
       if (db) {
         const leadsSnap = await getDocs(collection(db, 'leads'));
         setCloudLeadsCount(leadsSnap.size);
@@ -146,9 +160,28 @@ export const GoogleWorkspaceSync: React.FC<GoogleWorkspaceSyncProps> = ({
   };
 
   const handleSaveWebhook = async () => {
-    googleWorkspaceService.setWebhookUrl(webhookUrl);
-    setWebhookSuccess('Webhook URL সফলভাবে সংরক্ষণ করা হয়েছে!');
-    setTimeout(() => setWebhookSuccess(null), 3000);
+    try {
+      googleWorkspaceService.setWebhookUrl(webhookUrl);
+      
+      const updatedSettings = {
+        ...siteSettings,
+        googleSheetsWebhookUrl: webhookUrl.trim(),
+        fallbackTelegramToken: telegramToken.trim(),
+        fallbackTelegramChatId: telegramChatId.trim(),
+        fallbackNotificationEmail: fallbackEmail.trim(),
+        fallbackNotificationEnabled: fallbackEnabled
+      };
+      
+      storageService.updateSiteSettings(updatedSettings);
+      
+      // Instantly sync settings to the server so the backend uses the latest configuration
+      await storageService.syncAllData();
+      
+      setWebhookSuccess('বিকল্প লিড সিস্টেম ও নোটিফিকেশন কনফিগারেশন সফলভাবে সংরক্ষিত হয়েছে!');
+      setTimeout(() => setWebhookSuccess(null), 3000);
+    } catch (err: any) {
+      alert('সংরক্ষণ ব্যর্থ হয়েছে: ' + err.message);
+    }
   };
 
   const handleTestWebhook = async () => {
@@ -573,113 +606,339 @@ export const GoogleWorkspaceSync: React.FC<GoogleWorkspaceSyncProps> = ({
       </div>
 
       {/* Advanced Auth & Webhook Section */}
-      <div className="bg-white rounded-3xl border border-[#D9DED1] p-6 shadow-2xs space-y-6">
-        <div className="flex items-center justify-between pb-4 border-b border-[#D9DED1]">
-          <div className="flex items-center gap-2">
-            <LinkIcon className="w-4 h-4 text-[#4A5D3B]" />
-            <h2 className="text-sm font-bold text-[#2C3327] uppercase tracking-wider">
-              Google Apps Script Webhook ও বিকল্প সিঙ্ক (Zero OAuth Friction)
-            </h2>
+      <div className="bg-[#FFFFFF] rounded-[32px] border border-[#D9DED1] p-6 sm:p-8 shadow-xs space-y-8">
+        
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#D9DED1] gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5">
+              <LinkIcon className="w-5 h-5 text-[#4A5D3B]" />
+              <h2 className="text-base font-serif font-bold text-[#2C3327]">
+                বিকল্প লিড সংগ্রহ ও রিয়েল-টাইম ফলব্যাক সিস্টেম (Zero-Friction Fallback)
+              </h2>
+            </div>
+            <p className="text-xs text-[#5C6652]">
+              ফায়ারবেস কোটা বা লিমিট শেষ হলেও ভিজিটরদের লিড যাতে মিস না হয় এবং সাথে সাথে টেলিগ্রাম ও ইমেইল নোটিফিকেশন পাওয়া যায়।
+            </p>
           </div>
-          <span className="text-[11px] text-[#8A957F] bg-[#F5F1EB] px-2.5 py-0.5 rounded-full font-semibold">
-            বিকল্প পদ্ধতি
+          <span className="self-start sm:self-auto text-[11px] text-[#4A5D3B] bg-[#E8EAE2] px-3 py-1 rounded-full font-bold">
+            অ্যাক্টিভ ফলব্যাক মোড
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Webhook Sync */}
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-bold text-[#2C3327] mb-1">
-                Google Apps Script Webhook URL (অটোমেটিক লিড পুশ)
-              </label>
-              <p className="text-[11px] text-[#5C6652] mb-2 leading-relaxed">
-                আপনার গুগল স্প্রেডশিটের Apps Script Webhook লিঙ্কটি এখানে পেস্ট করলে কোনো OAuth ছাড়াই প্রতিটি নতুন লিড সরাসরি আপনার শিটসে যুক্ত হবে।
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          {/* Left Column: Fallback Configurations (8 cols) */}
+          <div className="lg:col-span-7 space-y-6">
+            
+            {/* Part A: Google Sheets Webhook */}
+            <div className="bg-[#FDFCF8] p-5 rounded-2xl border border-[#D9DED1] space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-[#2C3327] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-[#4A5D3B] rounded-full"></span>
+                  গুগল শিট Webhook URL (Google Apps Script Webhook)
+                </label>
+                <span className="text-[10px] text-[#8A957F] font-mono">Status: Enabled</span>
+              </div>
+              <p className="text-[11px] text-[#5C6652] leading-relaxed">
+                আপনার গুগল স্প্রেডশিটের Apps Script Webhook লিঙ্কটি এখানে যুক্ত করুন। এটিতে কোনো জটিল OAuth ছাড়াই সরাসরি লিড ডেটা ব্যাকআপ ও রিয়েল-টাইম শিট রাইট হয়।
               </p>
               <input
                 type="text"
                 value={webhookUrl}
                 onChange={(e) => setWebhookUrl(e.target.value)}
                 placeholder="https://script.google.com/macros/s/.../exec"
-                className="w-full bg-[#FDFCF8] border border-[#D9DED1] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2C3327]"
+                className="w-full bg-white border border-[#D9DED1] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2C3327] focus:outline-none focus:border-[#4A5D3B]"
               />
             </div>
 
+            {/* Part B: Telegram Alerts */}
+            <div className="bg-[#FDFCF8] p-5 rounded-2xl border border-[#D9DED1] space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-[#2C3327] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-[#1A73E8] rounded-full"></span>
+                  টেলিগ্রাম নোটিফিকেশন এলার্ট (Telegram Bot Integration)
+                </label>
+                <div className="flex items-center gap-1">
+                  <input
+                    type="checkbox"
+                    id="fallback_tg_toggle"
+                    checked={fallbackEnabled}
+                    onChange={(e) => setFallbackEnabled(e.target.checked)}
+                    className="w-3.5 h-3.5 text-[#4A5D3B] border-[#D9DED1] rounded-xs focus:ring-[#4A5D3B]"
+                  />
+                  <label htmlFor="fallback_tg_toggle" className="text-[10px] text-[#5C6652] font-semibold select-none cursor-pointer">
+                    চালু করুন
+                  </label>
+                </div>
+              </div>
+              <p className="text-[11px] text-[#5C6652] leading-relaxed">
+                ফায়ারবেস ডাউন থাকলে বা সাধারণ অবস্থাতেও নতুন ভিজিটর লিড সাবমিট করলে সরাসরি আপনার টেলিগ্রামে ইনস্ট্যান্ট মেসেজ চলে যাবে।
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <span className="block text-[10px] font-bold text-[#5C6652] mb-1">Telegram Bot Token:</span>
+                  <input
+                    type="password"
+                    value={telegramToken}
+                    onChange={(e) => setTelegramToken(e.target.value)}
+                    placeholder="5834292109:AAH_..."
+                    className="w-full bg-white border border-[#D9DED1] rounded-xl px-3 py-1.5 text-xs font-mono text-[#2C3327] focus:outline-none focus:border-[#4A5D3B]"
+                  />
+                </div>
+                <div>
+                  <span className="block text-[10px] font-bold text-[#5C6652] mb-1">Telegram Chat ID:</span>
+                  <input
+                    type="text"
+                    value={telegramChatId}
+                    onChange={(e) => setTelegramChatId(e.target.value)}
+                    placeholder="123456789"
+                    className="w-full bg-white border border-[#D9DED1] rounded-xl px-3 py-1.5 text-xs font-mono text-[#2C3327] focus:outline-none focus:border-[#4A5D3B]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Part C: Fallback Email Notification */}
+            <div className="bg-[#FDFCF8] p-5 rounded-2xl border border-[#D9DED1] space-y-3">
+              <label className="text-xs font-bold text-[#2C3327] flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-[#EA4335] rounded-full"></span>
+                ফলব্যাক ইমেইল নোটিফিকেশন (Real-time Email Alerts)
+              </label>
+              <p className="text-[11px] text-[#5C6652] leading-relaxed">
+                নতুন লিড এলে আপনার জিমেইলে স্বয়ংক্রিয়ভাবে এলার্ট পাঠানোর জন্য ইমেইল সেট করুন।
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <span className="block text-[10px] font-bold text-[#5C6652] mb-1">প্রাপক ইমেইল (Notification Email):</span>
+                  <input
+                    type="email"
+                    value={fallbackEmail}
+                    onChange={(e) => setFallbackEmail(e.target.value)}
+                    placeholder="sanjoybhootfm@gmail.com"
+                    className="w-full bg-white border border-[#D9DED1] rounded-xl px-3 py-1.5 text-xs font-mono text-[#2C3327] focus:outline-none focus:border-[#4A5D3B]"
+                  />
+                </div>
+                <div className="flex items-end pb-1.5">
+                  <span className="text-[10px] text-[#8A957F] font-semibold italic">
+                    *ডিফল্ট প্রাপক: sanjoybhootfm@gmail.com
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Save & Action Buttons */}
             {webhookSuccess && (
-              <div className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-300 p-2.5 rounded-xl font-semibold">
+              <div className="text-xs text-emerald-800 bg-emerald-50 border border-emerald-300 p-3 rounded-xl font-bold animate-pulse">
                 {webhookSuccess}
               </div>
             )}
 
-            <div className="flex items-center gap-2 pt-1">
+            <div className="flex items-center gap-3 pt-2">
               <button
                 type="button"
                 onClick={handleSaveWebhook}
-                className="px-3.5 py-2 bg-[#4A5D3B] text-white rounded-xl text-xs font-bold hover:bg-[#3A4533] transition-colors"
+                className="px-4 py-2.5 bg-[#4A5D3B] text-white rounded-xl text-xs font-bold hover:bg-[#3A4533] transition-colors shadow-xs"
               >
-                Webhook সংরক্ষণ
+                ফলব্যাক সিস্টেম সংরক্ষণ করুন
               </button>
+              
               <button
                 type="button"
                 onClick={handleTestWebhook}
                 disabled={isTestingWebhook}
-                className="px-3.5 py-2 bg-[#F5F1EB] text-[#2C3327] border border-[#D9DED1] rounded-xl text-xs font-bold hover:bg-[#E8EAE2] transition-colors flex items-center gap-1"
+                className="px-4 py-2.5 bg-white text-[#2C3327] border border-[#D9DED1] rounded-xl text-xs font-bold hover:bg-[#F5F1EB] transition-colors flex items-center gap-1.5"
               >
-                <Send className="w-3 h-3 text-[#4A5D3B]" />
-                <span>{isTestingWebhook ? 'টেস্ট হচ্ছে...' : 'টেস্ট ডাটা পাঠান'}</span>
+                <Send className="w-3.5 h-3.5 text-[#4A5D3B]" />
+                <span>{isTestingWebhook ? 'পরীক্ষা করা হচ্ছে...' : 'টেস্ট নোটিফিকেশন পাঠান'}</span>
               </button>
             </div>
-          </div>
 
-          {/* Manual Token Paste */}
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-bold text-[#2C3327] mb-1">
-                ম্যানুয়াল গুগল অ্যাক্সেস টোকেন (Manual Access Token)
-              </label>
-              <p className="text-[11px] text-[#5C6652] mb-2 leading-relaxed">
-                OAuth Playground বা গুগল কনসোল থেকে নেওয়া টেম্পোরারি Bearer টোকেন সরাসরি পেস্ট করে গুগল ড্রাইভ/শিটস অ্যাক্টিভেট করতে পারেন।
-              </p>
-              <div className="flex gap-2">
-                <input
-                  type="password"
-                  value={manualToken}
-                  onChange={(e) => setManualToken(e.target.value)}
-                  placeholder="ya29.a0Ac..."
-                  className="flex-1 bg-[#FDFCF8] border border-[#D9DED1] rounded-xl px-3.5 py-2 text-xs font-mono text-[#2C3327]"
-                />
-                <button
-                  type="button"
-                  onClick={handleApplyManualToken}
-                  className="px-3.5 py-2 bg-[#2C3327] text-white rounded-xl text-xs font-bold hover:bg-black transition-colors"
-                >
-                  প্রয়োগ
-                </button>
-              </div>
+            {/* Manual Token Paste for Developers */}
+            <div className="pt-4 border-t border-[#D9DED1]">
+              <button
+                type="button"
+                onClick={() => setShowAdvancedAuth(!showAdvancedAuth)}
+                className="text-xs text-[#5C6652] hover:text-[#2C3327] flex items-center gap-1 font-semibold transition-colors"
+              >
+                <span>{showAdvancedAuth ? '▲ কাস্টম ও ম্যানুয়াল টোকেন সেটিংস লুকান' : '▼ কাস্টম ও ম্যানুয়াল টোকেন সেটিংস দেখুন (Advanced)'}</span>
+              </button>
+              
+              {showAdvancedAuth && (
+                <div className="mt-4 p-4 bg-[#F5F1EB] rounded-2xl border border-[#D9DED1] space-y-4 animate-fadeIn">
+                  <div>
+                    <label className="block text-[11px] font-bold text-[#2C3327] mb-1">
+                      ম্যানুয়াল গুগল অ্যাক্সেস টোকেন (Manual Access Token)
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="password"
+                        value={manualToken}
+                        onChange={(e) => setManualToken(e.target.value)}
+                        placeholder="ya29.a0Ac..."
+                        className="flex-1 bg-white border border-[#D9DED1] rounded-xl px-3 py-1.5 text-xs font-mono text-[#2C3327]"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleApplyManualToken}
+                        className="px-3.5 py-1.5 bg-[#2C3327] text-white rounded-xl text-xs font-bold hover:bg-black transition-colors"
+                      >
+                        প্রয়োগ
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-[#5C6652] mb-1">
+                      কাস্টম Google Cloud OAuth Client ID:
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={customClientId}
+                        onChange={(e) => setCustomClientId(e.target.value)}
+                        className="flex-1 bg-white border border-[#D9DED1] rounded-xl px-3 py-1 text-[11px] font-mono text-[#2C3327]"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleSaveCustomClientId}
+                        className="px-3 py-1 bg-[#D9DED1] text-[#2C3327] rounded-xl text-[11px] font-bold hover:bg-[#C9CEBF]"
+                      >
+                        সেভ
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div>
-              <label className="block text-[11px] font-bold text-[#5C6652] mb-1">
-                কাস্টম Google Cloud OAuth Client ID:
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={customClientId}
-                  onChange={(e) => setCustomClientId(e.target.value)}
-                  className="flex-1 bg-[#FDFCF8] border border-[#D9DED1] rounded-xl px-3 py-1.5 text-[11px] font-mono text-[#2C3327]"
-                />
-                <button
-                  type="button"
-                  onClick={handleSaveCustomClientId}
-                  className="px-3 py-1.5 bg-[#E8EAE2] text-[#4A5D3B] rounded-xl text-xs font-bold hover:bg-[#D9DED1]"
-                >
-                  সেভ
-                </button>
+          </div>
+
+          {/* Right Column: Google Apps Script Deploy Instruction (5 cols) */}
+          <div className="lg:col-span-5 space-y-4">
+            <div className="bg-[#F5F1EB] p-5 rounded-2xl border border-[#D9DED1] space-y-4">
+              <h3 className="text-xs font-bold text-[#2C3327] flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-[#4A5D3B]" />
+                Google Apps Script সেটাপ গাইড
+              </h3>
+              
+              <ol className="text-[11px] text-[#5C6652] space-y-2 list-decimal pl-4 leading-relaxed">
+                <li>আপনার গুগল স্প্রেডশিট খুলুন।</li>
+                <li>উপরের মেনু থেকে <b>Extensions &gt; Apps Script</b>-এ যান।</li>
+                <li>সেখানকার আগের সব কোড মুছে নিচের কোডটি পেস্ট করুন।</li>
+                <li>ডান পাশে উপরের <b>Deploy &gt; New Deployment</b>-এ ক্লিক করুন।</li>
+                <li>Select Type-এ <b>Web App</b> সিলেক্ট করুন।</li>
+                <li>Who has access-এ <b>Anyone</b> সিলেক্ট করে <b>Deploy</b> করুন।</li>
+                <li>প্রাপ্ত <b>Web App URL</b>-টি কপি করে বাম পাশের Webhook URL বক্সে পেস্ট করুন।</li>
+              </ol>
+
+              {/* Code Box */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-[#2C3327] uppercase tracking-wider">Apps Script কোড:</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const codeText = `/**
+ * ST Web & Ads Studio - Universal Fallback Webhook
+ * Paste this script into Extensions > Apps Script of your Google Sheet.
+ * This handles saving leads, sending real-time Email alerts!
+ */
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    
+    // Append lead to Google Sheet
+    sheet.appendRow([
+      new Date().toLocaleString(),
+      data.name || "N/A",
+      data.whatsapp || data.phone || "N/A",
+      data.email || "N/A",
+      data.businessType || "N/A",
+      data.monthlyBudget || "N/A",
+      data.notes || "N/A",
+      data.calculatorSummary || "N/A",
+      data.source || "Website Form"
+    ]);
+
+    // Send Free Email Alert to sanjoybhootfm@gmail.com
+    var emailRecipient = "sanjoybhootfm@gmail.com";
+    var subject = "🔔 New Lead Fallback Alert: " + (data.name || "Anonymous");
+    var body = "Hi Sonjoy,\\n\\nA new lead has been submitted via the Fallback System (Firebase limits reached):\\n\\n" +
+               "👤 Name: " + (data.name || "N/A") + "\\n" +
+               "📞 WhatsApp/Phone: " + (data.whatsapp || data.phone || "N/A") + "\\n" +
+               "✉️ Email: " + (data.email || "N/A") + "\\n" +
+               "💼 Business Type: " + (data.businessType || "N/A") + "\\n" +
+               "💰 Monthly Budget: " + (data.monthlyBudget || "N/A") + "\\n" +
+               "📝 Notes: " + (data.notes || "N/A") + "\\n" +
+               "📊 Details: " + (data.calculatorSummary || "N/A") + "\\n\\n" +
+               "This lead has been saved in your Google Sheet: " + SpreadsheetApp.getActiveSpreadsheet().getUrl();
+               
+    MailApp.sendEmail(emailRecipient, subject, body);
+
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      message: "Lead saved in Sheet & Email notification sent!"
+    })).setMimeType(ContentService.MimeType.JSON);
+
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: error.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}`;
+                      navigator.clipboard.writeText(codeText);
+                      setCopiedCode(true);
+                      setTimeout(() => setCopiedCode(false), 2000);
+                    }}
+                    className="text-[10px] text-[#4A5D3B] hover:text-[#2C3327] font-bold flex items-center gap-1 bg-white border border-[#D9DED1] px-2 py-0.5 rounded-md transition-colors"
+                  >
+                    {copiedCode ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedCode ? 'Copied!' : 'Copy Code'}</span>
+                  </button>
+                </div>
+                
+                <pre className="w-full h-36 bg-[#2C3327] text-[#D9DED1] rounded-xl p-3 text-[10px] font-mono overflow-auto leading-relaxed border border-[#2C3327]">
+{`/**
+ * ST Web & Ads Studio - Universal Webhook
+ */
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    sheet.appendRow([
+      new Date().toLocaleString(),
+      data.name || "N/A",
+      data.whatsapp || data.phone || "N/A",
+      data.email || "N/A",
+      data.businessType || "N/A",
+      data.monthlyBudget || "N/A",
+      data.notes || "N/A",
+      data.calculatorSummary || "N/A",
+      data.source || "Website Form"
+    ]);
+
+    // Send Free Email Alert to sanjoybhootfm@gmail.com
+    var emailRecipient = "sanjoybhootfm@gmail.com";
+    var subject = "🔔 New Lead Fallback Alert: " + (data.name || "Anonymous");
+    var body = "Hi Sonjoy,\\n\\nA new lead has been submitted via the Fallback System...\\n\\n";
+    MailApp.sendEmail(emailRecipient, subject, body);
+
+    return ContentService.createTextOutput(JSON.stringify({success:true})).setMimeType(ContentService.MimeType.JSON);
+  } catch(e) {
+    return ContentService.createTextOutput(JSON.stringify({success:false, error:e.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}`}
+                </pre>
               </div>
+
             </div>
           </div>
+
         </div>
+
       </div>
 
       {/* Google Drive Asset Explorer (When authorized) */}

@@ -731,6 +731,10 @@ export interface SiteSettings {
   heroSpecialistFocusTitleEn?: string;
   heroSpecialistFocusTitleBn?: string;
   googleSheetsWebhookUrl?: string;
+  fallbackTelegramToken?: string;
+  fallbackTelegramChatId?: string;
+  fallbackNotificationEmail?: string;
+  fallbackNotificationEnabled?: boolean;
   email?: string;
   phone?: string;
   whatsappNumber?: string;

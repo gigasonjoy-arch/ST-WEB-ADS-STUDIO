@@ -69,6 +69,9 @@ import {
 import { onlineDbClient } from './onlineDatabaseClient';
 
 const syncLeadToFirestore = async (lead: Lead) => {
+  if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('firestore_quota_exceeded') === 'true') {
+    return;
+  }
   try {
     if (db) {
       await setDoc(doc(db, 'leads', lead.id), {
@@ -162,6 +165,7 @@ class StorageService {
   private listeners: Set<() => void> = new Set();
   private memoryCache: Map<string, string> = new Map();
   private isFirestoreSyncActive = false;
+  private firestoreUnsubscribe: (() => void) | null = null;
   private isOnlineDbSyncActive = false;
   private isBatchInitializing = false;
   private isApplyingRemoteUpdate = false;
@@ -290,11 +294,17 @@ class StorageService {
 
   private initFirestoreSync(): void {
     if (this.isFirestoreSyncActive || !db) return;
+
+    if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('firestore_quota_exceeded') === 'true') {
+      console.warn('⚠️ [Storage Service] Skipping Firestore sync listener because quota is exceeded.');
+      return;
+    }
+
     this.isFirestoreSyncActive = true;
 
     try {
       // 1. Real-time Firestore sync listener
-      onSnapshot(
+      this.firestoreUnsubscribe = onSnapshot(
         collection(db, 'leads'),
         (snapshot) => {
           const deletedIds = this.getDeletedLeadIds();
@@ -372,6 +382,21 @@ class StorageService {
         },
         (error) => {
           console.debug('Firestore onSnapshot notice:', error?.message);
+          const errMsg = (error?.message || '').toLowerCase();
+          if (errMsg.includes('quota') || errMsg.includes('resource-exhausted') || error?.code === 'resource-exhausted') {
+            if (typeof sessionStorage !== 'undefined') {
+              sessionStorage.setItem('firestore_quota_exceeded', 'true');
+            }
+            if (this.firestoreUnsubscribe) {
+              try {
+                this.firestoreUnsubscribe();
+              } catch (unsubErr) {
+                console.debug('Unsubscribe error:', unsubErr);
+              }
+              this.firestoreUnsubscribe = null;
+            }
+            this.isFirestoreSyncActive = false;
+          }
         }
       );
     } catch (e) {
@@ -1561,7 +1586,7 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
 
     try {
       if (typeof window !== 'undefined') {
-        fetch(`/api/db/collection/leads/${id}`, { method: 'DELETE' }).catch(() => {});
+        fetch(onlineDbClient.getFullUrl(`/api/db/collection/leads/${id}`), { method: 'DELETE' }).catch(() => {});
       }
     } catch {}
 
@@ -1570,6 +1595,14 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
 
   public async forceCloudSync(): Promise<{ success: boolean; message: string; count: number }> {
     try {
+      if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('firestore_quota_exceeded') === 'true') {
+        return {
+          success: false,
+          message: 'গুগল ফায়ারবেসের দৈনিক ফ্রি কোটা লিমিট শেষ হয়ে গেছে। আগামীকাল কোটা রিসেট হওয়ার পর আবার সিঙ্ক করতে পারবেন। বর্তমানে বিকল্প লোকাল ব্যাকএন্ড সচল আছে এবং সব ডেটা সেভ রাখছে!',
+          count: this.getLeads().length
+        };
+      }
+
       if (!db) {
         return { 
           success: false, 

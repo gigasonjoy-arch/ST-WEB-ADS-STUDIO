@@ -62,6 +62,14 @@ export const LeadFormModal: React.FC<LeadFormModalProps> = ({ isOpen, onClose, i
       };
 
       storageService.saveLead(newLead);
+      
+      // Fire real-time server fallback to ensure Webhook and Telegram notifications are triggered
+      fetch('/api/leads/fallback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newLead)
+      }).catch(err => console.debug('Real-time fallback notice:', err));
+
       trackingService.pushEvent('generate_lead', {
         lead_id: newLead.id,
         business_type: newLead.businessType,

@@ -1,4 +1,5 @@
 import { storageService } from './storageService';
+import { onlineDbClient } from './onlineDatabaseClient';
 import { KnowledgeBaseItem, InChatPredictionData, CalculatorInput } from '../types';
 
 export interface AiChatRequest {
@@ -374,7 +375,7 @@ class AiService {
 
     // 2. Primary Execution: Call server-side Gemini AI model with multi-turn history
     try {
-      const serverRes = await fetch('/api/ai/chat', {
+      const serverRes = await fetch(onlineDbClient.getFullUrl('/api/ai/chat'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

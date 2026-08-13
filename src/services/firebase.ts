@@ -1,4 +1,4 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
+import { initializeApp, getApps, getApp, setLogLevel } from 'firebase/app';
 import { 
   getFirestore, 
   collection as firestoreCollection, 
@@ -45,10 +45,36 @@ export const resolveFirebaseConfig = () => {
 
 export const activeFirebaseConfig = resolveFirebaseConfig();
 
-// Check if Firestore quota has been exceeded previously in this session
-const isFirestoreQuotaExceeded = typeof window !== 'undefined' && 
-  typeof sessionStorage !== 'undefined' && 
-  sessionStorage.getItem('firestore_quota_exceeded') === 'true';
+export const isQuotaExceeded = () => {
+  if (typeof window === 'undefined') return false;
+  
+  // Check sessionStorage
+  if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('firestore_quota_exceeded') === 'true') {
+    return true;
+  }
+  
+  // Check localStorage with a 24-hour expiration check (resets daily)
+  if (typeof localStorage !== 'undefined') {
+    const quotaExceededTime = localStorage.getItem('firestore_quota_exceeded_time');
+    if (quotaExceededTime) {
+      const exceededDate = new Date(parseInt(quotaExceededTime, 10));
+      const now = new Date();
+      // Check if it's the same calendar day
+      if (exceededDate.toDateString() === now.toDateString()) {
+        return true;
+      } else {
+        // Clean up stale quota marker
+        try {
+          localStorage.removeItem('firestore_quota_exceeded_time');
+        } catch (e) {}
+      }
+    }
+  }
+  return false;
+};
+
+// Check if Firestore quota has been exceeded previously in this session or day
+const isFirestoreQuotaExceeded = typeof window !== 'undefined' && isQuotaExceeded();
 
 // Initialize Firebase App safely
 let appInstance: any = null;
@@ -57,6 +83,11 @@ let authInstance: any = null;
 let googleAuthProviderInstance: any = null;
 
 try {
+  if (typeof window !== 'undefined') {
+    try {
+      setLogLevel('silent');
+    } catch (err) {}
+  }
   if (activeFirebaseConfig && activeFirebaseConfig.projectId) {
     appInstance = !getApps().length ? initializeApp(activeFirebaseConfig) : getApp();
     const dbId = activeFirebaseConfig.firestoreDatabaseId;
@@ -131,7 +162,7 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
 }
 
 // Test connection on startup as mandated by Firebase skill
-if (typeof window !== 'undefined' && db) {
+if (typeof window !== 'undefined' && db && !isQuotaExceeded()) {
   (async () => {
     try {
       await firestoreGetDocFromServer(firestoreDoc(db, 'test', 'connection'));
@@ -143,6 +174,9 @@ if (typeof window !== 'undefined' && db) {
         try {
           if (typeof sessionStorage !== 'undefined') {
             sessionStorage.setItem('firestore_quota_exceeded', 'true');
+          }
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('firestore_quota_exceeded_time', Date.now().toString());
           }
           await firestoreDisableNetwork(db);
           await firestoreTerminate(db);
@@ -158,12 +192,12 @@ if (typeof window !== 'undefined' && db) {
 
 // Safe wrapper functions to prevent SDK network errors when Firestore is not provisioned
 export const collection = (firestore: any, ...pathSegments: string[]) => {
-  if (!firestore) return null as any;
+  if (!firestore || isQuotaExceeded()) return null as any;
   return firestoreCollection(firestore, pathSegments[0], ...pathSegments.slice(1));
 };
 
 export const doc = (firestore: any, ...pathSegments: string[]) => {
-  if (!firestore) return null as any;
+  if (!firestore || isQuotaExceeded()) return null as any;
   return firestoreDoc(firestore, pathSegments[0], ...pathSegments.slice(1));
 };
 
@@ -201,6 +235,11 @@ const markQuotaExceededAndDisable = () => {
         sessionStorage.setItem('firestore_quota_exceeded', 'true');
       } catch (e) {}
     }
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem('firestore_quota_exceeded_time', Date.now().toString());
+      } catch (e) {}
+    }
     if (dbInstance) {
       firestoreDisableNetwork(dbInstance).catch(() => {});
       firestoreTerminate(dbInstance).catch(() => {});
@@ -209,7 +248,7 @@ const markQuotaExceededAndDisable = () => {
 };
 
 export const setDoc = async (reference: any, data: any, options?: any) => {
-  if (!reference) return;
+  if (!reference || isQuotaExceeded()) return;
   try {
     const cleanedData = cleanFirestoreData(data);
     return await firestoreSetDoc(reference, cleanedData, options);
@@ -226,7 +265,7 @@ export const setDoc = async (reference: any, data: any, options?: any) => {
 };
 
 export const getDocs = async (queryRef: any) => {
-  if (!queryRef) return { empty: true, size: 0, docs: [] } as any;
+  if (!queryRef || isQuotaExceeded()) return { empty: true, size: 0, docs: [] } as any;
   try {
     return await firestoreGetDocs(queryRef);
   } catch (err: any) {
@@ -241,7 +280,7 @@ export const getDocs = async (queryRef: any) => {
 };
 
 export const getDoc = async (reference: any) => {
-  if (!reference) return { exists: () => false, data: () => null } as any;
+  if (!reference || isQuotaExceeded()) return { exists: () => false, data: () => null } as any;
   try {
     return await firestoreGetDoc(reference);
   } catch (err: any) {
@@ -256,7 +295,7 @@ export const getDoc = async (reference: any) => {
 };
 
 export const getDocFromServer = async (reference: any) => {
-  if (!reference) return { exists: () => false, data: () => null } as any;
+  if (!reference || isQuotaExceeded()) return { exists: () => false, data: () => null } as any;
   try {
     return await firestoreGetDocFromServer(reference);
   } catch (err: any) {
@@ -271,7 +310,7 @@ export const getDocFromServer = async (reference: any) => {
 };
 
 export const deleteDoc = async (reference: any) => {
-  if (!reference) return;
+  if (!reference || isQuotaExceeded()) return;
   try {
     return await firestoreDeleteDoc(reference);
   } catch (err: any) {
@@ -287,7 +326,7 @@ export const deleteDoc = async (reference: any) => {
 };
 
 export const query = (queryRef: any, ...queryConstraints: any[]) => {
-  if (!queryRef) return null as any;
+  if (!queryRef || isQuotaExceeded()) return null as any;
   return firestoreQuery(queryRef, ...queryConstraints);
 };
 
@@ -296,7 +335,7 @@ export const orderBy = (...args: any[]) => {
 };
 
 export const onSnapshot = (reference: any, onNext: (snapshot: any) => void, onError?: (error: any) => void) => {
-  if (!reference) return () => {};
+  if (!reference || isQuotaExceeded()) return () => {};
   
   const wrappedOnError = (err: any) => {
     const errMsg = err?.message || String(err);

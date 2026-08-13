@@ -88,12 +88,63 @@ app.get('/api/db/all', (_req, res) => {
 });
 
 // Batch Sync / Replace Online Database State
-app.post('/api/db/sync', (req, res) => {
+app.post('/api/db/sync', async (req, res) => {
   try {
     const payload = req.body;
     if (!payload || typeof payload !== 'object') {
       return res.status(400).json({ success: false, error: 'Invalid payload' });
     }
+
+    // Capture and notify for newly synchronized leads
+    if (payload.leads && Array.isArray(payload.leads)) {
+      try {
+        const existingDb = loadDatabase();
+        const existingLeads = existingDb.leads || [];
+        const existingLeadIds = new Set(existingLeads.map((l: any) => l.id));
+        
+        // Find new leads that are not currently in the server database
+        const newIncomingLeads = payload.leads.filter((l: any) => l && l.id && !existingLeadIds.has(l.id));
+
+        if (newIncomingLeads.length > 0) {
+          console.log(`Detected ${newIncomingLeads.length} newly synced leads via bulk upload.`);
+          
+          const siteSettings = payload.siteSettings || existingDb.siteSettings || {};
+          const webhookUrl = siteSettings.googleSheetsWebhookUrl || 'https://script.google.com/macros/s/AKfycbwr4L1q1u_GogxSImbBaskpydhFsvzenjmElRHqCq8Uv2Kdg_lJJ93-JNmvxxzsmanG/exec';
+          const telegramToken = siteSettings.fallbackTelegramToken || '';
+          const telegramChatId = siteSettings.fallbackTelegramChatId || '';
+          const notificationEnabled = siteSettings.fallbackNotificationEnabled !== false;
+
+          for (const lead of newIncomingLeads) {
+            // Forward to Sheets Webhook
+            if (webhookUrl) {
+              fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(lead)
+              }).catch(err => console.error('Error sending synced lead to Webhook:', err.message));
+            }
+
+            // Send Telegram message
+            if (notificationEnabled && telegramToken && telegramChatId) {
+              const messageText = `🔔 *New Synced Lead Captured!* (Offline Sync)\n\n👤 *Name:* ${lead.name}\n📞 *WhatsApp/Phone:* ${lead.whatsapp || lead.phone}\n💼 *Business Type:* ${lead.businessType || 'N/A'}\n💰 *Budget:* ${lead.monthlyBudget || 'N/A'}\n📝 *Notes:* ${lead.notes || 'N/A'}`;
+              
+              fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  chat_id: telegramChatId,
+                  text: messageText,
+                  parse_mode: 'Markdown'
+                })
+              }).catch(err => console.error('Error sending synced Telegram message:', err.message));
+            }
+          }
+        }
+      } catch (err: any) {
+        console.warn('Sync notification hook failed:', err.message);
+      }
+    }
+
     const updated = saveDatabase(payload);
     res.json({ success: true, message: 'Online database synchronized successfully', lastUpdated: updated._lastUpdated });
   } catch (err: any) {
@@ -189,6 +240,98 @@ app.post('/api/db/restore', (req, res) => {
     }
     const updated = saveDatabase(backupData);
     res.json({ success: true, message: 'Database restored successfully', lastUpdated: updated._lastUpdated });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Real-time Lead Fallback Submission & Alerts
+app.post('/api/leads/fallback', async (req, res) => {
+  try {
+    const lead = req.body;
+    if (!lead || !lead.name) {
+      return res.status(400).json({ success: false, error: 'Name and basic info are required' });
+    }
+
+    console.log('Received lead via fallback API:', lead.name, lead.whatsapp || lead.phone);
+
+    // 1. Save lead to the server-side persistent database
+    const db = loadDatabase();
+    if (!db.leads) db.leads = [];
+    
+    // Check if duplicate lead exists
+    const cleanPhone = (lead.whatsapp || lead.phone || '').replace(/\D/g, '');
+    const existingIndex = db.leads.findIndex((l: any) => {
+      if (l.id === lead.id) return true;
+      const lPhone = (l.whatsapp || l.phone || '').replace(/\D/g, '');
+      return cleanPhone && lPhone === cleanPhone;
+    });
+
+    if (existingIndex >= 0) {
+      db.leads[existingIndex] = {
+        ...db.leads[existingIndex],
+        ...lead,
+        lastActivity: new Date().toISOString()
+      };
+    } else {
+      db.leads.unshift(lead);
+    }
+    
+    saveDatabase(db);
+
+    // 2. Fetch fallback configuration from database
+    const siteSettings = db.siteSettings || {};
+    const webhookUrl = siteSettings.googleSheetsWebhookUrl || 'https://script.google.com/macros/s/AKfycbwr4L1q1u_GogxSImbBaskpydhFsvzenjmElRHqCq8Uv2Kdg_lJJ93-JNmvxxzsmanG/exec';
+    const telegramToken = siteSettings.fallbackTelegramToken || '';
+    const telegramChatId = siteSettings.fallbackTelegramChatId || '';
+    const notificationEmail = siteSettings.fallbackNotificationEmail || 'sanjoybhootfm@gmail.com';
+    const notificationEnabled = siteSettings.fallbackNotificationEnabled !== false;
+
+    let webhookSuccess = false;
+    let telegramSuccess = false;
+
+    // 3. Push to Google Sheets Webhook
+    if (webhookUrl) {
+      try {
+        console.log('Forwarding lead to Sheets Webhook:', webhookUrl);
+        const webhookResponse = await fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(lead)
+        });
+        webhookSuccess = webhookResponse.ok;
+      } catch (err: any) {
+        console.error('Failed to push to Google Sheets Webhook:', err.message);
+      }
+    }
+
+    // 4. Send Telegram Bot Alert
+    if (notificationEnabled && telegramToken && telegramChatId) {
+      try {
+        console.log('Sending Telegram alert to chat ID:', telegramChatId);
+        const messageText = `🔔 *New Lead Captured!* (Fallback System)\n\n👤 *Name:* ${lead.name}\n📞 *WhatsApp/Phone:* ${lead.whatsapp || lead.phone}\n✉️ *Social/Link:* ${lead.socialLink || 'N/A'}\n💼 *Business Type:* ${lead.businessType || 'N/A'}\n💰 *Budget:* ${lead.monthlyBudget || 'N/A'}\n📝 *Notes:* ${lead.notes || 'N/A'}\n🌐 *Calculator Used:* ${lead.calculatorUsed ? 'Yes' : 'No'}\n📊 *Details:* ${lead.calculatorSummary || 'N/A'}`;
+        
+        const tgResponse = await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: telegramChatId,
+            text: messageText,
+            parse_mode: 'Markdown'
+          })
+        });
+        telegramSuccess = tgResponse.ok;
+      } catch (err: any) {
+        console.error('Failed to send Telegram notification:', err.message);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Lead saved and fallback notifications triggered',
+      webhookSynced: webhookSuccess,
+      telegramNotified: telegramSuccess
+    });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }

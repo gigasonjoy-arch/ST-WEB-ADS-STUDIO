@@ -1,6 +1,5 @@
 import { FirebaseTestReport, FirebaseDiagnosticStep } from '../types';
-import { db, activeFirebaseConfig as firebaseConfig } from './firebase';
-import { doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
+import { db, activeFirebaseConfig as firebaseConfig, doc, setDoc, getDoc, deleteDoc } from './firebase';
 
 export class FirebaseDiagnosticService {
   /**

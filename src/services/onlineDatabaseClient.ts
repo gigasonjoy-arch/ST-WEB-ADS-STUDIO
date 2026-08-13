@@ -188,7 +188,7 @@ class OnlineDatabaseClient {
   }
 
   /**
-   * Flushes all pending queued collections to Google Cloud Firestore
+   * Flushes all pending queued collections to Google Cloud Firestore or fallbacks to REST API
    */
   public async flushPendingSync(): Promise<boolean> {
     if (this.debounceTimer) {
@@ -209,9 +209,12 @@ class OnlineDatabaseClient {
     const payloadToSend = { ...this.pendingQueue };
     this.pendingQueue = {};
 
-    try {
-      // 1. Primary: Direct write to Firestore
-      if (db) {
+    let firestoreSuccess = false;
+    let restSuccess = false;
+
+    // 1. Primary: Direct write to Firestore if active and quota not exceeded
+    if (db && !sessionStorage.getItem('firestore_quota_exceeded')) {
+      try {
         const promises = Object.entries(payloadToSend).map(async ([colName, colData]) => {
           const docRef = doc(db, FIRESTORE_SYSTEM_COLLECTION, colName);
           await setDoc(docRef, {
@@ -226,28 +229,47 @@ class OnlineDatabaseClient {
         this.isOnline = true;
         this.lastSyncTime = new Date().toISOString();
         this.lastSyncError = null;
+        firestoreSuccess = true;
+      } catch (err: any) {
+        console.warn('Firestore sync failed, falling back:', err?.message);
+        const errMsg = (err?.message || '').toLowerCase();
+        if (errMsg.includes('quota') || errMsg.includes('resource-exhausted') || err?.code === 'resource-exhausted') {
+          sessionStorage.setItem('firestore_quota_exceeded', 'true');
+        }
       }
+    }
 
-      // 2. Secondary background sync to server REST (if on same origin)
-      if (typeof window !== 'undefined' && !this.getApiBaseUrl()) {
-        try {
-          fetch('/api/db/sync', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payloadToSend)
-          }).catch(() => {});
-        } catch {}
+    // 2. Secondary background sync to server REST (always runs if same origin OR remote host like Netlify is configured)
+    if (typeof window !== 'undefined') {
+      try {
+        const syncUrl = this.getFullUrl('/api/db/sync');
+        const res = await fetch(syncUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payloadToSend)
+        });
+        if (res.ok) {
+          restSuccess = true;
+          if (!firestoreSuccess) {
+            this.isOnline = true;
+            this.lastSyncTime = new Date().toISOString();
+            this.lastSyncError = null;
+          }
+        }
+      } catch (restErr: any) {
+        console.warn('REST API sync failed:', restErr?.message);
       }
+    }
 
+    this.isFlushInFlight = false;
+
+    if (firestoreSuccess || restSuccess) {
       return true;
-    } catch (err: any) {
-      console.warn('Sync notice:', err?.message);
-      // Re-queue on failure
+    } else {
+      // Re-queue on complete failure so we don't lose data
       this.pendingQueue = { ...payloadToSend, ...this.pendingQueue };
-      this.lastSyncError = err?.message || 'Sync failed';
+      this.lastSyncError = 'Both Firestore and REST sync failed';
       return false;
-    } finally {
-      this.isFlushInFlight = false;
     }
   }
 
@@ -330,8 +352,8 @@ class OnlineDatabaseClient {
     this.isSyncing = true;
 
     try {
-      // 1. Primary: Load from Firestore
-      if (db) {
+      // 1. Primary: Load from Firestore if active and quota not exceeded
+      if (db && !sessionStorage.getItem('firestore_quota_exceeded')) {
         try {
           const colRef = collection(db, FIRESTORE_SYSTEM_COLLECTION);
           const snapshot = await getDocs(colRef);
@@ -349,17 +371,23 @@ class OnlineDatabaseClient {
               this.lastSyncTime = new Date().toISOString();
               this.lastSyncError = null;
               this.notifyListeners(aggregatedData);
+              this.isSyncing = false;
               return aggregatedData;
             }
           }
         } catch (fErr: any) {
           console.warn('Firestore fetchAll notice:', fErr?.message);
+          const errMsg = (fErr?.message || '').toLowerCase();
+          if (errMsg.includes('quota') || errMsg.includes('resource-exhausted') || fErr?.code === 'resource-exhausted') {
+            sessionStorage.setItem('firestore_quota_exceeded', 'true');
+          }
         }
       }
 
-      // 2. Secondary: Fallback to REST API if same-origin
-      if (typeof window !== 'undefined' && !this.getApiBaseUrl()) {
-        const res = await fetch('/api/db/all', { headers: { 'Cache-Control': 'no-cache' } });
+      // 2. Secondary: Fallback to REST API (always permitted)
+      if (typeof window !== 'undefined') {
+        const fetchUrl = this.getFullUrl('/api/db/all');
+        const res = await fetch(fetchUrl, { headers: { 'Cache-Control': 'no-cache' } });
         if (res.ok) {
           const json = await res.json();
           if (json.success && json.data) {
@@ -367,6 +395,7 @@ class OnlineDatabaseClient {
             this.lastSyncTime = new Date().toISOString();
             this.lastSyncError = null;
             this.notifyListeners(json.data);
+            this.isSyncing = false;
             return json.data;
           }
         }
@@ -375,6 +404,7 @@ class OnlineDatabaseClient {
       return null;
     } catch (err: any) {
       this.lastSyncError = err?.message || 'Fetch failed';
+      this.isSyncing = false;
       return null;
     } finally {
       this.isSyncing = false;
