@@ -23,10 +23,12 @@ import {
   ShieldCheck,
   Target,
   Video,
-  Layers
+  Layers,
+  Trash2
 } from 'lucide-react';
 import { AIConversation, SiteSettings, AdminTab } from '../../types';
 import { storageService } from '../../services/storageService';
+import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
 interface AiConversationViewerProps {
   conversations?: AIConversation[];
@@ -62,8 +64,14 @@ export const AiConversationViewer: React.FC<AiConversationViewerProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('ALL');
   const [selectedTopicForFilter, setSelectedTopicForFilter] = useState<string | null>(null);
+  const [convToDelete, setConvToDelete] = useState<string | null>(null);
 
   const conversations = propConversations || internalConversations;
+
+  const handleDeleteConv = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    setConvToDelete(id);
+  };
 
   // Extract all user messages to calculate topic frequencies and trends
   const analyzedTopics: TopicTrend[] = useMemo(() => {
@@ -498,9 +506,18 @@ export const AiConversationViewer: React.FC<AiConversationViewerProps> = ({
                           </span>
                         </div>
 
-                        <div className="text-[10px] text-[#8A957F] flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          <span>{new Date(conv.lastActivity).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <div className="flex items-center gap-1.5">
+                          <div className="text-[10px] text-[#8A957F] flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            <span>{new Date(conv.lastActivity).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                          <button
+                            onClick={(e) => handleDeleteConv(e, conv.id)}
+                            className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                            title="এই চ্যাট সেশনটি মুছে ফেলুন"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </div>
 
@@ -548,6 +565,14 @@ export const AiConversationViewer: React.FC<AiConversationViewerProps> = ({
                       <span className="px-2.5 py-1 rounded-xl bg-[#F5F1EB] text-[#2C3327] text-xs font-bold">
                         {selectedConv.device || 'Desktop'}
                       </span>
+                      <button
+                        onClick={(e) => handleDeleteConv(e, selectedConv.id)}
+                        className="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl text-xs font-bold border border-red-200 flex items-center gap-1 transition-colors"
+                        title="এই চ্যাট সেশনটি মুছে ফেলুন"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>ডিলিট</span>
+                      </button>
                     </div>
                   </div>
 
@@ -617,6 +642,24 @@ export const AiConversationViewer: React.FC<AiConversationViewerProps> = ({
           </div>
         </div>
       )}
+      {/* Confirm Delete Modal */}
+      <ConfirmDeleteModal
+        isOpen={!!convToDelete}
+        title="চ্যাট রেকর্ড ডিলিট করুন"
+        message="আপনি কি নিশ্চিত যে এই চ্যাট হিস্ট্রি মুছে ফেলতে চান? এই অ্যাকশন বাতিল করা সম্ভব নয়।"
+        onConfirm={() => {
+          if (convToDelete) {
+            storageService.deleteAIConversation(convToDelete);
+            setInternalConversations(storageService.getAIConversations());
+            if (selectedConv?.id === convToDelete) {
+              setSelectedConv(null);
+            }
+            if (onRefresh) onRefresh();
+            setConvToDelete(null);
+          }
+        }}
+        onCancel={() => setConvToDelete(null)}
+      />
     </div>
   );
 };

@@ -26,6 +26,7 @@ import {
   SiteSettings 
 } from '../../types';
 import { storageService } from '../../services/storageService';
+import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
 interface BenchmarkManagementProps {
   settings?: SiteSettings;
@@ -71,6 +72,7 @@ export const BenchmarkManagement: React.FC<BenchmarkManagementProps> = ({
 
   // Success notifications
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<{ type: 'BENCHMARK' | 'PRICE_RANGE' | 'RECOMMENDATION'; id: string } | null>(null);
 
   useEffect(() => {
     if (initialSubTab) {
@@ -109,12 +111,7 @@ export const BenchmarkManagement: React.FC<BenchmarkManagementProps> = ({
   };
 
   const handleDeleteBenchmark = (id: string) => {
-    if (confirm('আপনি কি নিশ্চিত যে এই বেঞ্চমার্কটি মুছে ফেলতে চান?')) {
-      storageService.deleteBenchmark(id);
-      setBenchmarks(storageService.getBenchmarks(true));
-      showToast('বেঞ্চমার্ক মুছে ফেলা হয়েছে।');
-      if (onRefresh) onRefresh();
-    }
+    setItemToDelete({ type: 'BENCHMARK', id });
   };
 
   const handleSavePriceRange = (range: ProductPriceRange) => {
@@ -127,12 +124,7 @@ export const BenchmarkManagement: React.FC<BenchmarkManagementProps> = ({
   };
 
   const handleDeletePriceRange = (id: string) => {
-    if (confirm('আপনি কি নিশ্চিত যে এই প্রাইস রেঞ্জটি মুছে ফেলতে চান?')) {
-      storageService.deleteProductPriceRange(id);
-      setPriceRanges(storageService.getProductPriceRanges(false));
-      showToast('প্রাইস রেঞ্জ মুছে ফেলা হয়েছে।');
-      if (onRefresh) onRefresh();
-    }
+    setItemToDelete({ type: 'PRICE_RANGE', id });
   };
 
   const handleToggleDistrict = (d: District) => {
@@ -966,6 +958,33 @@ export const BenchmarkManagement: React.FC<BenchmarkManagementProps> = ({
           </div>
         </div>
       )}
+
+      {/* Confirm Delete Modal */}
+      <ConfirmDeleteModal
+        isOpen={!!itemToDelete}
+        title={
+          itemToDelete?.type === 'BENCHMARK' 
+            ? 'বেঞ্চমার্ক ডিলিট করুন' 
+            : 'প্রাইস রেঞ্জ ডিলিট করুন'
+        }
+        message="আপনি কি নিশ্চিত যে এই আইটেমটি চিরতরে মুছে ফেলতে চান?"
+        onConfirm={() => {
+          if (itemToDelete) {
+            if (itemToDelete.type === 'BENCHMARK') {
+              storageService.deleteBenchmark(itemToDelete.id);
+              setBenchmarks(storageService.getBenchmarks(true));
+              showToast('বেঞ্চমার্ক মুছে ফেলা হয়েছে।');
+            } else if (itemToDelete.type === 'PRICE_RANGE') {
+              storageService.deleteProductPriceRange(itemToDelete.id);
+              setPriceRanges(storageService.getProductPriceRanges(false));
+              showToast('প্রাইস রেঞ্জ মুছে ফেলা হয়েছে।');
+            }
+            if (onRefresh) onRefresh();
+            setItemToDelete(null);
+          }
+        }}
+        onCancel={() => setItemToDelete(null)}
+      />
     </div>
   );
 };

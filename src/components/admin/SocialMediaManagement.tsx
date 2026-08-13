@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { SocialLinksSettings, SocialLinkItem } from '../../types';
 import { storageService } from '../../services/storageService';
+import { onlineDbClient } from '../../services/onlineDatabaseClient';
 import { initialSocialLinksSettings } from '../../data/initialData';
 
 export const SocialMediaManagement: React.FC = () => {
@@ -47,14 +48,26 @@ export const SocialMediaManagement: React.FC = () => {
     setTimeout(() => setSuccessMessage(''), 4000);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     storageService.saveSocialLinksSettings(socialSettings);
+    storageService.notify();
+    try {
+      await onlineDbClient.flushPendingSync();
+    } catch {
+      // Background sync retry
+    }
     showNotification('সোশ্যাল মিডিয়া লিঙ্কসমূহ সফলভাবে সংরক্ষিত হয়েছে!');
   };
 
-  const handleResetDefaults = () => {
+  const handleResetDefaults = async () => {
     setSocialSettings(initialSocialLinksSettings);
     storageService.saveSocialLinksSettings(initialSocialLinksSettings);
+    storageService.notify();
+    try {
+      await onlineDbClient.flushPendingSync();
+    } catch {
+      // Background sync retry
+    }
     showNotification('সোশ্যাল লিঙ্ক ডিফল্টে রিসেট করা হয়েছে।');
   };
 

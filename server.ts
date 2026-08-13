@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
+import { GoogleGenAI } from '@google/genai';
 import { 
   loadDatabase, 
   saveDatabase, 
@@ -193,34 +194,190 @@ app.post('/api/db/restore', (req, res) => {
   }
 });
 
-// Autonomous grounded AI Chat endpoint (100% Free, Instant & No API Key Required)
+// Autonomous grounded AI Chat endpoint with Gemini & Multi-Turn History
 app.post('/api/ai/chat', async (req, res) => {
-  const { message, knowledgeContext, hasDirectKnowledge } = req.body;
+  try {
+    const { message, history, knowledgeContext } = req.body;
 
-  if (!message) {
-    return res.status(400).json({ error: 'Message is required' });
-  }
-
-  // Extract direct grounded answer helper from knowledgeContext
-  if (knowledgeContext && knowledgeContext.trim().length > 0) {
-    const parts = knowledgeContext.split(/A:\s*/g);
-    let reply = "";
-    if (parts.length > 1) {
-      reply = parts[1].split(/\n\nQ:/g)[0].trim();
-    } else {
-      reply = knowledgeContext.trim();
+    if (!message || typeof message !== 'string' || !message.trim()) {
+      return res.status(400).json({ error: 'Message is required' });
     }
-    return res.json({
-      reply,
-      isKnowledgeGap: false
-    });
-  }
 
-  // Knowledge gap fallback
-  return res.json({
-    reply: "এই বিষয়ে আমার কাছে পর্যাপ্ত তথ্য নেই। আপনার প্রশ্নটি আমাদের টিমের কাছে পাঠানো হয়েছে। আপনি চাইলে সরাসরি কথা বলতে WhatsApp বা Lead Form ব্যবহার করতে পারেন।",
-    isKnowledgeGap: true
-  });
+    // Precise Language Intent Detection Function
+    const determineLanguage = (msg: string): 'ENGLISH' | 'BENGALI' => {
+      if (!msg) return 'BENGALI';
+      const text = msg.trim();
+      const lower = text.toLowerCase();
+
+      // 1. Explicit request for Bangla/Bengali (in English or Banglish script)
+      const isBanglaRequest = /bangla|banglai|banglay|bengali|বাংলা/i.test(lower) && 
+        /answer|reply|koro|bol|bolo|likh|likhe|likho|please|pls|say|write|dao|dhao|dekhao|translate|in|speak|korus|bal|lekho/i.test(lower);
+      const isBanglaExplicitPhrase = /banglai\s*likhe\s*dao|banglay\s*lekho|bangla\s*e\s*answer|bangla\s*e\s*bolo|bangla\s*e\s*likho|bangla\s*please|bengali\s*please/i.test(lower);
+
+      if (isBanglaRequest || isBanglaExplicitPhrase) {
+        return 'BENGALI';
+      }
+
+      // 2. Explicit request for English
+      const isEnglishRequest = /english\s*(?:e|ingyeji|ingreji)?\s*(?:answer|reply|koro|bol|bolo|please|pls|say|write)|in\s*english|translate\s*to\s*english|speak\s*english|say\s*in\s*english/i.test(lower);
+      if (isEnglishRequest) {
+        return 'ENGLISH';
+      }
+
+      // 3. Bengali script presence
+      if (/[\u0980-\u09FF]/.test(text)) {
+        return 'BENGALI';
+      }
+
+      // 4. Banglish words trigger
+      const banglishWords = /\b(kivabe|koto|dibo|lagbe|kemon|bhai|bhaiya|bolo|koro|dhao|dao|amar|amr|apnar|korbo|paobo|hobe|paba|dekhao|bolun|korun|ki|kemne|koba|pabo|taka|bdt|dorkar)\b/i;
+      if (banglishWords.test(lower)) {
+        return 'BENGALI';
+      }
+
+      // 5. English phrases or pure English script
+      const englishKeywords = /\b(what|how|why|when|where|which|who|can|is|are|the|this|that|need|audit|budget|recommended|rule|rules|account|pixel|capi|tracking|setup|facebook|tiktok|ads|service|services|package|cost|management|case|study|agency|crm|store|lead|leads)\b/i;
+      if (englishKeywords.test(lower) || /^[a-zA-Z0-9\s,?.!/+=_\-()'&]+$/.test(text)) {
+        return 'ENGLISH';
+      }
+
+      return 'BENGALI';
+    };
+
+    const targetLang = determineLanguage(message);
+    const isUserMessageEnglish = targetLang === 'ENGLISH';
+
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (apiKey) {
+      try {
+        const ai = new GoogleGenAI({
+          apiKey,
+          httpOptions: {
+            headers: {
+              'User-Agent': 'aistudio-build'
+            }
+          }
+        });
+        
+        const systemInstruction = `
+You are "Sonjoy's AI Specialist", the official AI Performance Marketing Specialist & Assistant for Sonjoy Sarkar and ST Web & Ads Studio in Bangladesh.
+Your goal is to provide accurate, helpful, professional, and conversational guidance to website visitors asking about TikTok Ads, Facebook Ads, campaign budgets, Pixel & CAPI tracking, case studies, ad account setup rules, and marketing management services.
+
+CRITICAL MANDATORY LANGUAGE DIRECTIVE:
+${isUserMessageEnglish 
+  ? 'THE USER IS ASKING OR REQUESTING A RESPONSE IN ENGLISH ("' + message + '"). YOUR RESPONSE MUST BE 100% IN ENGLISH. DO NOT USE ANY BENGALI SCRIPT AT ALL. ANSWER COMPLETELY IN ENGLISH.' 
+  : 'THE USER IS ASKING OR REQUESTING A RESPONSE IN BENGALI/BANGLISH ("' + message + '"). YOUR RESPONSE MUST BE 100% IN CLEAR, NATURAL BENGALI SCRIPT (বাংলায় উত্তর দিন). DO NOT OUTPUT ENGLISH PARAGRAPHS. WRITE YOUR ENTIRE RESPONSE IN BENGALI.'}
+
+CRITICAL LANGUAGE & CONVERSATION RULES:
+1. STRICT LANGUAGE MATCHING & TRANSLATION:
+   - Always respond in the EXACT language requested or used by the user!
+   - If the user says "banglai likhe dao", "bangla e answer koro", "banglay bolo", "bangla please", "bengali please", "translate to bengali", "banglay lekho", or asks in Bengali/Banglish:
+     Inspect the conversation history carefully! Identify the VERY LAST response or topic discussed (e.g. TikTok Ads account setup rules, Pixel & CAPI tracking, TikTok Ads budget, Facebook Ads budget, etc.) and RE-EXPLAIN or TRANSLATE that exact topic into CLEAR, NATURAL BENGALI (বাংলায়)!
+     NEVER answer in English when the user says "banglai likhe dao" or requests Bengali!
+   - If the user says "english e answer koro", "in english", "english please", "reply in english", "translate to english", or asks in English:
+     Inspect the conversation history carefully! Identify the VERY LAST response or topic discussed and RE-EXPLAIN or TRANSLATE that exact topic in 100% ENGLISH!
+   - Always honor the user's explicit language request immediately!
+
+2. RECOMMENDED CAMPAIGN BUDGETS (Bangladesh E-Commerce):
+   - TikTok Ads Test Budget: $10 - $20 / day (approx ৳1,500 - ৳3,000 / day) or $150 - $300 / month.
+   - TikTok Ads Scaling Budget: $20 - $50+ / day (৳3,000 - ৳7,500+ / day).
+   - TikTok BD Benchmarks: Avg CPM ৳55 (Range ৳40-৳65), Avg CTR 2.0% (1.8-2.2%), Avg CVR 2.6% (2.3-3.0%), Avg CPA ৳106 (৳90-৳125 BDT) per order with UGC video ads.
+   - Facebook Ads Test Budget: $15 - $30 / day (approx ৳2,250 - ৳4,500 / day).
+   - Facebook BD Benchmarks: Avg CPM ৳215 (Range ৳180-৳250), Avg CPA ৳600 (৳350-৳900 BDT).
+   - Category Budgets:
+     * Fashion/Clothing: $150–$500/mo (৳22,500–৳75,000)
+     * Cosmetics/Beauty: $200–$600/mo (৳30,000–৳90,000)
+     * Gadgets/Tech: $100–$400/mo (৳15,000–৳60,000)
+
+3. SERVICES & FEES:
+   - Campaign Management Fee: ৳15,000 - ৳25,000 / month depending on spend scale.
+   - One-time Pixel & CAPI Setup Fee: ৳5,000 - ৳8,000.
+   - Includes: Business Manager setup, Pixel/CAPI event deduplication (PageView, ViewContent, AddToCart, InitiateCheckout, Purchase), UGC video script hooks, CBO scaling, weekly analytics.
+
+4. CONSOLIDATED CASE STUDY AUDIT METRICS:
+   - Audited 126 TikTok Ad Groups, ৳1,16,619 total spend, 3.66M impressions, 18,698 customer conversations at ৳6.24/conv, and 1,316 website leads at ৳88.61/lead.
+
+5. CONVERSATIONAL LEAD CAPTURE:
+   - Do NOT output or render HTML lead forms.
+   - Encourage visitors to share their WhatsApp number so Sonjoy's team can send a personalized strategy audit.
+   - If the user provides a WhatsApp/phone number, acknowledge it warmly and ask for their Name and Business Category if not yet provided.
+   - If Name and WhatsApp Number are provided, confirm that their details have been registered for a free strategy consultation on WhatsApp.
+
+6. DIRECT RELEVANCE:
+   - Answer the question directly! Do NOT output generic introductions or bios unless explicitly asked "Who is Sonjoy?".
+`;
+
+        // Sanitize multi-turn conversation history to ensure strictly alternating user and model roles for Gemini API
+        const contents: any[] = [];
+        if (Array.isArray(history) && history.length > 0) {
+          history.slice(-12).forEach((item: any) => {
+            if (item.text && item.sender) {
+              const role = item.sender === 'user' ? 'user' : 'model';
+              if (contents.length > 0 && contents[contents.length - 1].role === role) {
+                contents[contents.length - 1].parts[0].text += '\n' + item.text;
+              } else {
+                contents.push({
+                  role,
+                  parts: [{ text: item.text }]
+                });
+              }
+            }
+          });
+        }
+
+        // Add the current user query, combining if the last turn was also user
+        if (contents.length > 0 && contents[contents.length - 1].role === 'user') {
+          contents[contents.length - 1].parts[0].text += '\n' + message;
+        } else {
+          contents.push({
+            role: 'user',
+            parts: [{ text: message }]
+          });
+        }
+
+        const response = await ai.models.generateContent({
+          model: 'gemini-3.6-flash',
+          contents,
+          config: {
+            systemInstruction,
+            temperature: 0.3
+          }
+        });
+
+        const reply = response.text || '';
+        if (reply.trim().length > 0) {
+          return res.json({
+            reply: reply.trim(),
+            isKnowledgeGap: false,
+            source: 'gemini'
+          });
+        }
+      } catch (geminiErr: any) {
+        console.warn('Gemini chat API call failed, falling back:', geminiErr?.message || geminiErr);
+      }
+    }
+
+    // Fallback if no API key or Gemini error
+    if (knowledgeContext && knowledgeContext.trim().length > 0) {
+      const parts = knowledgeContext.split(/A:\s*/g);
+      let reply = "";
+      if (parts.length > 1) {
+        reply = parts[1].split(/\n\nQ:/g)[0].trim();
+      } else {
+        reply = knowledgeContext.trim();
+      }
+      return res.json({ reply, isKnowledgeGap: false, source: 'grounded' });
+    }
+
+    return res.json({
+      reply: "আমাদের সার্ভিস, টিকটক বা ফেসবুক অ্যাডস বাজেট সংক্রান্ত আপনার প্রশ্নের বিস্তারিত তথ্য পাওয়ার জন্য সরাসরি WhatsApp-এ যোগাযোগ করতে পারেন অথবা Lead Form পূরণ করে ফ্রি অডিট নিতে পারেন।",
+      isKnowledgeGap: true,
+      source: 'fallback'
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Internal AI chat error' });
+  }
 });
 
 // Dynamic SEO robots.txt endpoint

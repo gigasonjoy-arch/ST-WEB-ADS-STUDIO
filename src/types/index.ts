@@ -130,7 +130,7 @@ export interface CaseStudy {
   updatedAt: string;
 }
 
-export type CreativeType = 'UGC' | 'Product Video' | 'Image' | 'Professional Video';
+export type CreativeType = 'UGC' | 'Product Video' | 'Image' | 'Professional Video' | 'Spark Ads' | 'Studio Video' | 'Static Image' | 'Influencer / Creator Video';
 export type DurationOption = '7 days' | '14 days' | '30 days' | 'Custom';
 export type ConversionGoal = 
   | 'Purchase'
@@ -384,7 +384,7 @@ export interface VisitorJourney {
 
 export interface SocialLink {
   id: string;
-  platform: 'Facebook' | 'LinkedIn' | 'YouTube' | 'TikTok' | 'WhatsApp' | 'Other';
+  platform: 'Facebook' | 'LinkedIn' | 'YouTube' | 'TikTok' | 'WhatsApp' | 'Instagram' | 'X' | 'Telegram' | 'Other';
   label: string;
   url: string;
   enabled: boolean;
@@ -670,6 +670,7 @@ export interface SchemaMarkupSettings {
 }
 
 export interface SiteSettings {
+  defaultLanguage?: 'en' | 'bn';
   brandName: string;
   brandNameBn?: string;
   personalName: string;
@@ -900,6 +901,8 @@ export type AdminAiActionType =
   | 'BULK_CREATE_CASE_STUDIES'
   | 'PUBLISH_DRAFT_CASE_STUDIES'
   | 'BULK_ADD_KNOWLEDGE_BASE'
+  | 'UPDATE_KNOWLEDGE_ITEM'
+  | 'DISABLE_KNOWLEDGE_ITEM'
   | 'RESOLVE_KNOWLEDGE_GAPS'
   | 'UPDATE_CALCULATOR_BENCHMARK'
   | 'UPDATE_EXCHANGE_RATE'

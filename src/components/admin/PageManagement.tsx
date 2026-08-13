@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CustomPage, PageType, PageTemplate, PageStatus, HomePageSettings } from '../../types';
 import { storageService } from '../../services/storageService';
+import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { 
   FileText, 
   Plus, 
@@ -38,6 +39,7 @@ export const PageManagement: React.FC<PageManagementProps> = ({ onPreviewPage })
   const [searchTerm, setSearchTerm] = useState('');
   const [editingPage, setEditingPage] = useState<CustomPage | null>(null);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [pageToDelete, setPageToDelete] = useState<CustomPage | null>(null);
 
   useEffect(() => {
     loadPages();
@@ -108,16 +110,12 @@ export const PageManagement: React.FC<PageManagementProps> = ({ onPreviewPage })
     setEditingPage(null);
   };
 
-  const handleDelete = (id: string, isSystemPage?: boolean) => {
-    if (isSystemPage) {
-      alert('সিস্টেম পেজগুলো মুছে ফেলা যাবে না। তবে আপনি চাইলে স্ট্যাটাস পরিবর্তন করে Disabled রাখতে পারেন।');
+  const handleDelete = (page: CustomPage) => {
+    if (page.isSystemPage) {
+      showToast('সিস্টেম পেজগুলো মুছে ফেলা যাবে না। তবে আপনি চাইলে স্ট্যাটাস পরিবর্তন করে Disabled রাখতে পারেন।', 'error');
       return;
     }
-    if (window.confirm('আপনি কি নিশ্চিত যে এই পেজটি মুছে ফেলতে চান?')) {
-      storageService.deleteCustomPage(id);
-      loadPages();
-      showToast('পেজটি মুছে ফেলা হয়েছে।');
-    }
+    setPageToDelete(page);
   };
 
   const handleDuplicate = (page: CustomPage) => {
@@ -374,7 +372,7 @@ export const PageManagement: React.FC<PageManagementProps> = ({ onPreviewPage })
 
                           {!page.isSystemPage && (
                             <button
-                              onClick={() => handleDelete(page.id, page.isSystemPage)}
+                              onClick={() => handleDelete(page)}
                               title="মুছে ফেলুন"
                               className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors"
                             >
@@ -804,6 +802,23 @@ export const PageManagement: React.FC<PageManagementProps> = ({ onPreviewPage })
 
         </div>
       )}
+
+      {/* Confirm Delete Modal */}
+      <ConfirmDeleteModal
+        isOpen={!!pageToDelete}
+        itemName={pageToDelete?.titleBn || pageToDelete?.titleEn}
+        title="পেজ মুছে ফেলুন"
+        message="আপনি কি নিশ্চিত যে এই কাস্টম পেজটি স্থায়ীভাবে মুছে ফেলতে চান?"
+        onConfirm={() => {
+          if (pageToDelete) {
+            storageService.deleteCustomPage(pageToDelete.id);
+            loadPages();
+            showToast('পেজটি মুছে ফেলা হয়েছে।');
+            setPageToDelete(null);
+          }
+        }}
+        onCancel={() => setPageToDelete(null)}
+      />
 
     </div>
   );

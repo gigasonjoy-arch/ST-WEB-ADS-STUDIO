@@ -110,6 +110,8 @@ const STORAGE_KEYS = {
   RECOMMENDATIONS: 'st_recommendations_v1',
   PRODUCT_PRICE_RANGES: 'st_product_price_ranges_v1',
   LEADS: 'st_leads_v1',
+  DELETED_LEADS: 'st_deleted_leads_v1',
+  DELETED_ITEMS: 'st_deleted_items_v1',
   KNOWLEDGE_BASE: 'st_knowledge_base_v1',
   KNOWLEDGE_GAPS: 'st_knowledge_gaps_v1',
   AI_CONVERSATIONS: 'st_ai_conversations_v1',
@@ -124,7 +126,8 @@ const STORAGE_KEYS = {
   SITEMAP_SETTINGS: 'st_sitemap_settings_v1',
   AUDIT_LOGS: 'st_audit_logs_v1',
   VISITOR_ID: 'st_visitor_id_v1',
-  LAST_LEAD_INFO: 'st_last_lead_info_v1'
+  LAST_LEAD_INFO: 'st_last_lead_info_v1',
+  ADMIN_PRIVATE_INSTRUCTIONS: 'st_admin_private_instructions_v1'
 };
 
 const KEY_TO_COLLECTION_MAP: Record<string, string> = {
@@ -152,6 +155,7 @@ const KEY_TO_COLLECTION_MAP: Record<string, string> = {
   [STORAGE_KEYS.ROBOTS_SETTINGS]: 'robotsSettings',
   [STORAGE_KEYS.SITEMAP_SETTINGS]: 'sitemapSettings',
   [STORAGE_KEYS.AUDIT_LOGS]: 'auditLogs',
+  [STORAGE_KEYS.ADMIN_PRIVATE_INSTRUCTIONS]: 'adminPrivateInstructions',
 };
 
 class StorageService {
@@ -178,6 +182,51 @@ class StorageService {
     }
   }
 
+  private getDeletedLeadIds(): Set<string> {
+    const list = this.getItem<string[]>(STORAGE_KEYS.DELETED_LEADS, []);
+    return new Set(Array.isArray(list) ? list : []);
+  }
+
+  private getDeletedItemIds(): Set<string> {
+    const itemsList = this.getItem<string[]>(STORAGE_KEYS.DELETED_ITEMS, []);
+    const leadsList = this.getItem<string[]>(STORAGE_KEYS.DELETED_LEADS, []);
+    return new Set([
+      ...(Array.isArray(itemsList) ? itemsList : []),
+      ...(Array.isArray(leadsList) ? leadsList : [])
+    ]);
+  }
+
+  private addDeletedItemId(id: string): void {
+    if (!id) return;
+    const current = Array.from(this.getDeletedItemIds());
+    if (!current.includes(id)) {
+      current.push(id);
+      this.setItem(STORAGE_KEYS.DELETED_ITEMS, current);
+    }
+  }
+
+  private removeDeletedItemId(id: string): void {
+    if (!id) return;
+    const current = Array.from(this.getDeletedItemIds()).filter(i => i !== id);
+    this.setItem(STORAGE_KEYS.DELETED_ITEMS, current);
+    const currentLeads = Array.from(this.getDeletedLeadIds()).filter(i => i !== id);
+    this.setItem(STORAGE_KEYS.DELETED_LEADS, currentLeads);
+  }
+
+  private addDeletedLeadId(id: string): void {
+    const current = Array.from(this.getDeletedLeadIds());
+    if (!current.includes(id)) {
+      current.push(id);
+      this.setItem(STORAGE_KEYS.DELETED_LEADS, current);
+    }
+    this.addDeletedItemId(id);
+  }
+
+  private removeDeletedLeadId(id: string): void {
+    const current = Array.from(this.getDeletedLeadIds()).filter(i => i !== id);
+    this.setItem(STORAGE_KEYS.DELETED_LEADS, current);
+  }
+
   private initOnlineDbSync(): void {
     if (this.isOnlineDbSyncActive) return;
     this.isOnlineDbSyncActive = true;
@@ -189,10 +238,15 @@ class StorageService {
       let hasChanges = false;
       this.isApplyingRemoteUpdate = true;
       try {
+        const deletedItemIds = this.getDeletedItemIds();
         Object.entries(KEY_TO_COLLECTION_MAP).forEach(([storageKey, collectionName]) => {
           if (remoteDb[collectionName] !== undefined && remoteDb[collectionName] !== null) {
             try {
-              const remoteStr = JSON.stringify(remoteDb[collectionName]);
+              let remoteVal = remoteDb[collectionName];
+              if (Array.isArray(remoteVal)) {
+                remoteVal = remoteVal.filter((item: any) => item && item.id && !deletedItemIds.has(String(item.id)));
+              }
+              const remoteStr = JSON.stringify(remoteVal);
               const localStr = this.getRawItem(storageKey);
               if (remoteStr !== localStr) {
                 this.setRawItem(storageKey, remoteStr);
@@ -243,11 +297,15 @@ class StorageService {
       onSnapshot(
         collection(db, 'leads'),
         (snapshot) => {
+          const deletedIds = this.getDeletedLeadIds();
+
           if (!snapshot || snapshot.empty) {
             // If firestore is empty, push existing local leads up to Cloud
-            const localLeads = this.getItem<Lead[]>(STORAGE_KEYS.LEADS, []);
+            const localLeads = this.getLeads();
             if (localLeads.length > 0) {
-              localLeads.forEach(l => syncLeadToFirestore(l));
+              localLeads.forEach(l => {
+                if (!deletedIds.has(l.id)) syncLeadToFirestore(l);
+              });
             }
             return;
           }
@@ -255,9 +313,15 @@ class StorageService {
           const remoteLeads: Lead[] = [];
           snapshot.forEach((docSnap) => {
             const data = docSnap.data();
-            if (data && (data.id || docSnap.id)) {
+            const docId = data?.id || docSnap.id;
+            if (docId && deletedIds.has(docId)) {
+              // Clean up zombie doc from Firestore
+              deleteDoc(doc(db, 'leads', docId)).catch(() => {});
+              return;
+            }
+            if (data && docId) {
               remoteLeads.push({
-                id: data.id || docSnap.id,
+                id: docId,
                 name: data.name || 'Anonymous',
                 whatsapp: data.phone || data.whatsapp || '',
                 socialLink: data.socialLink || '',
@@ -281,14 +345,16 @@ class StorageService {
             }
           });
 
-          // Merge remote leads with local leads
-          const localLeads = this.getItem<Lead[]>(STORAGE_KEYS.LEADS, []);
+          // Merge remote leads with local leads, excluding deleted IDs
+          const localLeads = this.getLeads();
           const mergedMap = new Map<string, Lead>();
 
-          // Add local leads first
-          localLeads.forEach(l => mergedMap.set(l.id, l));
-          // Remote leads overwrite or augment
-          remoteLeads.forEach(r => mergedMap.set(r.id, r));
+          localLeads.forEach(l => {
+            if (!deletedIds.has(l.id)) mergedMap.set(l.id, l);
+          });
+          remoteLeads.forEach(r => {
+            if (!deletedIds.has(r.id)) mergedMap.set(r.id, r);
+          });
 
           const mergedLeads = Array.from(mergedMap.values()).sort(
             (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -297,9 +363,9 @@ class StorageService {
           this.setItem(STORAGE_KEYS.LEADS, mergedLeads);
           this.notify();
 
-          // Push any local leads that are missing in Firestore
+          // Push any local leads that are missing in Firestore (and not deleted)
           localLeads.forEach(l => {
-            if (!snapshot.docs.some(d => d.id === l.id)) {
+            if (!deletedIds.has(l.id) && !snapshot.docs.some(d => d.id === l.id)) {
               syncLeadToFirestore(l);
             }
           });
@@ -341,7 +407,7 @@ class StorageService {
     return () => this.listeners.delete(listener);
   }
 
-  private notify() {
+  public notify() {
     this.listeners.forEach(cb => cb());
   }
 
@@ -609,7 +675,31 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
 
   public updateSiteSettings(settings: Partial<SiteSettings>): void {
     const current = this.getSiteSettings();
-    const updated = { ...current, ...settings };
+    const updated: SiteSettings = {
+      ...current,
+      ...settings,
+      whatsapp: settings.whatsapp
+        ? { ...(current.whatsapp || {}), ...settings.whatsapp }
+        : current.whatsapp,
+      seo: settings.seo
+        ? { ...(current.seo || {}), ...settings.seo }
+        : current.seo,
+      gtm: settings.gtm
+        ? { ...(current.gtm || {}), ...settings.gtm }
+        : current.gtm,
+      sectionVisibility: settings.sectionVisibility
+        ? { ...(current.sectionVisibility || {}), ...settings.sectionVisibility }
+        : current.sectionVisibility,
+      header: settings.header
+        ? { ...(current.header || {}), ...settings.header }
+        : current.header,
+      socialLinks: settings.socialLinks
+        ? { ...(current.socialLinks || initialSocialLinksSettings), ...settings.socialLinks }
+        : current.socialLinks,
+      schemaMarkup: settings.schemaMarkup
+        ? { ...(current.schemaMarkup || {}), ...settings.schemaMarkup }
+        : current.schemaMarkup
+    };
     this.setItem(STORAGE_KEYS.SITE_SETTINGS, updated);
     
     // Auto-inject updated schema if modified
@@ -628,12 +718,38 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
 
   public saveSocialLinksSettings(socialLinks: Partial<SocialLinksSettings>): void {
     const current = this.getSiteSettings();
-    const updatedSocial = {
+    const existingSocial = current.socialLinks || initialSocialLinksSettings;
+    const updatedSocial: SocialLinksSettings = {
       ...initialSocialLinksSettings,
-      ...(current.socialLinks || {}),
+      ...existingSocial,
       ...socialLinks
     };
+
+    // 1. Save to siteSettings
     this.updateSiteSettings({ socialLinks: updatedSocial });
+
+    // 2. Map to SocialLink[] array and save to STORAGE_KEYS.SOCIAL_LINKS collection
+    const mappedLinks: SocialLink[] = [
+      { id: 'sl-fb', platform: 'Facebook', label: 'Facebook', url: updatedSocial.facebook || '', enabled: !!updatedSocial.facebook, sortOrder: 1 },
+      { id: 'sl-tt', platform: 'TikTok', label: 'TikTok', url: updatedSocial.tiktok || '', enabled: !!updatedSocial.tiktok, sortOrder: 2 },
+      { id: 'sl-yt', platform: 'YouTube', label: 'YouTube', url: updatedSocial.youtube || '', enabled: !!updatedSocial.youtube, sortOrder: 3 },
+      { id: 'sl-li', platform: 'LinkedIn', label: 'LinkedIn', url: updatedSocial.linkedin || '', enabled: !!updatedSocial.linkedin, sortOrder: 4 },
+      { id: 'sl-wa', platform: 'WhatsApp', label: 'WhatsApp', url: updatedSocial.whatsapp || '', enabled: !!updatedSocial.whatsapp, sortOrder: 5 },
+      ...(updatedSocial.customLinks || []).map((cl, idx) => ({
+        id: cl.id || `custom-sl-${idx}`,
+        platform: 'Other' as const,
+        label: cl.label,
+        url: cl.url,
+        enabled: cl.enabled,
+        sortOrder: 10 + idx
+      }))
+    ];
+    this.setItem(STORAGE_KEYS.SOCIAL_LINKS, mappedLinks);
+
+    // 3. Queue and Force flush to Cloud Database / Firestore to guarantee real-time sync
+    onlineDbClient.queueCollectionSync(STORAGE_KEYS.SOCIAL_LINKS, mappedLinks);
+    onlineDbClient.flushPendingSync();
+
     this.logAudit('SAVE_SOCIAL_LINKS', 'SocialLinks', 'Updated social media channels & links');
   }
 
@@ -697,15 +813,21 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
   // --- WordPress-like Custom Page Management ---
   public getCustomPages(includeDrafts: boolean = false): CustomPage[] {
     const all = this.getItem<CustomPage[]>(STORAGE_KEYS.CUSTOM_PAGES, initialCustomPages);
+    const deletedItemIds = this.getDeletedItemIds();
     
-    // Auto-hydrate any missing default/system pages from initialCustomPages
+    // Filter out deleted custom pages
+    const filteredAll = all.filter(p => p && p.id && !deletedItemIds.has(p.id));
+
+    // Auto-hydrate missing default/system pages ONLY IF NOT DELETED
     let hasMergedNew = false;
-    const mergedList = [...all];
+    const mergedList = [...filteredAll];
     initialCustomPages.forEach(initialPg => {
-      const exists = mergedList.some(p => p.id === initialPg.id || p.slug.toLowerCase() === initialPg.slug.toLowerCase());
-      if (!exists) {
-        mergedList.push(initialPg);
-        hasMergedNew = true;
+      if (!deletedItemIds.has(initialPg.id)) {
+        const exists = mergedList.some(p => p.id === initialPg.id || p.slug.toLowerCase() === initialPg.slug.toLowerCase());
+        if (!exists) {
+          mergedList.push(initialPg);
+          hasMergedNew = true;
+        }
       }
     });
 
@@ -723,15 +845,17 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
     const all = this.getCustomPages(includeDrafts);
     const found = all.find(p => p.slug.toLowerCase() === cleanSlug);
     if (found) return found;
-    // Fallback directly to initialCustomPages
+    const deletedItemIds = this.getDeletedItemIds();
+    // Fallback directly to initialCustomPages if not deleted
     const initialMatch = initialCustomPages.find(p => p.slug.toLowerCase() === cleanSlug);
-    if (initialMatch && (includeDrafts || initialMatch.status === 'PUBLISHED')) {
+    if (initialMatch && !deletedItemIds.has(initialMatch.id) && (includeDrafts || initialMatch.status === 'PUBLISHED')) {
       return initialMatch;
     }
     return null;
   }
 
   public saveCustomPage(page: CustomPage): void {
+    if (page?.id) this.removeDeletedItemId(page.id);
     const all = this.getItem<CustomPage[]>(STORAGE_KEYS.CUSTOM_PAGES, initialCustomPages);
     const idx = all.findIndex(p => p.id === page.id);
     const now = new Date().toISOString();
@@ -756,18 +880,24 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
       console.warn('System pages cannot be deleted, but status can be changed to DISABLED');
       return;
     }
+    this.addDeletedItemId(id);
     const filtered = all.filter(p => p.id !== id);
     this.setItem(STORAGE_KEYS.CUSTOM_PAGES, filtered);
+    onlineDbClient.flushPendingSync();
     this.logAudit('DELETE_PAGE', 'CustomPage', `Deleted page: ${id}`);
+    this.notify();
   }
 
   // --- Social Links ---
   public getSocialLinks(): SocialLink[] {
+    const deletedItemIds = this.getDeletedItemIds();
     return this.getItem<SocialLink[]>(STORAGE_KEYS.SOCIAL_LINKS, initialSocialLinks)
+      .filter(l => l && l.id && !deletedItemIds.has(l.id))
       .sort((a, b) => a.sortOrder - b.sortOrder);
   }
 
   public saveSocialLink(link: SocialLink): void {
+    if (link?.id) this.removeDeletedItemId(link.id);
     const links = this.getSocialLinks();
     const idx = links.findIndex(l => l.id === link.id);
     if (idx >= 0) {
@@ -780,14 +910,19 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
   }
 
   public deleteSocialLink(id: string): void {
+    this.addDeletedItemId(id);
     const links = this.getSocialLinks().filter(l => l.id !== id);
     this.setItem(STORAGE_KEYS.SOCIAL_LINKS, links);
+    onlineDbClient.flushPendingSync();
     this.logAudit('DELETE_SOCIAL_LINK', 'SocialLink', `Deleted link ${id}`);
+    this.notify();
   }
 
   // --- Case Studies ---
   public getCaseStudies(includeDrafts: boolean = false): CaseStudy[] {
-    const all = this.getItem<CaseStudy[]>(STORAGE_KEYS.CASE_STUDIES, initialCaseStudies);
+    const deletedItemIds = this.getDeletedItemIds();
+    const all = this.getItem<CaseStudy[]>(STORAGE_KEYS.CASE_STUDIES, initialCaseStudies)
+      .filter(c => c && c.id && !deletedItemIds.has(c.id));
     // Normalize and ensure bilingual fields exist
     const normalized = all.map(c => {
       const initialMatch = initialCaseStudies.find(ic => ic.id === c.id);
@@ -811,6 +946,7 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
   }
 
   public saveCaseStudy(caseStudy: CaseStudy): void {
+    if (caseStudy?.id) this.removeDeletedItemId(caseStudy.id);
     const items = this.getItem<CaseStudy[]>(STORAGE_KEYS.CASE_STUDIES, initialCaseStudies);
     const idx = items.findIndex(c => c.id === caseStudy.id);
     const updated = { ...caseStudy, updatedAt: new Date().toISOString() };
@@ -824,9 +960,12 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
   }
 
   public deleteCaseStudy(id: string): void {
+    this.addDeletedItemId(id);
     const items = this.getItem<CaseStudy[]>(STORAGE_KEYS.CASE_STUDIES, initialCaseStudies).filter(c => c.id !== id);
     this.setItem(STORAGE_KEYS.CASE_STUDIES, items);
+    onlineDbClient.flushPendingSync();
     this.logAudit('DELETE_CASE_STUDY', 'CaseStudy', `Deleted case study ${id}`);
+    this.notify();
   }
 
   // --- Districts & Locations ---
@@ -847,35 +986,59 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
 
   // --- Benchmarks & Calculation Engine ---
   public getBenchmarks(includeInactive: boolean = false): CalculatorBenchmark[] {
-    const all = this.getItem<CalculatorBenchmark[]>(STORAGE_KEYS.BENCHMARKS, initialBenchmarks);
+    const deletedItemIds = this.getDeletedItemIds();
+    let stored = this.getItem<CalculatorBenchmark[]>(STORAGE_KEYS.BENCHMARKS, initialBenchmarks);
+    
+    // Auto-merge missing initial benchmarks into stored array
+    let hasNew = false;
+    for (const initBm of initialBenchmarks) {
+      if (!deletedItemIds.has(initBm.id) && !stored.some(b => b.id === initBm.id)) {
+        stored.push(initBm);
+        hasNew = true;
+      }
+    }
+    if (hasNew) {
+      this.setItem(STORAGE_KEYS.BENCHMARKS, stored);
+      onlineDbClient.flushPendingSync();
+    }
+
+    const all = stored.filter(b => b && b.id && !deletedItemIds.has(b.id));
     if (includeInactive) return all;
     return all.filter(b => b.active);
   }
 
   public saveBenchmark(bm: CalculatorBenchmark): void {
+    if (bm?.id) this.removeDeletedItemId(bm.id);
     const items = this.getItem<CalculatorBenchmark[]>(STORAGE_KEYS.BENCHMARKS, initialBenchmarks);
     const idx = items.findIndex(b => b.id === bm.id);
     if (idx >= 0) items[idx] = bm;
     else items.unshift(bm);
     this.setItem(STORAGE_KEYS.BENCHMARKS, items);
+    onlineDbClient.flushPendingSync();
     this.logAudit('SAVE_BENCHMARK', 'Benchmark', `Saved ${bm.platform} benchmark for ${bm.productCategory}`);
   }
 
   public deleteBenchmark(id: string): void {
+    this.addDeletedItemId(id);
     const items = this.getItem<CalculatorBenchmark[]>(STORAGE_KEYS.BENCHMARKS, initialBenchmarks).filter(b => b.id !== id);
     this.setItem(STORAGE_KEYS.BENCHMARKS, items);
+    onlineDbClient.flushPendingSync();
     this.logAudit('DELETE_BENCHMARK', 'Benchmark', `Deleted benchmark ${id}`);
+    this.notify();
   }
 
   // --- Product Price Ranges ---
   public getProductPriceRanges(includeInactive: boolean = false): ProductPriceRange[] {
-    const all = this.getItem<ProductPriceRange[]>(STORAGE_KEYS.PRODUCT_PRICE_RANGES, initialProductPriceRanges);
+    const deletedItemIds = this.getDeletedItemIds();
+    const all = this.getItem<ProductPriceRange[]>(STORAGE_KEYS.PRODUCT_PRICE_RANGES, initialProductPriceRanges)
+      .filter(r => r && r.id && !deletedItemIds.has(r.id));
     const sorted = [...all].sort((a, b) => a.sortOrder - b.sortOrder);
     if (includeInactive) return sorted;
     return sorted.filter(r => r.active);
   }
 
   public saveProductPriceRange(range: ProductPriceRange): void {
+    if (range?.id) this.removeDeletedItemId(range.id);
     const items = this.getItem<ProductPriceRange[]>(STORAGE_KEYS.PRODUCT_PRICE_RANGES, initialProductPriceRanges);
     const idx = items.findIndex(r => r.id === range.id);
     if (idx >= 0) {
@@ -889,8 +1052,10 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
   }
 
   public deleteProductPriceRange(id: string): void {
+    this.addDeletedItemId(id);
     const items = this.getItem<ProductPriceRange[]>(STORAGE_KEYS.PRODUCT_PRICE_RANGES, initialProductPriceRanges).filter(r => r.id !== id);
     this.setItem(STORAGE_KEYS.PRODUCT_PRICE_RANGES, items);
+    onlineDbClient.flushPendingSync();
     this.logAudit('DELETE_PRICE_RANGE', 'ProductPriceRange', `Deleted price tier ${id}`);
     this.notify();
   }
@@ -915,6 +1080,37 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
   }
 
   /**
+   * Helper function for category matching with fuzzy synonyms
+   */
+  private matchCategory(catA: string, catB: string): boolean {
+    if (!catA || !catB) return false;
+    const a = catA.toLowerCase().trim();
+    const b = catB.toLowerCase().trim();
+    if (a === b) return true;
+    if (a.includes(b) || b.includes(a)) return true;
+    
+    const isFashion = (s: string) => s.includes('fashion') || s.includes('apparel') || s.includes('clothing') || s.includes('wear');
+    const isBeauty = (s: string) => s.includes('beauty') || s.includes('cosmetic') || s.includes('skin') || s.includes('makeup');
+    const isTech = (s: string) => s.includes('elec') || s.includes('gadget') || s.includes('tech') || s.includes('mobile');
+    const isFood = (s: string) => s.includes('food') || s.includes('grocery') || s.includes('organic') || s.includes('beverage');
+    const isEdu = (s: string) => s.includes('edu') || s.includes('course') || s.includes('service') || s.includes('tuition');
+    const isTravel = (s: string) => s.includes('travel') || s.includes('tour') || s.includes('trip') || s.includes('hotel');
+    const isHome = (s: string) => s.includes('home') || s.includes('decor') || s.includes('furniture') || s.includes('living');
+    const isRealEstate = (s: string) => s.includes('real') || s.includes('estate') || s.includes('flat') || s.includes('plot');
+
+    if (isFashion(a) && isFashion(b)) return true;
+    if (isBeauty(a) && isBeauty(b)) return true;
+    if (isTech(a) && isTech(b)) return true;
+    if (isFood(a) && isFood(b)) return true;
+    if (isEdu(a) && isEdu(b)) return true;
+    if (isTravel(a) && isTravel(b)) return true;
+    if (isHome(a) && isHome(b)) return true;
+    if (isRealEstate(a) && isRealEstate(b)) return true;
+
+    return false;
+  }
+
+  /**
    * Hierarchical Benchmark Selection Engine
    * Exact Match -> Category+Platform+Creative+Goal -> Category+Platform+Goal -> Platform+Goal -> Platform Default
    */
@@ -923,7 +1119,7 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
     
     // Level 1: Exact Match (Location + Category + Platform + Creative + Goal)
     let match = all.find(b => 
-      b.productCategory.toLowerCase() === input.productCategory.toLowerCase() &&
+      this.matchCategory(b.productCategory, input.productCategory) &&
       b.creativeType === input.creativeType &&
       b.conversionGoal === input.conversionGoal &&
       (b.location === input.location || b.location === 'All Bangladesh')
@@ -932,7 +1128,7 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
 
     // Level 2: Category + Platform + Creative + Goal
     match = all.find(b =>
-      b.productCategory.toLowerCase() === input.productCategory.toLowerCase() &&
+      this.matchCategory(b.productCategory, input.productCategory) &&
       b.creativeType === input.creativeType &&
       b.conversionGoal === input.conversionGoal
     );
@@ -940,16 +1136,20 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
 
     // Level 3: Platform + Category + Goal
     match = all.find(b =>
-      b.productCategory.toLowerCase() === input.productCategory.toLowerCase() &&
+      this.matchCategory(b.productCategory, input.productCategory) &&
       b.conversionGoal === input.conversionGoal
     );
     if (match) return { benchmark: match, matchLevel: 'Category + Goal Benchmark Match' };
 
-    // Level 4: Platform + Goal
+    // Level 4: Platform + Category
+    match = all.find(b => this.matchCategory(b.productCategory, input.productCategory));
+    if (match) return { benchmark: match, matchLevel: 'Category-Level Platform Benchmark' };
+
+    // Level 5: Platform + Goal
     match = all.find(b => b.conversionGoal === input.conversionGoal);
     if (match) return { benchmark: match, matchLevel: 'Goal-Level Platform Benchmark' };
 
-    // Level 5: Platform Fallback
+    // Level 6: Platform Fallback
     const fallback = all[0] || initialBenchmarks[0];
     return { benchmark: fallback, matchLevel: 'Platform Default Baseline (Market Average)' };
   }
@@ -1164,9 +1364,10 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
 
   // --- Lead Management CRM ---
   public getLeads(): Lead[] {
-    return this.getItem<Lead[]>(STORAGE_KEYS.LEADS, []).sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    const deletedIds = this.getDeletedLeadIds();
+    return this.getItem<Lead[]>(STORAGE_KEYS.LEADS, [])
+      .filter(l => l && l.id && !deletedIds.has(l.id))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
   public getLeadById(id: string): Lead | undefined {
@@ -1217,6 +1418,10 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
           return lPhone ? lPhone.replace(/\D/g, '') === cleanPhone : false;
         })
       : undefined;
+
+    if (existing && existing.id) {
+      this.removeDeletedLeadId(existing.id);
+    }
 
     const timestamp = new Date().toISOString();
     const activity: LeadActivity = {
@@ -1279,6 +1484,7 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
         visitorId
       };
 
+      this.removeDeletedLeadId(newLead.id);
       leads.unshift(newLead);
       this.setItem(STORAGE_KEYS.LEADS, leads);
       this.setSavedLeadInfo({
@@ -1333,14 +1539,32 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
   }
 
   public deleteLead(id: string): void {
-    const leads = this.getLeads().filter(l => l.id !== id);
+    this.addDeletedLeadId(id);
+
+    const leads = this.getItem<Lead[]>(STORAGE_KEYS.LEADS, []).filter(l => l && l.id !== id);
     this.setItem(STORAGE_KEYS.LEADS, leads);
     this.logAudit('DELETE_LEAD', 'Lead', `Deleted lead ID: ${id}`);
+    onlineDbClient.queueCollectionSync('leads', leads);
+
     try {
       if (db) {
         deleteDoc(doc(db, 'leads', id)).catch(() => {});
+        const docRef = doc(db, 'system_collections', 'leads');
+        setDoc(docRef, {
+          data: leads,
+          name: 'leads',
+          count: leads.length,
+          updatedAt: new Date().toISOString()
+        }).catch(() => {});
       }
     } catch {}
+
+    try {
+      if (typeof window !== 'undefined') {
+        fetch(`/api/db/collection/leads/${id}`, { method: 'DELETE' }).catch(() => {});
+      }
+    } catch {}
+
     this.notify();
   }
 
@@ -1354,9 +1578,18 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
         };
       }
 
+      const deletedIds = this.getDeletedLeadIds();
+
+      // Delete zombie lead docs from Firestore
+      for (const delId of Array.from(deletedIds)) {
+        await deleteDoc(doc(db, 'leads', delId)).catch(() => {});
+      }
+
       const leads = this.getLeads();
       for (const lead of leads) {
-        await syncLeadToFirestore(lead);
+        if (!deletedIds.has(lead.id)) {
+          await syncLeadToFirestore(lead);
+        }
       }
 
       // Fetch all remote leads from Firestore
@@ -1365,9 +1598,14 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
         const remoteLeads: Lead[] = [];
         snap.forEach(d => {
           const data = d.data();
+          const leadId = data?.id || d.id;
+          if (deletedIds.has(leadId)) {
+            deleteDoc(doc(db, 'leads', leadId)).catch(() => {});
+            return;
+          }
           if (data) {
             remoteLeads.push({
-              id: data.id || d.id,
+              id: leadId,
               name: data.name || 'Anonymous',
               whatsapp: data.phone || data.whatsapp || '',
               socialLink: data.socialLink || '',
@@ -1392,8 +1630,8 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
         });
 
         const mergedMap = new Map<string, Lead>();
-        leads.forEach(l => mergedMap.set(l.id, l));
-        remoteLeads.forEach(r => mergedMap.set(r.id, r));
+        leads.forEach(l => { if (!deletedIds.has(l.id)) mergedMap.set(l.id, l); });
+        remoteLeads.forEach(r => { if (!deletedIds.has(r.id)) mergedMap.set(r.id, r); });
 
         const finalLeads = Array.from(mergedMap.values()).sort(
           (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -1405,7 +1643,7 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
 
       return {
         success: true,
-        message: `ক্লাউড ডেটাবেস (Firestore)-এ মোট ${leads.length} টি লিড সফলভাবে সিঙ্ক সম্পন্ন হয়েছে!`,
+        message: `ক্লাউড ডেটাবেস (Firestore)-এ মোট ${this.getLeads().length} টি লিড সফলভাবে সিঙ্ক সম্পন্ন হয়েছে!`,
         count: this.getLeads().length
       };
     } catch (err: any) {
@@ -1420,9 +1658,13 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
   // --- Knowledge Base & Gaps ---
   public getKnowledgeBase(onlyPublished: boolean = true): KnowledgeBaseItem[] {
     const raw = this.getItem<KnowledgeBaseItem[]>(STORAGE_KEYS.KNOWLEDGE_BASE, initialKnowledgeBase);
+    const deletedItemIds = this.getDeletedItemIds();
     
+    // Filter out deleted items
+    const filteredRaw = raw.filter(item => item && item.id && !deletedItemIds.has(item.id));
+
     // Ensure all items have bilingual fields merged from initialKnowledgeBase if missing
-    const all = raw.map(item => {
+    const all = filteredRaw.map(item => {
       const initMatch = initialKnowledgeBase.find(k => k.id === item.id);
       return {
         ...item,
@@ -1459,6 +1701,7 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
   }
 
   public saveKnowledgeItem(item: KnowledgeBaseItem): void {
+    if (item?.id) this.removeDeletedItemId(item.id);
     const items = this.getItem<KnowledgeBaseItem[]>(STORAGE_KEYS.KNOWLEDGE_BASE, initialKnowledgeBase);
     const idx = items.findIndex(k => k.id === item.id);
     const updated = { ...item, updatedAt: new Date().toISOString() };
@@ -1469,15 +1712,49 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
   }
 
   public deleteKnowledgeItem(id: string): void {
+    this.addDeletedItemId(id);
     const items = this.getItem<KnowledgeBaseItem[]>(STORAGE_KEYS.KNOWLEDGE_BASE, initialKnowledgeBase).filter(k => k.id !== id);
     this.setItem(STORAGE_KEYS.KNOWLEDGE_BASE, items);
+    onlineDbClient.flushPendingSync();
     this.logAudit('DELETE_KB_ITEM', 'KnowledgeBase', `Deleted knowledge item ${id}`);
+    this.notify();
+  }
+
+  // --- Admin Private Instructions (Strictly private to Admin Copilot - Never exported to Public Knowledge Base) ---
+  public getAdminPrivateInstructions(): string[] {
+    return this.getItem<string[]>(STORAGE_KEYS.ADMIN_PRIVATE_INSTRUCTIONS, []);
+  }
+
+  public saveAdminPrivateInstructions(instructions: string[]): void {
+    const cleaned = Array.from(new Set(instructions.map(i => i.trim()).filter(Boolean)));
+    this.setItem(STORAGE_KEYS.ADMIN_PRIVATE_INSTRUCTIONS, cleaned);
+    this.logAudit('UPDATE_ADMIN_INSTRUCTIONS', 'AdminAI', `Updated Admin Copilot Private Instructions (${cleaned.length} items)`);
+  }
+
+  public addAdminPrivateInstruction(instruction: string): void {
+    if (!instruction.trim()) return;
+    const current = this.getAdminPrivateInstructions();
+    if (!current.includes(instruction.trim())) {
+      current.push(instruction.trim());
+      this.saveAdminPrivateInstructions(current);
+    }
+  }
+
+  public removeAdminPrivateInstruction(instruction: string): void {
+    const current = this.getAdminPrivateInstructions().filter(i => i !== instruction);
+    this.saveAdminPrivateInstructions(current);
+  }
+
+  public clearAdminPrivateInstructions(): void {
+    this.setItem(STORAGE_KEYS.ADMIN_PRIVATE_INSTRUCTIONS, []);
+    this.logAudit('CLEAR_ADMIN_INSTRUCTIONS', 'AdminAI', 'Cleared all Admin Copilot Private Instructions');
   }
 
   public getKnowledgeGaps(): KnowledgeGap[] {
-    return this.getItem<KnowledgeGap[]>(STORAGE_KEYS.KNOWLEDGE_GAPS, []).sort(
-      (a, b) => new Date(b.lastAsked).getTime() - new Date(a.lastAsked).getTime()
-    );
+    const deletedItemIds = this.getDeletedItemIds();
+    return this.getItem<KnowledgeGap[]>(STORAGE_KEYS.KNOWLEDGE_GAPS, [])
+      .filter(g => g && g.id && !deletedItemIds.has(g.id))
+      .sort((a, b) => new Date(b.lastAsked).getTime() - new Date(a.lastAsked).getTime());
   }
 
   public logKnowledgeGap(question: string, aiResponseGiven?: string, visitorId?: string): void {
@@ -1530,11 +1807,33 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
     }
   }
 
+  public deleteKnowledgeGap(id: string): void {
+    this.addDeletedItemId(id);
+    const gaps = this.getKnowledgeGaps().filter(g => g.id !== id);
+    this.setItem(STORAGE_KEYS.KNOWLEDGE_GAPS, gaps);
+    onlineDbClient.queueCollectionSync('knowledgeGaps', gaps);
+    this.logAudit('DELETE_KNOWLEDGE_GAP', 'KnowledgeGap', `Deleted knowledge gap ID: ${id}`);
+    this.notify();
+  }
+
+  public clearKnowledgeGaps(statusFilter?: string): void {
+    const gaps = this.getKnowledgeGaps();
+    const toDelete = gaps.filter(g => !statusFilter || statusFilter === 'ALL' || g.status === statusFilter);
+    toDelete.forEach(g => this.addDeletedItemId(g.id));
+
+    const remaining = gaps.filter(g => statusFilter && statusFilter !== 'ALL' ? g.status !== statusFilter : false);
+    this.setItem(STORAGE_KEYS.KNOWLEDGE_GAPS, remaining);
+    onlineDbClient.queueCollectionSync('knowledgeGaps', remaining);
+    this.logAudit('CLEAR_KNOWLEDGE_GAPS', 'KnowledgeGap', `Cleared knowledge gaps filter: ${statusFilter || 'ALL'}`);
+    this.notify();
+  }
+
   // --- AI Conversations & Settings ---
   public getAIConversations(): AIConversation[] {
-    return this.getItem<AIConversation[]>(STORAGE_KEYS.AI_CONVERSATIONS, []).sort(
-      (a, b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()
-    );
+    const deletedItemIds = this.getDeletedItemIds();
+    return this.getItem<AIConversation[]>(STORAGE_KEYS.AI_CONVERSATIONS, [])
+      .filter(c => c && c.id && !deletedItemIds.has(c.id))
+      .sort((a, b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime());
   }
 
   public saveAIConversation(conv: AIConversation): void {
@@ -1543,6 +1842,15 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
     if (idx >= 0) convs[idx] = conv;
     else convs.unshift(conv);
     this.setItem(STORAGE_KEYS.AI_CONVERSATIONS, convs);
+  }
+
+  public deleteAIConversation(id: string): void {
+    this.addDeletedItemId(id);
+    const convs = this.getAIConversations().filter(c => c.id !== id);
+    this.setItem(STORAGE_KEYS.AI_CONVERSATIONS, convs);
+    onlineDbClient.queueCollectionSync('aiConversations', convs);
+    this.logAudit('DELETE_AI_CONVERSATION', 'AIConversation', `Deleted AI Conversation ID: ${id}`);
+    this.notify();
   }
 
   public getAISettings(): AISettings {
@@ -1624,12 +1932,15 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
 
   // --- Media Library ---
   public getMedia(includeDisabled: boolean = true): MediaItem[] {
-    const media = this.getItem<MediaItem[]>(STORAGE_KEYS.MEDIA, initialMedia);
+    const deletedItemIds = this.getDeletedItemIds();
+    const media = this.getItem<MediaItem[]>(STORAGE_KEYS.MEDIA, initialMedia)
+      .filter(m => m && m.id && !deletedItemIds.has(m.id));
     if (includeDisabled) return media;
     return media.filter(m => m.isEnabled !== false);
   }
 
   public saveMedia(item: MediaItem): void {
+    if (item?.id) this.removeDeletedItemId(item.id);
     const media = this.getItem<MediaItem[]>(STORAGE_KEYS.MEDIA, initialMedia);
     const idx = media.findIndex(m => m.id === item.id);
     if (idx >= 0) {
@@ -1644,8 +1955,10 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
   }
 
   public deleteMedia(id: string): void {
+    this.addDeletedItemId(id);
     const media = this.getItem<MediaItem[]>(STORAGE_KEYS.MEDIA, initialMedia).filter(m => m.id !== id);
     this.setItem(STORAGE_KEYS.MEDIA, media);
+    onlineDbClient.flushPendingSync();
     this.logAudit('DELETE_MEDIA', 'Media', `Deleted media item ${id}`);
     this.notify();
   }
@@ -1669,28 +1982,31 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
   public getAdminUsers(): AdminUser[] {
     const raw = this.getItem<any[]>(STORAGE_KEYS.ADMIN_USERS, initialAdminUsers);
     const usersList = Array.isArray(raw) && raw.length > 0 ? raw : initialAdminUsers;
+    const deletedItemIds = this.getDeletedItemIds();
     
-    const normalized: AdminUser[] = usersList.map(u => {
-      const isPrimary = (u.email || '').toLowerCase() === 'giga.sonjoy@gmail.com' || u.role === 'SUPER_ADMIN';
-      const role = (isPrimary || u.role === 'ADMIN' || u.role === 'admin' || u.role === 'SUPER_ADMIN') ? 'ADMIN' : 'EDITOR';
-      const status = (u.status === 'DISABLED' || u.status === 'disabled' || u.isActive === false) && !isPrimary
-        ? 'DISABLED' 
-        : 'ACTIVE';
-      
-      return {
-        id: u.id || (isPrimary ? 'usr-admin-1' : `usr-${Date.now()}`),
-        name: isPrimary ? 'Sonjoy Sarkar' : (u.name || 'Admin User'),
-        email: isPrimary ? 'giga.sonjoy@gmail.com' : (u.email || 'user@stwebads.com'),
-        mobile: normalizeMobileNumber(u.mobile || '01723516793'),
-        role: role as 'ADMIN' | 'EDITOR',
-        status: status as 'ACTIVE' | 'DISABLED',
-        passwordHash: u.passwordHash,
-        passcode: u.passcode || 'stweb2025',
-        createdAt: u.createdAt || '2026-01-01',
-        lastLogin: u.lastLogin,
-        avatarUrl: u.avatarUrl
-      };
-    });
+    const normalized: AdminUser[] = usersList
+      .filter(u => u && u.id && (!deletedItemIds.has(u.id) || (u.email || '').toLowerCase() === 'giga.sonjoy@gmail.com'))
+      .map(u => {
+        const isPrimary = (u.email || '').toLowerCase() === 'giga.sonjoy@gmail.com' || u.role === 'SUPER_ADMIN';
+        const role = (isPrimary || u.role === 'ADMIN' || u.role === 'admin' || u.role === 'SUPER_ADMIN') ? 'ADMIN' : 'EDITOR';
+        const status = (u.status === 'DISABLED' || u.status === 'disabled' || u.isActive === false) && !isPrimary
+          ? 'DISABLED' 
+          : 'ACTIVE';
+        
+        return {
+          id: u.id || (isPrimary ? 'usr-admin-1' : `usr-${Date.now()}`),
+          name: isPrimary ? 'Sonjoy Sarkar' : (u.name || 'Admin User'),
+          email: isPrimary ? 'giga.sonjoy@gmail.com' : (u.email || 'user@stwebads.com'),
+          mobile: normalizeMobileNumber(u.mobile || '01723516793'),
+          role: role as 'ADMIN' | 'EDITOR',
+          status: status as 'ACTIVE' | 'DISABLED',
+          passwordHash: u.passwordHash,
+          passcode: u.passcode || 'stweb2025',
+          createdAt: u.createdAt || '2026-01-01',
+          lastLogin: u.lastLogin,
+          avatarUrl: u.avatarUrl
+        };
+      });
 
     // Ensure primary admin always exists
     if (!normalized.some(u => u.email.toLowerCase() === 'giga.sonjoy@gmail.com')) {
@@ -1700,6 +2016,7 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
   }
 
   public saveAdminUser(user: AdminUser): void {
+    if (user?.id) this.removeDeletedItemId(user.id);
     const users = this.getAdminUsers();
     // Normalize mobile
     const sanitizedUser: AdminUser = {
@@ -1723,8 +2040,10 @@ Always encourage the user with helpful next steps: Lead Form, Ads Prediction Cal
   }
 
   public deleteAdminUser(id: string): void {
+    this.addDeletedItemId(id);
     const users = this.getAdminUsers().filter(u => u.id !== id);
     this.setItem(STORAGE_KEYS.ADMIN_USERS, users);
+    onlineDbClient.flushPendingSync();
     this.logAudit('DELETE_ADMIN_USER', 'AdminUser', `Deleted user account ${id}`);
     this.notify();
   }

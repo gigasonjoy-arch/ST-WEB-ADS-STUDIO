@@ -12,6 +12,308 @@ import { storageService } from './storageService';
 
 export class AdminAgentEngine {
   /**
+   * System Analysis Engine: Scans DB for missing, incomplete, or outdated knowledge and generates
+   * specific targeted questions one by one with multiple suggested answers.
+   */
+  public static generateSystemInterviewQuestions(answeredQuestionIds: string[] = []): Array<{ id: string; category: string; question: string; reason: string; options?: string[] }> {
+    const questions: Array<{ id: string; category: string; question: string; reason: string; options?: string[] }> = [];
+    
+    const kb = storageService.getKnowledgeBase(false);
+    const caseStudies = storageService.getCaseStudies(true);
+    const benchmarks = storageService.getCalculatorBenchmarks();
+    const settings = storageService.getSiteSettings();
+    const gaps = storageService.getKnowledgeGaps().filter(g => g.status !== 'resolved');
+
+    // 1. Unresolved Knowledge Gaps
+    if (gaps.length > 0) {
+      gaps.slice(0, 3).forEach(g => {
+        const qId = `q-gap-${g.id}`;
+        if (!answeredQuestionIds.includes(qId)) {
+          questions.push({
+            id: qId,
+            category: 'Knowledge Gap',
+            question: `ভিজিটররা একাধিকবার এই প্রশ্নটি জিজ্ঞেস করেছেন: "${g.question}"। এর সঠিক ও আপডেটেড উত্তরটি কী হবে?`,
+            reason: `পেন্ডিং নলেজ গ্যাপ (${g.count || 1} বার জিজ্ঞাসিত)`,
+            options: [
+              `উত্তর: ${g.question} এর ক্ষেত্রে আমাদের টিম সার্বক্ষণিক সার্ভিস প্রদান করে। বিস্তারিত হোয়াটসঅ্যাপে জানা যাবে।`,
+              `উত্তর: ${g.question} এর তথ্যটি আমাদের অনবোর্ডিং গাইডে দেওয়া আছে। আমাদের সার্ভিস ফি ও শর্তাবলী প্রযোজ্য।`
+            ]
+          });
+        }
+      });
+    }
+
+    // 2. Work / Services & Process Coverage
+    const hasServiceProcess = kb.some(k => k.category === 'Services' || k.category === 'Process' || /process|সার্ভিস|প্যাকেজ|ফি|কাজ|শুরু/i.test(k.question + k.answer));
+    if (!hasServiceProcess && !answeredQuestionIds.includes('q-service-process')) {
+      questions.push({
+        id: 'q-service-process',
+        category: 'Work & Services',
+        question: 'আপনার মূল সার্ভিসগুলো (যেমন TikTok Ads setup, Meta CAPI Tracking) শুরু করার প্রক্রিয়া ও ক্লায়েন্ট রিকোয়ারমেন্টস কী কী?',
+        reason: 'সার্ভিস প্রসেস সম্পর্কিত পূর্ণাঙ্গ প্রশ্নোত্তর নলেজ বেসে অনুপস্থিত',
+        options: [
+          'প্রথমে অনবোর্ডিং ফর্ম পূরণ -> বিজনেস ম্যানেজার/টিকটক অ্যাকাউন্টের এক্সেস শেয়ার -> পিক্সেল ও CAPI সেটআপ -> ক্যাম্পেইন চালুকরণ।',
+          'সার্ভিস শুরুর জন্য ক্লায়েন্টকে টিকটক অ্যাড এক্সেস দিতে হবে এবং দৈনিক সর্বনিম্ন $১০ বাজেট রাখতে হবে।',
+          'আমরা অনবোর্ডিং থেকে শুরু করে সম্পূর্ণ টেকনিক্যাল সেটআপ, অ্যাড ক্রিয়েটিভ কনসাল্টিং এবং সাপ্তাহিক পারফর্মেন্স রিপোর্ট প্রদান করি।'
+        ]
+      });
+    }
+
+    // 3. Case Studies & Client Results
+    if (caseStudies.length === 0 && !answeredQuestionIds.includes('q-case-study-new')) {
+      questions.push({
+        id: 'q-case-study-new',
+        category: 'Case Studies',
+        question: 'আপনার সাম্প্রতিক যেকোনো একটি সফল ক্লায়েন্ট প্রজেক্টের নাম, বাজেট, ও অর্জিত রেভিনিউ/ROAS তথ্য জানাবেন কি?',
+        reason: 'লাইভ কেস স্টাডি সংগৃহীত নয়',
+        options: [
+          'ক্লায়েন্ট: Silk Vogue, বাজেট: ৪০,০০০ টাকা, সেলস: ১,৬০,০০০ টাকা, অর্ডার: ৩৫০টি, প্ল্যাটফর্ম: TikTok',
+          'ক্লায়েন্ট: Aarong Lifestyle, বাজেট: ৫০,০০০ টাকা, সেলস: ২,৫০,০০০ টাকা, ROAS: 5.0x, প্ল্যাটফর্ম: Meta Ads'
+        ]
+      });
+    } else {
+      const incompleteCases = caseStudies.filter(c => !c.adSpendBDT || !c.roas || !c.purchases);
+      if (incompleteCases.length > 0) {
+        const target = incompleteCases[0];
+        const qId = `q-cs-inc-${target.id}`;
+        if (!answeredQuestionIds.includes(qId)) {
+          questions.push({
+            id: qId,
+            category: 'Case Studies',
+            question: `ক্লায়েন্ট "${target.clientName || target.title}"-এর কেস স্টাডিতে স্পেন্ড বা অর্জিত অর্ডার/ROAS মেট্রিক্স অনুপস্থিত। এই পারফর্মেন্সের তথ্য কি দিতে পারবেন?`,
+            reason: 'অসম্পূর্ণ কেস স্টাডি মেট্রিক্স আপডেট',
+            options: [
+              `অ্যাড স্পেন্ড: ৳৩৫,০০০, মোট সেলস: ৳১,৪০,০০০, ROAS: 4.0x, মোট পারচেজ: ২৮০টি`,
+              `অ্যাড স্পেন্ড: ৳৫০,০০০, মোট সেলস: ৳২,২০,০০০, ROAS: 4.4x, মোট পারচেজ: ৪৫০টি`
+            ]
+          });
+        }
+      }
+    }
+
+    // 4. Benchmarks & Ad Metrics
+    if (benchmarks.length === 0 && !answeredQuestionIds.includes('q-benchmark-new')) {
+      questions.push({
+        id: 'q-benchmark-new',
+        category: 'Benchmarks',
+        question: 'আপনার ফ্যাশন বা বিউটি ক্যাটাগরির জন্য সাম্প্রতিক TikTok Ads CPM, CTR বা CVR কত?',
+        reason: 'অ্যাড ক্যালকুলেটর বেঞ্চমার্ক অনুপস্থিত',
+        options: [
+          'ফ্যাশন ক্যাটাগরির গড় CPM $১.২০, CTR ২.৮%, CVR ৪.৫%, এবং CPA ৳১৮০',
+          'বিউটি ও স্কিনকেয়ার ক্যাটাগরির গড় CPM $১.৫০, CTR ৩.২%, CVR ৫.০%'
+        ]
+      });
+    }
+
+    // 5. Payment, Dollar Rate & Delivery FAQs
+    const hasPaymentFaq = kb.some(k => /payment|পেমেন্ট|বিকাশ|ব্যাংক|ডলার|ফি|charge|চার্জ/i.test(k.question + k.answer));
+    if (!hasPaymentFaq && !answeredQuestionIds.includes('q-payment-faq')) {
+      questions.push({
+        id: 'q-payment-faq',
+        category: 'Payment & Pricing',
+        question: `বর্তমানে পেমেন্ট পদ্ধতি (বিকাশ/ব্যাংক) এবং ডলার এক্সচেঞ্জ রেট (বর্তমান রেট ৳${settings.exchangeRateUsdToBdt || 150}) সংক্রান্ত কোনো নির্দিষ্ট নিয়ম কি নলেজ বেসে যোগ করবেন?`,
+        reason: 'পেমেন্ট ও ডলার সংক্রান্ত প্রশ্নের অভাব',
+        options: [
+          `আমরা বিকাশ, নগদ ও ব্যাংকে পেমেন্ট গ্রহণ করি। ডলার এক্সচেঞ্জ রেট ৳${settings.exchangeRateUsdToBdt || 130}। পেমেন্ট ৫০% অগ্রিম দিতে হয়।`,
+          `পেমেন্ট পদ্ধতি: বিকাশ মার্চেন্ট ও ব্যাংক অ্যাকাউন্ট। ডলার রেট প্রতিদিনের বাজার দর অনুযায়ী নির্ধারিত হয়।`
+        ]
+      });
+    }
+
+    // 6. Guarantee / Refund / Policy
+    const hasPolicy = kb.some(k => /guarantee|refund|গ্যারান্টি|রিফান্ড|শর্ত|পলিসি/i.test(k.question + k.answer));
+    if (!hasPolicy && !answeredQuestionIds.includes('q-policy-faq')) {
+      questions.push({
+        id: 'q-policy-faq',
+        category: 'Policies',
+        question: 'ক্যাম্পেইন রেজাল্ট বা কাজের ক্ষেত্রে কোনো গ্যারান্টি বা রিফান্ড পলিসি প্রযোজ্য কি?',
+        reason: 'পলিসি সম্পর্কিত স্পষ্ট প্রশ্নোত্তর অনুপস্থিত',
+        options: [
+          'বিজ্ঞাপনের ফলাফলের শতভাগ গ্যারান্টি দেওয়া সম্ভব নয়, তবে সঠিক অডিয়েন্স ও ট্র্যাকিংয়ের মাধ্যমে সর্বোচ্চ ROI নিশ্চিত করা হয়।',
+          'কারিগরি ত্রুটির কারণে কাজ শুরু হতে ব্যর্থ হলে ১০০% রিফান্ড প্রদান করা হবে।'
+        ]
+      });
+    }
+
+    // Fallback general routine questions
+    if (!answeredQuestionIds.includes('q-routine-general-1')) {
+      questions.push({
+        id: 'q-routine-general-1',
+        category: 'General',
+        question: 'আপনার ক্লায়েন্ট বা ভিজিটররা সম্প্রতি নতুন কোনো সাধারণ প্রশ্ন বা বিভ্রান্তি প্রকাশ করেছেন কি?',
+        reason: 'নিয়মিত সিস্টেম নলেজ আপডেট',
+        options: [
+          'প্রশ্ন: সার্ভিস বুক করার প্রসেস কী? উত্তর: প্রথমে বুকিং কনফার্ম করে রিকোয়ারমেন্ট সাবমিট করতে হবে, এরপর আমাদের এক্সপার্ট টিম কাজ শুরু করবে।',
+          'প্রশ্ন: অ্যাড অ্যাকাউন্ট ও ফেসবুক পেজ অ্যাক্সেস কীভাবে দিব? উত্তর: আমাদের ফেসবুক বিজনেস ম্যানেজার আইডি অথবা ইমেইল অ্যাড্রেসে পার্টনার অ্যাক্সেস দিতে হবে।'
+        ]
+      });
+    }
+
+    if (!answeredQuestionIds.includes('q-routine-general-2')) {
+      questions.push({
+        id: 'q-routine-general-2',
+        category: 'General',
+        question: 'নলেজ বেসের এমন কোনো পুরাতন তথ্য বা অফার কি আছে, যা এখন আর প্রযোজ্য নয় বা পরিবর্তন প্রয়োজন?',
+        reason: 'অপ্রাসঙ্গিক ও পুরাতন তথ্য যাচাই',
+        options: [
+          'সব তথ্য আপডেট আছে, কোনো কিছু পরিবর্তনের প্রয়োজন নেই।',
+          'আমাদের সার্ভিসের ফি বা কোনো পুরাতন কাস্টম প্যাকেজের প্রাইস আপডেট করা প্রয়োজন।'
+        ]
+      });
+    }
+
+    return questions;
+  }
+
+  /**
+   * Evaluates user response during interview, detects matching/outdated info,
+   * and prepares an interactive Human-in-the-Loop Proposal card.
+   */
+  public static processSystemInterviewAnswer(
+    userAnswer: string,
+    currentQuestion: { id: string; category: string; question: string }
+  ): { text: string; proposal?: AdminAiActionProposal; suggestions?: string[] } {
+    const raw = userAnswer.trim();
+    const lower = raw.toLowerCase();
+
+    // Check if user wants to skip
+    if (/skip|স্কিপ|পরের|পরবর্তী|next|পরে|স্টপ|stop|থাক/i.test(lower) && raw.length < 15) {
+      return {
+        text: 'ঠিক আছে, এই প্রশ্নটি এড়িয়ে পরবর্তী প্রশ্নে চলে যাচ্ছি।',
+        suggestions: ['পরবর্তী প্রশ্ন করুন', 'ইন্টারভিউ বন্ধ করো']
+      };
+    }
+
+    // Check for "disable" / "outdated" intent
+    const isDisableIntent = /বন্ধ|অনুপযোগী|পুরাতন|পুরানো|বাতিল|অফ|অকার্যকর|অবসোলেট|outdated|deprecated|delete|ডিলেট/i.test(lower);
+
+    // Semantic search in existing Knowledge Base
+    const existingKb = storageService.getKnowledgeBase(false);
+    const matchingKb = existingKb.find(k => {
+      const q = (k.question + ' ' + k.title + ' ' + k.answer).toLowerCase();
+      const userWords = lower.split(/\s+/).filter(w => w.length > 3);
+      return userWords.some(w => q.includes(w));
+    });
+
+    if (isDisableIntent && matchingKb) {
+      // Create DISABLE proposal card
+      const proposal: AdminAiActionProposal = {
+        id: `prop-dis-kb-${Date.now()}`,
+        actionType: 'DISABLE_KNOWLEDGE_ITEM',
+        titleEn: `Disable Outdated Knowledge Base Article: "${matchingKb.title || matchingKb.question}"`,
+        titleBn: `পুরাতন/অপ্রাসঙ্গিক নলেজ আর্টিকেল নিষ্ক্রিয় (Disable) করার প্রস্তাবনা`,
+        summaryEn: `Question: "${matchingKb.question}"\nReason: Identified as outdated by admin response. Will hide from Public AI Chat.`,
+        summaryBn: `প্রশ্ন: "${matchingKb.question}"\nআপনার উত্তরের ভিত্তিতে এটি পুরোনো/অপ্রাসঙ্গিক হিসেবে চিহ্নিত হয়েছে। অনুমোদনের পর পাবলিক AI আর এটি ক্লায়েন্টদের উত্তর হিসেবে দেবে না।`,
+        targetTab: 'KNOWLEDGE_BASE',
+        payload: { itemId: matchingKb.id, item: matchingKb },
+        status: 'PENDING_CONFIRMATION'
+      };
+
+      return {
+        text: `আমি চিহ্নিত করেছি যে বর্তমান নলেজ বেসের **"${matchingKb.question}"** বিষয়টি অপ্রাসঙ্গিক বা বাতিল করতে চান। নিচে নিষ্ক্রিয় করার কনফার্মেশন কার্ড তৈরি হয়েছে:`,
+        proposal,
+        suggestions: ['অনুমোদন ও নিষ্ক্রিয় করুন', 'পরবর্তী প্রশ্ন']
+      };
+    }
+
+    if (matchingKb && !isDisableIntent) {
+      // Create UPDATE proposal card for existing KB item
+      const updatedItem: KnowledgeBaseItem = {
+        ...matchingKb,
+        answer: raw,
+        answerBn: raw,
+        answerEn: raw,
+        status: 'published',
+        updatedAt: new Date().toISOString(),
+        updatedBy: 'Admin Interviewer'
+      };
+
+      const proposal: AdminAiActionProposal = {
+        id: `prop-upd-kb-${Date.now()}`,
+        actionType: 'UPDATE_KNOWLEDGE_ITEM',
+        titleEn: `Update Existing Knowledge Base Q&A: "${matchingKb.title || matchingKb.question.slice(0, 30)}"`,
+        titleBn: `বিদ্যমান নলেজ আর্টিকেলে তথ্য আপডেটের প্রস্তাবনা`,
+        summaryEn: `Existing Q: "${matchingKb.question}"\nUpdated Answer: "${raw}"`,
+        summaryBn: `পুরাতন প্রশ্ন: "${matchingKb.question}"\nনতুন আপডেটেড উত্তর: "${raw}"\n\nএটি বিদ্যমান আর্টিকেলের সাথে সম্পর্কিত হওয়ায় তা আপডেট করা হবে।`,
+        targetTab: 'KNOWLEDGE_BASE',
+        payload: { item: updatedItem },
+        status: 'PENDING_CONFIRMATION'
+      };
+
+      return {
+        text: `আপনার উত্তরটি বিদ্যমান নলেজ আইটেম **"${matchingKb.question}"** এর সাথে মিলে গেছে! আমি এটি আপডেট করার প্রস্তাবনা কার্ড তৈরি করেছি। অনুমোদন দিলে পাবলিক AI নতুন তথ্য ব্যবহার করবে:`,
+        proposal,
+        suggestions: ['অনুমোদন ও আপডেট করুন', 'নতুন আইটেম হিসেবে যোগ করুন']
+      };
+    }
+
+    // Check if user answer is a Case Study format
+    const parsedCs = this.extractCaseStudyFromInput(raw, storageService.getSiteSettings());
+    if (parsedCs) {
+      const proposal: AdminAiActionProposal = {
+        id: `prop-add-cs-int-${Date.now()}`,
+        actionType: 'BULK_CREATE_CASE_STUDIES',
+        titleEn: `Add Case Study for Client: "${parsedCs.clientName}"`,
+        titleBn: `ক্লায়েন্ট "${parsedCs.clientName}"-এর কেস স্টাডি যোগ করার প্রস্তাবনা`,
+        summaryEn: `Spend ৳${parsedCs.adSpendBDT?.toLocaleString('en-IN')}, ROAS ${parsedCs.roas}x, Purchases ${parsedCs.purchases}.`,
+        summaryBn: `বিজ্ঞাপন খরচ ৳${parsedCs.adSpendBDT?.toLocaleString('en-IN')}, রিটার্ন (ROAS) ${parsedCs.roas}x, মোট পারচেজ ${parsedCs.purchases}টি।`,
+        targetTab: 'CASE_STUDIES',
+        payload: { caseStudies: [parsedCs] },
+        status: 'PENDING_CONFIRMATION'
+      };
+
+      return {
+        text: `আপনার উত্তরের ভিত্তিতে একটি নতুন **কেস স্টাডি প্রিভিউ কার্ড** প্রস্তুত করেছি। অনুমোদন দিলে লাইভ সাইটে প্রকাশিত হবে:`,
+        proposal,
+        suggestions: ['অনুমোদন ও সেভ করুন', 'পরবর্তী প্রশ্ন']
+      };
+    }
+
+    // Default: Create NEW Knowledge Base Item Proposal
+    const parsedKb = this.extractKnowledgeItemFromInput(
+      raw.includes('উত্তর') ? raw : `প্রশ্ন: ${currentQuestion.question} উত্তর: ${raw}`
+    );
+
+    const newItem: KnowledgeBaseItem = parsedKb || {
+      id: `kb-int-${Date.now()}`,
+      title: currentQuestion.question.slice(0, 50),
+      category: (currentQuestion.category as any) || 'General',
+      categoryEn: currentQuestion.category || 'General',
+      categoryBn: currentQuestion.category || 'সাধারণ',
+      question: currentQuestion.question,
+      questionEn: currentQuestion.question,
+      questionBn: currentQuestion.question,
+      answer: raw,
+      answerEn: raw,
+      answerBn: raw,
+      keywords: currentQuestion.question.toLowerCase().split(/\s+/).filter(w => w.length > 2),
+      priority: 8,
+      status: 'published',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      createdBy: 'Admin Intelligent Interviewer'
+    };
+
+    const proposal: AdminAiActionProposal = {
+      id: `prop-add-kb-int-${Date.now()}`,
+      actionType: 'BULK_ADD_KNOWLEDGE_BASE',
+      titleEn: `Add New Q&A to Knowledge Base: "${newItem.question.slice(0, 40)}..."`,
+      titleBn: `নলেজ বেসে নতুন প্রশ্নোত্তর যোগের প্রস্তাবনা`,
+      summaryEn: `Question: "${newItem.question}"\nAnswer: "${newItem.answer}"`,
+      summaryBn: `প্রশ্ন: "${newItem.question}"\nউত্তর: "${newItem.answer}"\nক্যাটাগরি: ${newItem.categoryBn || newItem.category}। অনুমোদনের পর পাবলিক AI এটি থেকে ভিজিটরদের উত্তর দেবে।`,
+      targetTab: 'KNOWLEDGE_BASE',
+      payload: { items: [newItem] },
+      status: 'PENDING_CONFIRMATION'
+    };
+
+    return {
+      text: `আপনার উত্তরের ভিত্তিতে **নলেজ বেস প্রস্তাবনা কার্ড** সাজানো হয়েছে। অনুমোদন দিলে এটি ডেটাবেসে ও পাবলিক এআই-তে যুক্ত হবে:`,
+      proposal,
+      suggestions: ['অনুমোদন ও সেভ করুন', 'পরবর্তী প্রশ্ন']
+    };
+  }
+
+  /**
    * Evaluates an admin command.
    * STRICT POLICY:
    * 1. Never generate hallucinated/fake data out of thin air.
@@ -27,9 +329,17 @@ export class AdminAgentEngine {
     const query = rawQuery.trim();
     const qLower = query.toLowerCase();
 
-    // =========================================================================
-    // 1. CASE STUDY MANAGEMENT (STRICT USER INPUT DRIVEN)
-    // =========================================================================
+    // Direct English reply prompt handling without blocking
+    if (qLower === 'reply in english' || qLower === 'english mode' || qLower === 'in english') {
+      return {
+        text: "🌐 **English Mode Active!**\n\nI will now respond in English for this conversation. You can enter case studies, Q&A, or settings in English or Bengali.",
+        suggestions: [
+          'Client: Silk Vogue, Budget: 40000, Sales: 160000, Orders: 310. Add case study',
+          'Question: Delivery time? Answer: Dhaka 24-48 hours, outside 3-4 days. Add to KB',
+          'Publish all draft case studies'
+        ]
+      };
+    }
     const isCaseStudyIntent = 
       qLower.includes('case study') || 
       qLower.includes('কেস স্টাডি') || 
@@ -961,8 +1271,37 @@ export class AdminAgentEngine {
           return {
             success: true,
             messageEn: `Added ${items.length} verified Q&A article(s) to Knowledge Base!`,
-            messageBn: `মোট ${items.length}টি প্রশ্নোত্তর সফলভাবে নলেজ বেসে সেভ করা হয়েছে! এআই চ্যাট এখন থেকে এগুলোর উত্তর দেবে।`,
+            messageBn: `মোট ${items.length}টি নতুন প্রশ্নোত্তর সফলভাবে নলেজ বেসে সেভ করা হয়েছে! পাবলিক AI Assistant এখন এগুলোর উত্তর দিতে পারবে।`,
             details: items.map(k => `✓ ${k.question}`)
+          };
+        }
+
+        case 'UPDATE_KNOWLEDGE_ITEM': {
+          const item: KnowledgeBaseItem = proposal.payload?.item;
+          if (!item) throw new Error('Knowledge item missing in payload.');
+          storageService.saveKnowledgeItem(item);
+          return {
+            success: true,
+            messageEn: `Updated Knowledge Base item "${item.title || item.question.slice(0, 30)}"!`,
+            messageBn: `নলেজ বেস আইটেমটি ("${item.title || item.question.slice(0, 30)}...") সফলভাবে আপডেট ও সেভ করা হয়েছে! পাবলিক AI Assistant এখন পরিবর্তিত তথ্য ব্যবহার করবে।`,
+            details: [`Updated Q&A ID: ${item.id}`, `Status: ${item.status}`]
+          };
+        }
+
+        case 'DISABLE_KNOWLEDGE_ITEM': {
+          const itemId: string = proposal.payload?.itemId || proposal.payload?.item?.id;
+          if (!itemId) throw new Error('Knowledge item ID missing in payload.');
+          const allKb = storageService.getKnowledgeBase(false);
+          const target = allKb.find(k => k.id === itemId);
+          if (target) {
+            target.status = 'disabled';
+            storageService.saveKnowledgeItem(target);
+          }
+          return {
+            success: true,
+            messageEn: `Disabled Knowledge Base item ID ${itemId}!`,
+            messageBn: `পুরাতন তথ্যটি নলেজ বেসে অকার্যকর (Disabled) চিহ্নিত করা হয়েছে। পাবলিক AI Assistant এখন আর এটি ক্লায়েন্টদের দেবে না।`,
+            details: [`Disabled Item ID: ${itemId}`]
           };
         }
 

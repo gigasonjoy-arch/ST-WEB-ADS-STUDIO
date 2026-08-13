@@ -85,6 +85,19 @@
         "enableAiChatWidget": { "type": "boolean", "description": "Toggle AI chat assistant" },
         "enableCalculator": { "type": "boolean", "description": "Toggle public calculator" }
       }
+    },
+    "knowledgeBase": {
+      "title": "Knowledge Base",
+      "description": "Question and answer repository for AI assistant",
+      "fields": {
+        "id": { "type": "string", "description": "Unique ID" },
+        "question": { "type": "string", "description": "Question in English" },
+        "answer": { "type": "string", "description": "Answer in English" },
+        "questionBn": { "type": "string", "description": "Question in Bengali" },
+        "answerBn": { "type": "string", "description": "Answer in Bengali" },
+        "category": { "type": "string", "description": "Category" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" }
+      }
     }
   }
 }

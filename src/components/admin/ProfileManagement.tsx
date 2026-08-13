@@ -39,6 +39,12 @@ export const ProfileManagement: React.FC<ProfileManagementProps> = ({
   onNavigateTab
 }) => {
   const [formData, setFormData] = useState<SiteSettings>(settings);
+
+  React.useEffect(() => {
+    if (settings) {
+      setFormData(settings);
+    }
+  }, [settings]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [activePreviewMode, setActivePreviewMode] = useState<'CARD' | 'HERO'>('CARD');

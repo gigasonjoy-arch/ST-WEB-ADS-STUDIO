@@ -10,10 +10,12 @@ import {
   X, 
   Sparkles,
   ArrowRight,
-  TrendingUp
+  TrendingUp,
+  Trash2
 } from 'lucide-react';
 import { KnowledgeGap, SiteSettings } from '../../types';
 import { storageService } from '../../services/storageService';
+import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
 interface KnowledgeGapManagementProps {
   settings?: SiteSettings;
@@ -39,6 +41,8 @@ export const KnowledgeGapManagement: React.FC<KnowledgeGapManagementProps> = ({
   const [adminAnswer, setAdminAnswer] = useState('');
   const [addToKnowledgeBase, setAddToKnowledgeBase] = useState(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [gapToDelete, setGapToDelete] = useState<{ id: string; question: string } | null>(null);
+  const [isClearingAll, setIsClearingAll] = useState(false);
 
   useEffect(() => {
     if (initialFilter === 'UNRESOLVED' || initialFilter === 'unresolved') {
@@ -80,6 +84,14 @@ export const KnowledgeGapManagement: React.FC<KnowledgeGapManagementProps> = ({
     if (onRefresh) onRefresh();
   };
 
+  const handleDeleteGap = (id: string, questionText: string) => {
+    setGapToDelete({ id, question: questionText });
+  };
+
+  const handleClearAll = () => {
+    setIsClearingAll(true);
+  };
+
   const filteredGaps = gaps.filter(gap => {
     if (filterStatus === 'ALL') return true;
     return gap.status === filterStatus;
@@ -96,7 +108,7 @@ export const KnowledgeGapManagement: React.FC<KnowledgeGapManagementProps> = ({
             অজানা প্রশ্ন ও Knowledge Gaps
           </h1>
           <p className="text-sm text-[#5C6652] mt-1">
-            ওয়েবসাইটে ভিজিটরদের করা যে প্রশ্নগুলোর উত্তর এআই এর নলেজ বেসে ছিল না, সেগুলো এখানে জমা হয়। উত্তর দিয়ে নলেজ বেস সমৃদ্ধ করুন।
+            ওয়েবসাইটে ভিজিটরদের করা যে প্রশ্নগুলোর উত্তর এআই এর নলেজ বেসে ছিল না, সেগুলো এখানে জমা হয়। অপ্রয়োজনীয় প্রশ্ন ডিলিট বা উত্তর দিয়ে সমাধান করুন।
           </p>
         </div>
 
@@ -104,6 +116,16 @@ export const KnowledgeGapManagement: React.FC<KnowledgeGapManagementProps> = ({
           <span className="px-3.5 py-1.5 rounded-xl bg-[#E2725B]/10 text-[#E2725B] text-xs font-bold border border-[#E2725B]/20">
             অমীমাংসিত প্রশ্ন: {unresolvedCount} টি
           </span>
+          {gaps.length > 0 && (
+            <button
+              onClick={handleClearAll}
+              className="px-3.5 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold border border-red-200 flex items-center gap-1.5 transition-colors"
+              title="প্রশ্নসমূহ মুছে ফেলুন"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>মুছে ফেলুন</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -115,37 +137,39 @@ export const KnowledgeGapManagement: React.FC<KnowledgeGapManagementProps> = ({
       )}
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        <button
-          onClick={() => setFilterStatus('ALL')}
-          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-            filterStatus === 'ALL'
-              ? 'bg-[#4A5D3B] text-white'
-              : 'bg-white border border-[#D9DED1] text-[#5C6652] hover:bg-[#E8EAE2]'
-          }`}
-        >
-          সব ({gaps.length})
-        </button>
-        <button
-          onClick={() => setFilterStatus('unresolved')}
-          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-            filterStatus === 'unresolved'
-              ? 'bg-[#E2725B] text-white'
-              : 'bg-white border border-[#D9DED1] text-[#5C6652] hover:bg-[#E8EAE2]'
-          }`}
-        >
-          অমীমাংসিত ({unresolvedCount})
-        </button>
-        <button
-          onClick={() => setFilterStatus('added_to_kb')}
-          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-            filterStatus === 'added_to_kb'
-              ? 'bg-[#4A5D3B] text-white'
-              : 'bg-white border border-[#D9DED1] text-[#5C6652] hover:bg-[#E8EAE2]'
-          }`}
-        >
-          নলেজ বেসে যোগ করা ({gaps.filter(g => g.status === 'added_to_kb').length})
-        </button>
+      <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setFilterStatus('ALL')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              filterStatus === 'ALL'
+                ? 'bg-[#4A5D3B] text-white'
+                : 'bg-white border border-[#D9DED1] text-[#5C6652] hover:bg-[#E8EAE2]'
+            }`}
+          >
+            সব ({gaps.length})
+          </button>
+          <button
+            onClick={() => setFilterStatus('unresolved')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              filterStatus === 'unresolved'
+                ? 'bg-[#E2725B] text-white'
+                : 'bg-white border border-[#D9DED1] text-[#5C6652] hover:bg-[#E8EAE2]'
+            }`}
+          >
+            অমীমাংসিত ({unresolvedCount})
+          </button>
+          <button
+            onClick={() => setFilterStatus('added_to_kb')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              filterStatus === 'added_to_kb'
+                ? 'bg-[#4A5D3B] text-white'
+                : 'bg-white border border-[#D9DED1] text-[#5C6652] hover:bg-[#E8EAE2]'
+            }`}
+          >
+            নলেজ বেসে যোগ করা ({gaps.filter(g => g.status === 'added_to_kb').length})
+          </button>
+        </div>
       </div>
 
       {/* Gaps List */}
@@ -182,9 +206,18 @@ export const KnowledgeGapManagement: React.FC<KnowledgeGapManagementProps> = ({
                     </span>
                   </div>
 
-                  <div className="text-[11px] text-[#8A957F] flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    <span>{new Date(gap.lastAsked).toLocaleDateString('bn-BD')}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="text-[11px] text-[#8A957F] flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      <span>{new Date(gap.lastAsked).toLocaleDateString('bn-BD')}</span>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteGap(gap.id, gap.question)}
+                      className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                      title="এই প্রশ্নটি মুছে ফেলুন"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
 
@@ -203,7 +236,7 @@ export const KnowledgeGapManagement: React.FC<KnowledgeGapManagementProps> = ({
                 )}
               </div>
 
-              <div className="pt-3 border-t border-[#D9DED1]">
+              <div className="pt-3 border-t border-[#D9DED1] flex items-center gap-2">
                 {gap.status === 'unresolved' ? (
                   <button
                     onClick={() => {
@@ -211,17 +244,25 @@ export const KnowledgeGapManagement: React.FC<KnowledgeGapManagementProps> = ({
                       setAdminAnswer(gap.suggestedAnswer || '');
                       setAddToKnowledgeBase(true);
                     }}
-                    className="w-full bg-[#4A5D3B] hover:bg-[#3D4D30] text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors shadow-2xs"
+                    className="flex-1 bg-[#4A5D3B] hover:bg-[#3D4D30] text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors shadow-2xs"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>উত্তর প্রদান ও নলেজ বেসে যোগ করুন</span>
                   </button>
                 ) : (
-                  <div className="text-right text-[11px] text-[#4A5D3B] font-bold flex items-center justify-end gap-1">
+                  <div className="flex-1 text-right text-[11px] text-[#4A5D3B] font-bold flex items-center justify-end gap-1">
                     <Check className="w-3.5 h-3.5" />
                     <span>সমাধান সম্পন্ন হয়েছে</span>
                   </div>
                 )}
+                <button
+                  onClick={() => handleDeleteGap(gap.id, gap.question)}
+                  className="px-3 py-2.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-xl text-xs font-bold flex items-center gap-1 transition-colors shrink-0"
+                  title="ডিলিট করুন"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">ডিলিট</span>
+                </button>
               </div>
             </div>
           ))}
@@ -297,6 +338,39 @@ export const KnowledgeGapManagement: React.FC<KnowledgeGapManagementProps> = ({
           </div>
         </div>
       )}
+      {/* Single Gap Confirm Delete Modal */}
+      <ConfirmDeleteModal
+        isOpen={!!gapToDelete}
+        itemName={gapToDelete?.question}
+        title="প্রশ্ন ডিলিট করুন"
+        message="আপনি কি নিশ্চিত যে এই অজানা প্রশ্নটি তালিকা থেকে মুছে ফেলতে চান?"
+        onConfirm={() => {
+          if (gapToDelete) {
+            storageService.deleteKnowledgeGap(gapToDelete.id);
+            setGaps(storageService.getKnowledgeGaps());
+            showToast('প্রশ্নটি ডিলিট করা হয়েছে।');
+            if (onRefresh) onRefresh();
+            setGapToDelete(null);
+          }
+        }}
+        onCancel={() => setGapToDelete(null)}
+      />
+
+      {/* Clear All Gaps Confirm Delete Modal */}
+      <ConfirmDeleteModal
+        isOpen={isClearingAll}
+        title="সকল প্রশ্ন মুছে ফেলুন"
+        message={`আপনি কি নিশ্চিত যে ${filterStatus === 'unresolved' ? 'অমীমাংসিত' : filterStatus === 'added_to_kb' ? 'নলেজ বেসে যোগ করা' : 'সকল'} সকল প্রশ্ন স্থায়ীভাবে মুছে ফেলতে চান?`}
+        onConfirm={() => {
+          const filterLabel = filterStatus === 'unresolved' ? 'অমীমাংসিত' : filterStatus === 'added_to_kb' ? 'নলেজ বেসে যোগ করা' : 'সকল';
+          storageService.clearKnowledgeGaps(filterStatus);
+          setGaps(storageService.getKnowledgeGaps());
+          showToast(`${filterLabel} সকল প্রশ্ন ডিলিট করা হয়েছে।`);
+          if (onRefresh) onRefresh();
+          setIsClearingAll(false);
+        }}
+        onCancel={() => setIsClearingAll(false)}
+      />
     </div>
   );
 };

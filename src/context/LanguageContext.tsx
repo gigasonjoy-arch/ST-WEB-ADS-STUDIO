@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { storageService } from '../services/storageService';
 
 export type Language = 'en' | 'bn';
 
@@ -421,7 +422,6 @@ export const translations = {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Default to English ('en') as requested by the user
   const [language, setLanguageState] = useState<Language>(() => {
     try {
       if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
@@ -433,8 +433,45 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     } catch (e) {
       console.warn('Could not read language from storage', e);
     }
-    return 'en'; // English by default
+    // Check default language configured in Admin Site Settings
+    try {
+      const siteSettings = storageService.getSiteSettings();
+      if (siteSettings?.defaultLanguage === 'bn' || siteSettings?.defaultLanguage === 'en') {
+        return siteSettings.defaultLanguage;
+      }
+    } catch (e) {
+      // Fallback
+    }
+    return 'bn'; // Default language (Bangla / English depending on site config)
   });
+
+  // Sync with Admin Site Settings updates if user hasn't explicitly set localStorage language preference
+  useEffect(() => {
+    const checkAndUpdateDefault = () => {
+      try {
+        if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+          const userSaved = localStorage.getItem('st_app_language');
+          if (userSaved === 'bn' || userSaved === 'en') {
+            return; // Honor user's explicit session override
+          }
+        }
+        const siteSettings = storageService.getSiteSettings();
+        if (siteSettings?.defaultLanguage && (siteSettings.defaultLanguage === 'bn' || siteSettings.defaultLanguage === 'en')) {
+          setLanguageState(siteSettings.defaultLanguage);
+        }
+      } catch (e) {
+        // Ignore
+      }
+    };
+
+    checkAndUpdateDefault();
+    const unsubscribe = storageService.subscribe(() => {
+      checkAndUpdateDefault();
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);

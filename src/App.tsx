@@ -514,6 +514,10 @@ export default function App() {
           <LeadManagement
             leads={leads}
             onRefresh={refreshAllData}
+            onDeleteLead={(id) => {
+              storageService.deleteLead(id);
+              refreshAllData();
+            }}
           />
         )}
 

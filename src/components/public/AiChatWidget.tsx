@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   MessageSquare, 
   X, 
@@ -98,23 +98,146 @@ export const AiChatWidget: React.FC<AiChatWidgetProps> = ({
     }, 4000);
   };
 
-  const quickPrompts = language === 'en' 
-    ? [
-        "What is the recommended budget for TikTok Ads?",
-        "I need a Free Website & Pixel Audit",
-        "How does Pixel & CAPI tracking work?",
-        "View verified Case Studies & ROAS",
-        "Rules to set up a TikTok Ads account?",
-        "What are your service management fees?"
-      ]
-    : [
-        "টিকটক অ্যাডে কেমন বাজেট লাগে?",
-        "আমার ওয়েবসাইটের জন্য ফ্রি অডিট চাই",
-        "পিক্সেল ও CAPI ট্র্যাকিং কীভাবে কাজ করে?",
-        "রিসেন্ট কেস স্টাডি দেখতে চাই",
-        "অ্যাড অ্যাকাউন্ট সেটআপের নিয়ম কী?",
-        "সার্ভিস চার্জ ও ম্যানেজমেন্ট ফি কত?"
+  // Dynamic Suggested Questions based on chat history & frequently asked questions
+  const dynamicSuggestedQuestions = useMemo(() => {
+    try {
+      const kbItems = storageService.getKnowledgeBase(true);
+      
+      // Track asked questions in current chat stream
+      const askedQuestions = new Set<string>();
+      messages.forEach(msg => {
+        askedQuestions.add(msg.text.trim().toLowerCase());
+      });
+
+      // Standard frequently asked questions
+      const fallbackFaQs = language === 'en' ? [
+        { question: "What is the recommended budget for TikTok Ads?", keywords: ["budget", "tiktok", "cost", "taka", "dollar", "price"] },
+        { question: "I need a Free Website & Pixel Audit", keywords: ["audit", "website", "free", "pixel", "capi", "conversion"] },
+        { question: "How does Pixel & CAPI tracking work?", keywords: ["pixel", "capi", "tracking", "conversion", "event"] },
+        { question: "View verified Case Studies & ROAS", keywords: ["case", "study", "results", "roas", "success"] },
+        { question: "Rules to set up a TikTok Ads account?", keywords: ["tiktok", "account", "rules", "setup", "agency"] },
+        { question: "What are your service management fees?", keywords: ["fee", "charge", "cost", "management", "price"] }
+      ] : [
+        { question: "টিকটক অ্যাডে কেমন বাজেট লাগে?", keywords: ["বাজেট", "টিকটক", "খরচ", "টাকা", "ডলার", "প্রাইস"] },
+        { question: "আমার ওয়েবসাইটের জন্য ফ্রি অডিট চাই", keywords: ["অডিট", "ওয়েবসাইট", "ফ্রি", "পিক্সেল", "ট্র্যাকিং", "কনভার্সন"] },
+        { question: "পিক্সেল ও CAPI ট্র্যাকিং কীভাবে কাজ করে?", keywords: ["পিক্সেল", "capi", "ট্র্যাকিং", "কনভার্সন", "ইভেন্ট"] },
+        { question: "রিসেন্ট কেস স্টাডি দেখতে চাই", keywords: ["কেস", "স্টাডি", "রেজাল্ট", "ফলাফল", "সফলতা"] },
+        { question: "অ্যাড অ্যাকাউন্ট সেটআপের নিয়ম কী?", keywords: ["টিকটক", "অ্যাকাউন্ট", "সেটআপ", "এজেন্সি", "নিয়ম"] },
+        { question: "সার্ভিস চার্জ ও ম্যানেজমেন্ট ফি কত?", keywords: ["ফি", "চার্জ", "খরচ", "ম্যানেজমেন্ট", "প্রাইস"] }
       ];
+
+      const faqPool = [
+        ...kbItems.map(item => ({
+          question: language === 'en' ? (item.questionEn || item.question || item.title) : (item.questionBn || item.question || item.title),
+          answer: language === 'en' ? (item.answerEn || item.answer) : (item.answerBn || item.answer),
+          keywords: item.keywords || [],
+          kbItem: item
+        })),
+        ...fallbackFaQs.map(item => ({
+          question: item.question,
+          answer: "",
+          keywords: item.keywords,
+          kbItem: null
+        }))
+      ];
+
+      // Combine text of the last messages for context
+      const lastMessagesText = messages.slice(-3).map(m => m.text.toLowerCase()).join(" ");
+
+      const scoredFaqs = faqPool.map(faq => {
+        let score = 0;
+        
+        // Match keywords from history context
+        faq.keywords.forEach(kw => {
+          const kwLower = kw.toLowerCase();
+          if (lastMessagesText.includes(kwLower)) {
+            score += 15;
+          }
+        });
+
+        if (faq.kbItem) {
+          const catLower = (faq.kbItem.category || "").toLowerCase();
+          if (lastMessagesText.includes(catLower)) {
+            score += 10;
+          }
+        }
+
+        // Add stability based on string length to make sure sorting is deterministic yet diverse
+        score += Math.sin(faq.question.length) * 2;
+
+        return { faq, score };
+      });
+
+      // Filter out asked questions to prevent repetition
+      const filtered = scoredFaqs.filter(item => {
+        const qLower = item.faq.question.trim().toLowerCase();
+        for (const asked of askedQuestions) {
+          if (asked.includes(qLower) || qLower.includes(asked)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      // Sort by score
+      filtered.sort((a, b) => b.score - a.score);
+
+      // Return top 4 unique questions
+      return filtered.slice(0, 4).map(item => item.faq);
+    } catch (e) {
+      console.error("Error generating suggested questions:", e);
+      return [];
+    }
+  }, [messages, language]);
+
+  const handleSuggestedQuestionClick = async (faq: { question: string; answer: string; kbItem: any }) => {
+    if (isLoading) return;
+
+    const salt = () => Math.random().toString(36).substring(2, 7);
+
+    if (faq.answer) {
+      const userMsg: AIMessage = {
+        id: `msg_${Date.now()}_${salt()}_u`,
+        sender: 'user',
+        text: faq.question,
+        timestamp: new Date().toISOString()
+      };
+
+      setMessages(prev => [...prev, userMsg]);
+      setIsLoading(true);
+
+      // Simulate natural response feel
+      setTimeout(() => {
+        const aiMsg: AIMessage = {
+          id: `msg_${Date.now()}_${salt()}_a`,
+          sender: 'ai',
+          text: faq.answer,
+          timestamp: new Date().toISOString(),
+          suggestedCtas: [
+            { label: language === 'en' ? 'Direct WhatsApp' : 'সরাসরি WhatsApp', action: 'WHATSAPP' },
+            { label: language === 'en' ? 'Open Calculator' : 'ক্যালকুলেটর দেখুন', action: 'CALCULATOR' }
+          ]
+        };
+        setMessages(prev => [...prev, aiMsg]);
+        setIsLoading(false);
+
+        storageService.saveAIConversation({
+          id: conversationId,
+          visitorId: storageService.getVisitorId(),
+          startTime: new Date().toISOString(),
+          lastActivity: new Date().toISOString(),
+          messages: [...messages, userMsg, aiMsg],
+          topics: [faq.question],
+          knowledgeGapsIdentified: [],
+          calculatorUsed: false,
+          leadSubmitted: false,
+          status: 'active'
+        });
+      }, 300);
+    } else {
+      await handleSend(faq.question);
+    }
+  };
 
   // Initialize Speech Recognition (Client-side native Web Speech API)
   useEffect(() => {
@@ -281,8 +404,10 @@ export const AiChatWidget: React.FC<AiChatWidgetProps> = ({
       recognitionRef.current.stop();
     }
 
+    const salt = () => Math.random().toString(36).substring(2, 7);
+
     const userMsg: AIMessage = {
-      id: `msg_${Date.now()}_u`,
+      id: `msg_${Date.now()}_${salt()}_u`,
       sender: 'user',
       text: query,
       timestamp: new Date().toISOString()
@@ -301,15 +426,14 @@ export const AiChatWidget: React.FC<AiChatWidgetProps> = ({
       });
 
       const aiMsg: AIMessage = {
-        id: `msg_${Date.now()}_a`,
+        id: `msg_${Date.now()}_${salt()}_a`,
         sender: 'ai',
         text: response.reply,
         timestamp: new Date().toISOString(),
         suggestedCtas: response.suggestedCtas as any,
         knowledgeBaseItemIds: response.sourceItemIds,
         isFallback: response.isKnowledgeGap,
-        predictionData: response.predictionData,
-        leadFormCard: response.leadFormCard
+        predictionData: response.predictionData
       };
 
       setMessages(prev => [...prev, aiMsg]);
@@ -333,7 +457,7 @@ export const AiChatWidget: React.FC<AiChatWidgetProps> = ({
       setMessages(prev => [
         ...prev,
         {
-          id: `msg_${Date.now()}_err`,
+          id: `msg_${Date.now()}_${salt()}_err`,
           sender: 'ai',
           text: language === 'en'
             ? 'Connection temporary interruption. Please message Sonjoy directly on WhatsApp.'
@@ -375,9 +499,10 @@ export const AiChatWidget: React.FC<AiChatWidgetProps> = ({
 
       setLeadSubmittedForMsgId(prev => ({ ...prev, [msgId]: true }));
 
+      const salt = () => Math.random().toString(36).substring(2, 7);
       // Add instant AI confirmation message
       const confirmMsg: AIMessage = {
-        id: `msg_${Date.now()}_conf`,
+        id: `msg_${Date.now()}_${salt()}_conf`,
         sender: 'ai',
         text: language === 'en'
           ? `Thank you ${leadName}! Your strategy request has been submitted directly to Sonjoy Sarkar's team. We will contact you on WhatsApp (${leadPhone}) within 30 minutes.`
@@ -726,17 +851,19 @@ export const AiChatWidget: React.FC<AiChatWidgetProps> = ({
           </div>
 
           {/* Quick Prompts Bar */}
-          <div className="px-3 py-2 bg-[#F5F1EB]/80 border-t border-[#D9DED1] flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">
-            {quickPrompts.map((qp, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSend(qp)}
-                className="whitespace-nowrap px-2.5 py-1 bg-[#FFFFFF] hover:bg-[#E8EAE2] text-[#5C6652] text-[10px] font-medium rounded-lg border border-[#D9DED1] shrink-0 transition-colors shadow-2xs"
-              >
-                {qp}
-              </button>
-            ))}
-          </div>
+          {dynamicSuggestedQuestions.length > 0 && (
+            <div className="px-3 py-2 bg-[#F5F1EB]/80 border-t border-[#D9DED1] flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">
+              {dynamicSuggestedQuestions.map((faq, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSuggestedQuestionClick(faq)}
+                  className="whitespace-nowrap px-2.5 py-1 bg-[#FFFFFF] hover:bg-[#E8EAE2] text-[#5C6652] text-[10px] font-semibold rounded-lg border border-[#D9DED1] shrink-0 transition-colors shadow-2xs"
+                >
+                  {faq.question}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Voice status or error notice */}
           {voiceNotice && (

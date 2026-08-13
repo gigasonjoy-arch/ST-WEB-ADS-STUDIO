@@ -5,6 +5,7 @@ import {
 } from '../../types';
 import { storageService } from '../../services/storageService';
 import { VideoEmbedPlayer } from '../common/VideoEmbedPlayer';
+import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { 
   Image as ImageIcon, 
   Video, 
@@ -46,6 +47,7 @@ export const MediaManagement: React.FC<MediaManagementProps> = ({ onNavigateToTa
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingItem, setEditingItem] = useState<MediaItem | null>(null);
+  const [mediaToDelete, setMediaToDelete] = useState<{ id: string; title: string } | null>(null);
 
   // Form State
   const [formType, setFormType] = useState<'image' | 'youtube' | 'tiktok' | 'video_embed'>('image');
@@ -201,10 +203,7 @@ export const MediaManagement: React.FC<MediaManagementProps> = ({ onNavigateToTa
   };
 
   const handleDelete = (id: string, title: string) => {
-    if (window.confirm(`আপনি কি "${title}" মিডিয়া ফাইলটি মুছে ফেলতে চান?`)) {
-      storageService.deleteMedia(id);
-      showNotification('success', 'মিডিয়া ডিলিট করা হয়েছে।');
-    }
+    setMediaToDelete({ id, title });
   };
 
   const handleToggleStatus = (id: string) => {
@@ -956,6 +955,22 @@ export const MediaManagement: React.FC<MediaManagementProps> = ({ onNavigateToTa
           </div>
         </div>
       )}
+
+      {/* Confirm Delete Modal */}
+      <ConfirmDeleteModal
+        isOpen={!!mediaToDelete}
+        itemName={mediaToDelete?.title}
+        title="মিডিয়া ফাইল ডিলিট করুন"
+        message="আপনি কি নিশ্চিত যে এই মিডিয়া ফাইলটি স্থায়ীভাবে মুছে ফেলতে চান?"
+        onConfirm={() => {
+          if (mediaToDelete) {
+            storageService.deleteMedia(mediaToDelete.id);
+            showNotification('success', 'মিডিয়া ডিলিট করা হয়েছে।');
+            setMediaToDelete(null);
+          }
+        }}
+        onCancel={() => setMediaToDelete(null)}
+      />
 
     </div>
   );

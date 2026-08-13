@@ -20,6 +20,7 @@ import {
 import { Lead, LeadSubmission } from '../../types';
 import { storageService } from '../../services/storageService';
 import { googleWorkspaceService } from '../../services/googleWorkspaceService';
+import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
 interface LeadManagementProps {
   leads?: (Lead | LeadSubmission)[];
@@ -70,6 +71,7 @@ export const LeadManagement: React.FC<LeadManagementProps> = ({
   const [serviceFilter, setServiceFilter] = useState<string>('ALL');
   const [isSyncingCloud, setIsSyncingCloud] = useState(false);
   const [syncFeedback, setSyncFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [leadToDelete, setLeadToDelete] = useState<LeadSubmission | null>(null);
 
   useEffect(() => {
     if (initialStatusFilter) {
@@ -102,7 +104,8 @@ export const LeadManagement: React.FC<LeadManagementProps> = ({
     }
   }, [targetElementId, highlightLeadId]);
   
-  const leads = propLeads ? propLeads.map(normalizeLead) : internalLeads;
+  const leads = (propLeads ? propLeads.map(normalizeLead) : internalLeads)
+    .filter(l => l && l.id && storageService.getLeads().some(valid => valid.id === l.id));
 
   const refreshData = () => {
     setInternalLeads(storageService.getLeads().map(normalizeLead));
@@ -465,13 +468,7 @@ export const LeadManagement: React.FC<LeadManagementProps> = ({
                           </button>
 
                           <button
-                            onClick={() => {
-                              if (confirm(`আপনি কি "${lead.name}" এর লিড মুছে ফেলতে চান?`)) {
-                                storageService.deleteLead(lead.id);
-                                if (onDeleteLead) onDeleteLead(lead.id);
-                                refreshData();
-                              }
-                            }}
+                            onClick={() => setLeadToDelete(lead)}
                             className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
                             title="মুছে ফেলুন"
                           >
@@ -515,19 +512,38 @@ export const LeadManagement: React.FC<LeadManagementProps> = ({
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex items-center justify-between pt-2">
               <button
-                onClick={() => setSelectedLead(null)}
-                className="px-4 py-2 border border-[#D9DED1] text-xs font-semibold rounded-xl text-[#5C6652]"
+                type="button"
+                onClick={() => {
+                  if (selectedLead) {
+                    const target = selectedLead;
+                    setSelectedLead(null);
+                    setLeadToDelete(target);
+                  }
+                }}
+                className="px-3.5 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-bold border border-red-200 flex items-center gap-1.5 transition-colors"
               >
-                বাতিল
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>লিড ডিলিট করুন</span>
               </button>
-              <button
-                onClick={handleSaveNotes}
-                className="px-5 py-2 bg-[#4A5D3B] text-[#FDFCF8] text-xs font-semibold rounded-xl hover:bg-[#3A4533]"
-              >
-                সংরক্ষণ করুন
-              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedLead(null)}
+                  className="px-4 py-2 border border-[#D9DED1] text-xs font-semibold rounded-xl text-[#5C6652]"
+                >
+                  বাতিল
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveNotes}
+                  className="px-5 py-2 bg-[#4A5D3B] text-[#FDFCF8] text-xs font-semibold rounded-xl hover:bg-[#3A4533]"
+                >
+                  সংরক্ষণ করুন
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -626,6 +642,22 @@ export const LeadManagement: React.FC<LeadManagementProps> = ({
         </div>
       )}
 
+      {/* Confirm Delete Modal */}
+      <ConfirmDeleteModal
+        isOpen={!!leadToDelete}
+        itemName={leadToDelete?.name}
+        title="লিড মুছে ফেলা নিশ্চিত করুন"
+        message="আপনি কি নিশ্চিত যে এই লিডের সমস্ত তথ্য স্থায়ীভাবে মুছে ফেলতে চান?"
+        onConfirm={() => {
+          if (leadToDelete) {
+            storageService.deleteLead(leadToDelete.id);
+            if (onDeleteLead) onDeleteLead(leadToDelete.id);
+            refreshData();
+            setLeadToDelete(null);
+          }
+        }}
+        onCancel={() => setLeadToDelete(null)}
+      />
     </div>
   );
 };

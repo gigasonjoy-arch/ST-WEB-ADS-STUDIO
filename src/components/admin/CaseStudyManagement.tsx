@@ -19,6 +19,7 @@ import { CaseStudy } from '../../types';
 import { storageService } from '../../services/storageService';
 import { VideoEmbedPlayer } from '../common/VideoEmbedPlayer';
 import { MediaSelectorModal } from './MediaSelectorModal';
+import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
 interface CaseStudyManagementProps {
   caseStudies?: CaseStudy[];
@@ -45,6 +46,7 @@ export const CaseStudyManagement: React.FC<CaseStudyManagementProps> = ({
   const [imageUploadLoading, setImageUploadLoading] = useState<boolean>(false);
   const [mediaSelectorOpen, setMediaSelectorOpen] = useState<boolean>(false);
   const [mediaSelectorTarget, setMediaSelectorTarget] = useState<'IMAGE' | 'VIDEO'>('IMAGE');
+  const [studyToDelete, setStudyToDelete] = useState<string | null>(null);
 
   const caseStudies = propCaseStudies || internalStudies;
 
@@ -104,11 +106,7 @@ export const CaseStudyManagement: React.FC<CaseStudyManagementProps> = ({
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm('আপনি কি নিশ্চিত এই কেস স্টাডি মুছে ফেলতে চান?')) {
-      storageService.deleteCaseStudy(id);
-      if (onDeleteCaseStudy) onDeleteCaseStudy(id);
-      refreshData();
-    }
+    setStudyToDelete(id);
   };
 
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -680,6 +678,22 @@ export const CaseStudyManagement: React.FC<CaseStudyManagementProps> = ({
             }));
           }
         }}
+      />
+
+      {/* Confirm Delete Modal */}
+      <ConfirmDeleteModal
+        isOpen={!!studyToDelete}
+        title="কেস স্টাডি মুছে ফেলুন"
+        message="আপনি কি নিশ্চিত যে এই কেস স্টাডি স্থায়ীভাবে মুছে ফেলতে চান?"
+        onConfirm={() => {
+          if (studyToDelete) {
+            storageService.deleteCaseStudy(studyToDelete);
+            if (onDeleteCaseStudy) onDeleteCaseStudy(studyToDelete);
+            refreshData();
+            setStudyToDelete(null);
+          }
+        }}
+        onCancel={() => setStudyToDelete(null)}
       />
 
     </div>

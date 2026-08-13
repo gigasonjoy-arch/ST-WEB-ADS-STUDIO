@@ -34,6 +34,7 @@ import {
   Eye,
   ShieldCheck,
   Zap,
+  Globe,
   ExternalLink
 } from 'lucide-react';
 import { 
@@ -114,6 +115,50 @@ export const AdminAiAssistantDrawer: React.FC<AdminAiAssistantDrawerProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const voiceTimeoutRef = useRef<any>(null);
+  const hasPromptedKbRef = useRef(false);
+  const [systemQuestions, setSystemQuestions] = useState<Array<{ id: string; category: string; question: string; reason: string; options?: string[] }>>([]);
+  const [currentQuestionIdx, setCurrentQuestionIdx] = useState<number>(0);
+  const [isSystemInterviewing, setIsSystemInterviewing] = useState<boolean>(false);
+  const [answeredQIds, setAnsweredQIds] = useState<string[]>([]);
+
+  const startSystemInterview = () => {
+    const questions = AdminAgentEngine.generateSystemInterviewQuestions(answeredQIds);
+    setSystemQuestions(questions);
+    setCurrentQuestionIdx(0);
+    setIsSystemInterviewing(true);
+
+    if (questions.length === 0) {
+      setMessages(prev => [...prev, {
+        id: `msg-sys-int-empty-${Date.now()}`,
+        sender: 'assistant',
+        text: '🎉 **সিস্টেম অ্যানালিসিস সম্পন্ন!**\n\nআপনার সিস্টেমে নলেজ বেস, কেস স্টাডি ও বেঞ্চমার্কের তথ্য পর্যাপ্ত রয়েছে। কোনো প্রশ্ন পেন্ডিং নেই। নতুন কোনো তথ্য যোগ বা পরিবর্তন করতে চাইলে সরাসরি আমাকে লিখে জানান।',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }]);
+      return;
+    }
+
+    const firstQ = questions[0];
+    const suggestions = [...(firstQ.options || []), 'স্কিপ করুন', 'ইন্টারভিউ বন্ধ করো'];
+
+    const welcomeMsg: AdminAiMessage = {
+      id: `msg-sys-int-start-${Date.now()}`,
+      sender: 'assistant',
+      text: `🤖 **সিস্টেম ইন্টেলিজেন্ট সিঙ্ক ও ইন্টারভিউ শুরু করা হয়েছে**\n\nআমি আপনার ডাটাবেসের কাজ, কেস স্টাডি, বেঞ্চমার্ক ও ক্লায়েন্ট প্রশ্নোত্তর গ্যাপ বিশ্লেষণ করেছি। পর্যায়ক্রমে ১টি করে প্রশ্ন করছি। আপনি চাইলে প্রস্তাবিত উত্তর সিলেক্ট/এডিট করতে পারেন অথবা নিজস্ব উত্তর লিখতে পারেন।\n\n📌 **প্রশ্ন #1/মোট ${questions.length} [ক্যাটাগরি: ${firstQ.category}]**\n> ${firstQ.question}\n\n*(কারণ: ${firstQ.reason})*`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      suggestions
+    };
+    setMessages(prev => [...prev, welcomeMsg]);
+  };
+
+  useEffect(() => {
+    // Proactive interactive prompting loop on drawer open
+    if (!hasPromptedKbRef.current && isOpen) {
+      hasPromptedKbRef.current = true;
+      setTimeout(() => {
+        startSystemInterview();
+      }, 400);
+    }
+  }, [isOpen]);
 
   const showVoiceNotice = (msg: string) => {
     setVoiceNotice(msg);
@@ -366,6 +411,76 @@ export const AdminAiAssistantDrawer: React.FC<AdminAiAssistantDrawerProps> = ({
     setIsThinking(true);
 
     setTimeout(() => {
+      // Check if triggering interview command explicitly
+      if (query.includes('ইন্টারভিউ') || query.includes('প্রশ্ন কর') || query.includes('সিস্টেম সিঙ্ক') || query.toLowerCase().includes('interview')) {
+        startSystemInterview();
+        setIsThinking(false);
+        return;
+      }
+
+      // Check if system interview is active
+      if (isSystemInterviewing && systemQuestions.length > 0) {
+        if (/বন্ধ|স্টপ|stop|exit|বাহির/i.test(query) && query.length < 15) {
+          setIsSystemInterviewing(false);
+          setMessages(prev => [...prev, {
+            id: `msg-sys-int-stop-${Date.now()}`,
+            sender: 'assistant',
+            text: 'ইন্টারভিউ প্রক্রিয়া বন্ধ করা হয়েছে। যেকোনো প্রয়োজনে আবার ডাকতে পারেন।',
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }]);
+          setIsThinking(false);
+          return;
+        }
+
+        const currentQ = systemQuestions[currentQuestionIdx];
+        if (currentQ) {
+          setAnsweredQIds(prev => [...prev, currentQ.id]);
+        }
+
+        const evalResult = AdminAgentEngine.processSystemInterviewAnswer(query, currentQ);
+
+        const replyMsg: AdminAiMessage = {
+          id: `msg-int-ans-${Date.now()}`,
+          sender: 'assistant',
+          text: evalResult.text,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          proposal: evalResult.proposal,
+          suggestions: evalResult.suggestions
+        };
+        setMessages(prev => [...prev, replyMsg]);
+
+        // Advance question
+        const nextIdx = currentQuestionIdx + 1;
+        if (nextIdx < systemQuestions.length) {
+          setCurrentQuestionIdx(nextIdx);
+          const nextQ = systemQuestions[nextIdx];
+          const nextSuggestions = [...(nextQ.options || []), 'স্কিপ করুন', 'ইন্টারভিউ বন্ধ করো'];
+
+          setTimeout(() => {
+            setMessages(prev => [...prev, {
+              id: `msg-sys-int-next-${Date.now()}`,
+              sender: 'assistant',
+              text: `📌 **পরবর্তী প্রশ্ন #${nextIdx + 1}/মোট ${systemQuestions.length} [ক্যাটাগরি: ${nextQ.category}]**\n> ${nextQ.question}\n\n*(কারণ: ${nextQ.reason})*`,
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              suggestions: nextSuggestions
+            }]);
+          }, 600);
+        } else {
+          setIsSystemInterviewing(false);
+          setTimeout(() => {
+            setMessages(prev => [...prev, {
+              id: `msg-sys-int-done-${Date.now()}`,
+              sender: 'assistant',
+              text: `🎉 **ধন্যবাদ! সমস্ত সিস্টেম ইন্টেলিজেন্ট সিঙ্ক প্রশ্ন সম্পন্ন হয়েছে।**\n\nআপনার প্রস্তাবনা কার্ডগুলোতে 'অনুমোদন ও সেভ করুন' ক্লিক করলেই তা নলেজ বেসে সেভ হয়ে যাবে।`,
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            }]);
+          }, 600);
+        }
+
+        setIsThinking(false);
+        return;
+      }
+
       // Process using our Zero-API-Key Autonomous Admin Agent Engine
       const result = AdminAgentEngine.processCommand(query, settings);
 
@@ -733,19 +848,37 @@ export const AdminAiAssistantDrawer: React.FC<AdminAiAssistantDrawerProps> = ({
                     </div>
                   )}
 
-                  {/* Suggestion Chips */}
+                  {/* Suggestion Chips & Answer Options */}
                   {msg.suggestions && msg.suggestions.length > 0 && (
                     <div className="pt-2 flex flex-wrap gap-1.5">
-                      {msg.suggestions.map((sug, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => processAdminQuery(sug)}
-                          className="text-[11px] bg-[#E8EAE2] hover:bg-[#D9DED1] text-[#2C3327] px-3 py-1 rounded-full font-medium transition-colors text-left flex items-center gap-1"
-                        >
-                          <Sparkles className="w-3 h-3 text-[#4A5D3B]" />
-                          <span>{sug}</span>
-                        </button>
-                      ))}
+                      {msg.suggestions.map((sug, idx) => {
+                        const isControl = sug === 'স্কিপ করুন' || sug === 'ইন্টারভিউ বন্ধ করো' || sug === 'পরবর্তী প্রশ্ন' || sug === 'অনুমোদন ও সেভ করুন' || sug === 'পরবর্তী প্রশ্ন করুন';
+                        return (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              if (isControl) {
+                                processAdminQuery(sug);
+                              } else {
+                                setInputQuery(sug);
+                              }
+                            }}
+                            className={`text-[11px] px-3 py-1.5 rounded-xl font-medium transition-all text-left flex items-center gap-1.5 border shadow-2xs ${
+                              isControl 
+                                ? 'bg-[#E8EAE2] hover:bg-[#D9DED1] text-[#2C3327] border-[#D9DED1]' 
+                                : 'bg-purple-50 hover:bg-purple-100 text-purple-900 border-purple-200 hover:border-purple-300'
+                            }`}
+                          >
+                            <Sparkles className={`w-3 h-3 shrink-0 ${isControl ? 'text-[#4A5D3B]' : 'text-purple-600'}`} />
+                            <span className="line-clamp-2">{sug}</span>
+                            {!isControl && (
+                              <span className="text-[9px] bg-purple-200 text-purple-800 px-1.5 py-0.5 rounded font-bold shrink-0 ml-1">
+                                এডিট করুন
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
 
@@ -778,6 +911,13 @@ export const AdminAiAssistantDrawer: React.FC<AdminAiAssistantDrawerProps> = ({
         <div className="p-4 border-t border-[#D9DED1] bg-[#FFFFFF]">
           {/* Quick Shortcuts Bar */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-2 text-xs no-scrollbar">
+            <button
+              onClick={() => startSystemInterview()}
+              className="px-2.5 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-[11px] font-bold whitespace-nowrap transition-colors flex items-center gap-1 shadow-2xs"
+            >
+              <Bot className="w-3.5 h-3.5 text-purple-200 animate-pulse" />
+              <span>🔄 সিঙ্ক ইন্টারভিউ রান করো</span>
+            </button>
             <button
               onClick={() => processAdminQuery('ক্লায়েন্ট: Silk Craze, বাজেট: 35000, সেলস: 140000, অর্ডার: 280, প্ল্যাটফর্ম: TikTok। কেস স্টাডি যোগ করো')}
               className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors flex items-center gap-1"

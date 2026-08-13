@@ -376,6 +376,54 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
               মূল ব্র্যান্ড ও প্রোফাইল কনফিগারেশন
             </h3>
 
+            {/* Frontend Default Language Selector */}
+            <div className="bg-[#F8F9F5] p-4.5 rounded-2xl border border-[#D9DED1] space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="block text-xs font-bold text-[#2C3327] flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-[#4A5D3B]" />
+                    <span>ফ্রন্টএন্ডের ডিফল্ট ভাষা (Frontend Default Language)</span>
+                  </label>
+                  <p className="text-[11px] text-[#5C6652] mt-0.5">
+                    নতুন ভিজিটর প্রথমবার ওয়েবসাইটে প্রবেশ করলে মূল ইন্টারফেসটি যে ভাষায় প্রদর্শিত হবে।
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 pt-1">
+                <label className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border text-xs font-bold cursor-pointer transition-all ${
+                  (formData.defaultLanguage || 'bn') === 'bn'
+                    ? 'bg-[#4A5D3B] text-white border-[#4A5D3B] shadow-2xs'
+                    : 'bg-white text-[#2C3327] border-[#D9DED1] hover:border-[#4A5D3B]'
+                }`}>
+                  <input
+                    type="radio"
+                    name="defaultLanguage"
+                    value="bn"
+                    checked={(formData.defaultLanguage || 'bn') === 'bn'}
+                    onChange={() => setFormData({ ...formData, defaultLanguage: 'bn' })}
+                    className="hidden"
+                  />
+                  <span>🇧🇩 বাংলা (Bangla)</span>
+                </label>
+
+                <label className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border text-xs font-bold cursor-pointer transition-all ${
+                  formData.defaultLanguage === 'en'
+                    ? 'bg-[#4A5D3B] text-white border-[#4A5D3B] shadow-2xs'
+                    : 'bg-white text-[#2C3327] border-[#D9DED1] hover:border-[#4A5D3B]'
+                }`}>
+                  <input
+                    type="radio"
+                    name="defaultLanguage"
+                    value="en"
+                    checked={formData.defaultLanguage === 'en'}
+                    onChange={() => setFormData({ ...formData, defaultLanguage: 'en' })}
+                    className="hidden"
+                  />
+                  <span>🇺🇸 English (ইংরেজি)</span>
+                </label>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-[#2C3327] mb-1.5">ব্র্যান্ড নাম</label>

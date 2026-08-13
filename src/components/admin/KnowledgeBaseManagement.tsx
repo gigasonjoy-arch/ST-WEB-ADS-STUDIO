@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { KnowledgeBaseItem, KnowledgeCategory, KnowledgeStatus, SiteSettings } from '../../types';
 import { storageService } from '../../services/storageService';
+import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
 interface KnowledgeBaseManagementProps {
   settings?: SiteSettings;
@@ -32,6 +33,7 @@ export const KnowledgeBaseManagement: React.FC<KnowledgeBaseManagementProps> = (
   const [isCreating, setIsCreating] = useState(false);
   const [keywordInput, setKeywordInput] = useState('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   // Test playground state
   const [testQuery, setTestQuery] = useState('');
@@ -66,12 +68,7 @@ export const KnowledgeBaseManagement: React.FC<KnowledgeBaseManagementProps> = (
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('আপনি কি নিশ্চিত যে এই আর্টিকেলটি মুছে ফেলতে চান?')) {
-      storageService.deleteKnowledgeItem(id);
-      setItems(storageService.getKnowledgeBase(false));
-      showToast('আর্টিকেল মুছে ফেলা হয়েছে।');
-      if (onRefresh) onRefresh();
-    }
+    setItemToDelete(id);
   };
 
   const filteredItems = items.filter(item => {
@@ -448,6 +445,22 @@ export const KnowledgeBaseManagement: React.FC<KnowledgeBaseManagementProps> = (
           </div>
         </div>
       )}
+      {/* Confirm Delete Modal */}
+      <ConfirmDeleteModal
+        isOpen={!!itemToDelete}
+        title="আর্টিকেল ডিলিট করুন"
+        message="আপনি কি নিশ্চিত যে এই নলেজ বেস আর্টিকেলটি মুছে ফেলতে চান?"
+        onConfirm={() => {
+          if (itemToDelete) {
+            storageService.deleteKnowledgeItem(itemToDelete);
+            setItems(storageService.getKnowledgeBase(false));
+            showToast('আর্টিকেল মুছে ফেলা হয়েছে।');
+            if (onRefresh) onRefresh();
+            setItemToDelete(null);
+          }
+        }}
+        onCancel={() => setItemToDelete(null)}
+      />
     </div>
   );
 };
