@@ -11,6 +11,8 @@ import {
   query as firestoreQuery, 
   orderBy as firestoreOrderBy, 
   onSnapshot as firestoreOnSnapshot,
+  disableNetwork as firestoreDisableNetwork,
+  terminate as firestoreTerminate,
   Firestore
 } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider, signInWithPopup as authSignInWithPopup, signOut as authSignOut, Auth } from 'firebase/auth';
@@ -43,6 +45,11 @@ export const resolveFirebaseConfig = () => {
 
 export const activeFirebaseConfig = resolveFirebaseConfig();
 
+// Check if Firestore quota has been exceeded previously in this session
+const isFirestoreQuotaExceeded = typeof window !== 'undefined' && 
+  typeof sessionStorage !== 'undefined' && 
+  sessionStorage.getItem('firestore_quota_exceeded') === 'true';
+
 // Initialize Firebase App safely
 let appInstance: any = null;
 let dbInstance: any = null;
@@ -53,7 +60,12 @@ try {
   if (activeFirebaseConfig && activeFirebaseConfig.projectId) {
     appInstance = !getApps().length ? initializeApp(activeFirebaseConfig) : getApp();
     const dbId = activeFirebaseConfig.firestoreDatabaseId;
-    dbInstance = dbId ? getFirestore(appInstance, dbId) : getFirestore(appInstance);
+    if (!isFirestoreQuotaExceeded) {
+      dbInstance = dbId ? getFirestore(appInstance, dbId) : getFirestore(appInstance);
+    } else {
+      console.warn('⚠️ [Firebase Sync] Firestore quota was previously exceeded. Initializing in offline REST API / Local cache fallback mode.');
+      dbInstance = null;
+    }
     authInstance = getAuth(appInstance);
     googleAuthProviderInstance = new GoogleAuthProvider();
     googleAuthProviderInstance.addScope('https://www.googleapis.com/auth/drive.file');
@@ -123,8 +135,21 @@ if (typeof window !== 'undefined' && db) {
   (async () => {
     try {
       await firestoreGetDocFromServer(firestoreDoc(db, 'test', 'connection'));
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('the client is offline')) {
+    } catch (error: any) {
+      const errMsg = error?.message || String(error);
+      const errCode = error?.code || '';
+      if (errCode === 'resource-exhausted' || errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('exhausted')) {
+        console.warn('⚠️ [Firebase Sync] Firestore quota limit exceeded detected on startup. Disabling Firestore network connection to run in offline local cache mode.');
+        try {
+          if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.setItem('firestore_quota_exceeded', 'true');
+          }
+          await firestoreDisableNetwork(db);
+          await firestoreTerminate(db);
+        } catch (networkErr) {
+          console.debug('Failed to disable network or terminate:', networkErr);
+        }
+      } else if (errMsg.includes('the client is offline')) {
         console.debug('Firebase client offline status check');
       }
     }
@@ -167,6 +192,22 @@ const cleanFirestoreData = (obj: any): any => {
 // Global flag to log quota warning only once
 let isQuotaExceededLogged = false;
 
+const markQuotaExceededAndDisable = () => {
+  if (!isQuotaExceededLogged) {
+    console.warn('⚠️ [Firebase Sync] Firestore write quota limit exceeded. Disabling online sync to prevent background retries. Working in local-offline cache mode.');
+    isQuotaExceededLogged = true;
+    if (typeof sessionStorage !== 'undefined') {
+      try {
+        sessionStorage.setItem('firestore_quota_exceeded', 'true');
+      } catch (e) {}
+    }
+    if (dbInstance) {
+      firestoreDisableNetwork(dbInstance).catch(() => {});
+      firestoreTerminate(dbInstance).catch(() => {});
+    }
+  }
+};
+
 export const setDoc = async (reference: any, data: any, options?: any) => {
   if (!reference) return;
   try {
@@ -176,10 +217,7 @@ export const setDoc = async (reference: any, data: any, options?: any) => {
     const errMsg = err?.message || String(err);
     const errCode = err?.code || '';
     if (errCode === 'resource-exhausted' || errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('exhausted')) {
-      if (!isQuotaExceededLogged) {
-        console.warn('⚠️ [Firebase Sync] Firestore write quota limit exceeded. The application is operating beautifully in high-performance local-offline fallback mode.');
-        isQuotaExceededLogged = true;
-      }
+      markQuotaExceededAndDisable();
       return; // Resolve gracefully to prevent blocking any state flows
     }
     console.debug('Firestore setDoc notice:', err);
@@ -189,17 +227,47 @@ export const setDoc = async (reference: any, data: any, options?: any) => {
 
 export const getDocs = async (queryRef: any) => {
   if (!queryRef) return { empty: true, size: 0, docs: [] } as any;
-  return firestoreGetDocs(queryRef);
+  try {
+    return await firestoreGetDocs(queryRef);
+  } catch (err: any) {
+    const errMsg = err?.message || String(err);
+    const errCode = err?.code || '';
+    if (errCode === 'resource-exhausted' || errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('exhausted')) {
+      markQuotaExceededAndDisable();
+      return { empty: true, size: 0, docs: [] } as any;
+    }
+    throw err;
+  }
 };
 
 export const getDoc = async (reference: any) => {
   if (!reference) return { exists: () => false, data: () => null } as any;
-  return firestoreGetDoc(reference);
+  try {
+    return await firestoreGetDoc(reference);
+  } catch (err: any) {
+    const errMsg = err?.message || String(err);
+    const errCode = err?.code || '';
+    if (errCode === 'resource-exhausted' || errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('exhausted')) {
+      markQuotaExceededAndDisable();
+      return { exists: () => false, data: () => null } as any;
+    }
+    throw err;
+  }
 };
 
 export const getDocFromServer = async (reference: any) => {
   if (!reference) return { exists: () => false, data: () => null } as any;
-  return firestoreGetDocFromServer(reference);
+  try {
+    return await firestoreGetDocFromServer(reference);
+  } catch (err: any) {
+    const errMsg = err?.message || String(err);
+    const errCode = err?.code || '';
+    if (errCode === 'resource-exhausted' || errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('exhausted')) {
+      markQuotaExceededAndDisable();
+      return { exists: () => false, data: () => null } as any;
+    }
+    throw err;
+  }
 };
 
 export const deleteDoc = async (reference: any) => {
@@ -210,6 +278,7 @@ export const deleteDoc = async (reference: any) => {
     const errMsg = err?.message || String(err);
     const errCode = err?.code || '';
     if (errCode === 'resource-exhausted' || errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('exhausted')) {
+      markQuotaExceededAndDisable();
       return; // Ignore quota exhaustions safely
     }
     console.debug('Firestore deleteDoc notice:', err);
@@ -228,7 +297,25 @@ export const orderBy = (...args: any[]) => {
 
 export const onSnapshot = (reference: any, onNext: (snapshot: any) => void, onError?: (error: any) => void) => {
   if (!reference) return () => {};
-  return firestoreOnSnapshot(reference, onNext, onError);
+  
+  const wrappedOnError = (err: any) => {
+    const errMsg = err?.message || String(err);
+    const errCode = err?.code || '';
+    if (errCode === 'resource-exhausted' || errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('exhausted')) {
+      markQuotaExceededAndDisable();
+      if (onError) {
+        onError(err);
+      }
+      return;
+    }
+    if (onError) {
+      onError(err);
+    } else {
+      console.debug('Firestore onSnapshot subscription notice:', err);
+    }
+  };
+
+  return firestoreOnSnapshot(reference, onNext, wrappedOnError);
 };
 
 export const signInWithPopup = async (authObj: any, provider: any) => {

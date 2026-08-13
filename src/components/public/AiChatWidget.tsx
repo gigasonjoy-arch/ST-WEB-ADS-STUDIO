@@ -852,14 +852,15 @@ export const AiChatWidget: React.FC<AiChatWidgetProps> = ({
 
           {/* Quick Prompts Bar */}
           {dynamicSuggestedQuestions.length > 0 && (
-            <div className="px-3 py-2 bg-[#F5F1EB]/80 border-t border-[#D9DED1] flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">
+            <div className="px-4 py-2.5 bg-[#F5F1EB]/90 border-t border-[#D9DED1] flex flex-col gap-1.5 max-h-[165px] overflow-y-auto no-scrollbar shrink-0">
               {dynamicSuggestedQuestions.map((faq, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleSuggestedQuestionClick(faq)}
-                  className="whitespace-nowrap px-2.5 py-1 bg-[#FFFFFF] hover:bg-[#E8EAE2] text-[#5C6652] text-[10px] font-semibold rounded-lg border border-[#D9DED1] shrink-0 transition-colors shadow-2xs"
+                  className="w-full text-left px-3 py-2.5 bg-[#FFFFFF] hover:bg-[#E8EAE2] text-[#4A5D3B] hover:text-[#2C3327] text-[11px] font-semibold rounded-lg border border-[#D9DED1] transition-colors shadow-2xs flex items-center justify-between gap-3"
                 >
-                  {faq.question}
+                  <span className="flex-1 leading-normal">{faq.question}</span>
+                  <span className="text-[#8A957F] text-xs font-normal shrink-0">→</span>
                 </button>
               ))}
             </div>
